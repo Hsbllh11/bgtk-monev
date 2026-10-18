@@ -20,14 +20,11 @@
                 Daftar hasil pengisian Instrumen Monitoring dan Evaluasi BCKS.
             </p>
         </div>
-
         <a
             href="{{ route('bcks.create') }}"
-            class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-        >
+            class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
             + Pengisian BCKS Baru
         </a>
-
     </div>
 
 
@@ -176,7 +173,7 @@
                             </th>
 
                             <th class="px-5 py-4 text-center text-xs font-bold uppercase tracking-wide text-slate-500">
-                                Aksi
+                                Aksi 
                             </th>
 
                         </tr>
@@ -365,6 +362,6 @@
 
     </div>
 
-</div>
+</div> -->
 
 @endsection

@@ -23,7 +23,7 @@
                 Perbarui informasi instrumen pemantauan dan evaluasi.
             </p>
         </div>
-
+        
         <div>
             <a href="{{ route('instrumen.show', ['instrumen' => $instrumen->id]) }}"
                class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">

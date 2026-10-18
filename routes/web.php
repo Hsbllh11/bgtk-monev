@@ -10,6 +10,8 @@ use App\Http\Controllers\WawancaraController;
 use App\Http\Controllers\TindakLanjutController;
 use App\Http\Controllers\BKController;
 use App\Http\Controllers\BcksPengisianController;
+use App\Http\Controllers\TendikController;
+use App\Http\Controllers\ManajemenAkunController;
 
 
 // ============================================================
@@ -79,43 +81,59 @@ Route::middleware('auth')->group(function () {
 
 
     // ========================================================
-    // BK
+    // INSTRUMEN PEMANTAUAN TENAGA KEPENDIDIKAN
     // ========================================================
 
-    // Daftar / Riwayat Pengisian BK
-    // =========================
-// INSTRUMEN BK
-// =========================
+    Route::resource('tendik', TendikController::class);
+
+    Route::get('tendik/{tendik}/cetak', [
+        TendikController::class,
+        'cetak'
+    ])->name('tendik.cetak');
+
+    // ========================================================
+    // INSTRUMEN BK
+    // ========================================================
 
     Route::get('/bk', [
-        \App\Http\Controllers\BKController::class,
+        BKController::class,
         'index'
     ])->name('bk.index');
 
     Route::get('/bk/create', [
-        \App\Http\Controllers\BKController::class,
+        BKController::class,
         'create'
     ])->name('bk.create');
 
     Route::post('/bk', [
-        \App\Http\Controllers\BKController::class,
+        BKController::class,
         'store'
     ])->name('bk.store');
 
     Route::get('/bk/{submission}', [
-        \App\Http\Controllers\BKController::class,
+        BKController::class,
         'show'
     ])->name('bk.show');
 
     Route::get('/bk/{submission}/edit', [
-        \App\Http\Controllers\BKController::class,
+        BKController::class,
         'edit'
     ])->name('bk.edit');
 
+    Route::get('/bk/{submission}/cetak', [
+        BKController::class,
+        'cetak'
+    ])->name('bk.cetak');
+
     Route::put('/bk/{submission}', [
-        \App\Http\Controllers\BKController::class,
+        BKController::class,
         'update'
     ])->name('bk.update');
+
+    Route::delete('/bk/{submission}', [
+        BKController::class,
+        'destroy'
+    ])->name('bk.destroy');
 
 
     // ========================================================
@@ -129,6 +147,48 @@ Route::middleware('auth')->group(function () {
     // LEMBAR WAWANCARA
     // ========================================================
 
+    // Form wawancara BCKS.
+    Route::get('/wawancara/bcks', [
+        WawancaraController::class,
+        'createBcks'
+    ])->name('wawancara.bcks.create');
+
+
+    // Form dan penyimpanan wawancara BK.
+    Route::get('/wawancara/bk', [
+        WawancaraController::class,
+        'createBk'
+    ])->name('wawancara.bk.create');
+
+    Route::post('/wawancara/bk', [
+        WawancaraController::class,
+        'storeBk'
+    ])->name('wawancara.bk.store');
+
+
+    // Form dan penyimpanan wawancara TENDIK.
+    Route::get('/wawancara/tendik', [
+        WawancaraController::class,
+        'createTendik'
+    ])->name('wawancara.tendik.create');
+
+    Route::post('/wawancara/tendik', [
+        WawancaraController::class,
+        'storeTendik'
+    ])->name('wawancara.tendik.store');
+
+    Route::get('/wawancara/{wawancara}/cetak-bcks', [
+        \App\Http\Controllers\WawancaraController::class,
+        'cetakBcks',
+    ])->name('wawancara.cetak-bcks');
+
+    Route::get('/wawancara/{wawancara}/cetak', [
+        WawancaraController::class,
+        'cetak',
+    ])->name('wawancara.cetak');
+
+    // Riwayat, detail, edit, dan hapus wawancara.
+    // Letakkan setelah route khusus BCKS, BK, dan TENDIK.
     Route::resource('wawancara', WawancaraController::class)
         ->parameters([
             'wawancara' => 'wawancara',
@@ -162,6 +222,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profil', function () {
         return view('profil.index');
+    });
+    Route::middleware('admin')->group(function () {
+        Route::resource('manajemen-akun', ManajemenAkunController::class)
+            ->parameters(['manajemen-akun' => 'manajemen_akun']);
     });
 
 });

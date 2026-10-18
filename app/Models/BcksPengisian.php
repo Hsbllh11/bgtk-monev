@@ -28,6 +28,7 @@ class BcksPengisian extends Model
         'dukungan_lingkungan_sekolah',
         'keberlanjutan_program_inovasi',
         'status_pengisian',
+        'sekolah_id',
     ];
 
     protected $casts = [
@@ -42,5 +43,9 @@ class BcksPengisian extends Model
     public function jawaban(): HasMany
     {
         return $this->hasMany(BcksJawaban::class, 'bcks_pengisian_id');
+    }
+    public function sekolah()
+    {
+        return $this->belongsTo(Sekolah::class);
     }
 }

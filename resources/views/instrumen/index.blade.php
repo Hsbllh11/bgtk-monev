@@ -129,7 +129,7 @@
 
                     <div class="mt-6 grid grid-cols-2 gap-2">
 
-                        <a href="{{ route('instrumen.create') }}"
+                        <a href="{{ route('tendik.create') }}"
                             class="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700">
                             <span>+</span>
                             Isi Instrumen
@@ -153,115 +153,69 @@
         FILTER
         ========================================================== --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-
             <form action="{{ route('instrumen.index') }}" method="GET">
+                <div class="grid grid-cols-1 items-end gap-4 md:grid-cols-2 xl:grid-cols-4">
 
-                <div class="flex items-end gap-4">
-
-                    {{-- JENIS INSTRUMEN --}}
-                    <div class="w-1/4">
-
-                        <label for="jenis_instrumen" class="mb-2 block text-sm font-semibold text-slate-700">
+                    <div>
+                        <label for="jenis_instrumen" class="mb-2 block text-sm font-medium text-slate-700">
                             Jenis Instrumen
                         </label>
-
                         <select id="jenis_instrumen" name="jenis_instrumen"
-                            class="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-
-                            <option value="">
-                                Semua jenis
-                            </option>
-
-                            <option value="BCKS" {{ request('jenis_instrumen') === 'BCKS' ? 'selected' : '' }}>
-                                BCKS
-                            </option>
-
-                            <option value="BK" {{ request('jenis_instrumen') === 'BK' ? 'selected' : '' }}>
-                                BK
-                            </option>
-
-                            <option value="TENDIK" {{ request('jenis_instrumen') === 'TENDIK' ? 'selected' : '' }}>
-                                TENDIK
-                            </option>
-
+                            class="w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                            style="height: 44px">
+                            <option value="">Semua jenis</option>
+                            <option value="BCKS" @selected(request('jenis_instrumen') === 'BCKS')>BCKS</option>
+                            <option value="BK" @selected(request('jenis_instrumen') === 'BK')>BK</option>
+                            <option value="TENDIK" @selected(request('jenis_instrumen') === 'TENDIK')>TENDIK</option>
                         </select>
-
                     </div>
 
-
-                    {{-- STATUS --}}
-                    <div class="w-1/4">
-
-                        <label for="status" class="mb-2 block text-sm font-semibold text-slate-700">
+                    <div>
+                        <label for="status" class="mb-2 block text-sm font-medium text-slate-700">
                             Status
                         </label>
-
                         <select id="status" name="status"
-                            class="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-
-                            <option value="">
-                                Semua status
-                            </option>
-
-                            <option value="Draft" {{ request('status') === 'Draft' ? 'selected' : '' }}>
-                                Draft
-                            </option>
-
-                            <option value="Dalam Proses" {{ request('status') === 'Dalam Proses' ? 'selected' : '' }}>
-                                Dalam Proses
-                            </option>
-
-                            <option value="Final" {{ request('status') === 'Final' ? 'selected' : '' }}>
-                                Final
-                            </option>
-
+                            class="w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                            style="height: 44px">
+                            <option value="">Semua status</option>
+                            <option value="Draft" @selected(request('status') === 'Draft')>Draft</option>
+                            <option value="Dalam Proses" @selected(request('status') === 'Dalam Proses')>Dalam Proses</option>
+                            <option value="Final" @selected(request('status') === 'Final')>Final</option>
                         </select>
-
                     </div>
 
-
-                    {{-- PENCARIAN --}}
-                    <div class="flex-1">
-
-                        <label for="search" class="mb-2 block text-sm font-semibold text-slate-700">
+                    <div>
+                        <label for="search" class="mb-2 block text-sm font-medium text-slate-700">
                             Pencarian
                         </label>
-
                         <input id="search" type="text" name="search" value="{{ request('search') }}"
                             placeholder="Nama BCKS, BK, responden, atau unit kerja"
-                            class="h-11 w-full rounded-xl border border-slate-300 px-4 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-
+                            class="w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                            style="height: 44px">
                     </div>
 
-
-                    {{-- TOMBOL --}}
-                    <div class="flex w-[160px] gap-2">
-
+                    <div class="flex gap-2">
                         <button type="submit"
-                            class="h-11 flex-1 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700">
+                            class="inline-flex flex-1 items-center justify-center rounded-xl px-5 text-sm font-semibold text-white transition hover:opacity-90"
+                            style="height: 44px; background: #1457f5">
                             Cari
                         </button>
-
                         <a href="{{ route('instrumen.index') }}"
-                            class="flex h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                            class="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                            style="height: 44px">
                             Reset
                         </a>
-
                     </div>
 
                 </div>
-
             </form>
-
         </div>
 
 
         {{-- =========================================================
         RIWAYAT PENGISIAN
         ========================================================== --}}
-        {{-- =========================================================
-        RIWAYAT PENGISIAN
-        ========================================================= --}}
+
         <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
             <div class="border-b border-slate-200 px-6 py-5">
@@ -290,11 +244,6 @@
                                 Instrumen
                             </th>
 
-                            {{-- NAMA / UNIT --}}
-                            <th class="whitespace-nowrap px-6 py-4 text-xs font-bold uppercase text-slate-500">
-                                Nama / Unit
-                            </th>
-
                             {{-- RESPONDEN --}}
                             <th class="whitespace-nowrap px-6 py-4 text-xs font-bold uppercase text-slate-500">
                                 Responden
@@ -320,10 +269,14 @@
                                 Status
                             </th>
 
+                            {{-- AKSI --}}
+                            <th class="whitespace-nowrap px-6 py-4 text-center text-xs font-bold uppercase text-slate-500">
+                                Aksi
+                            </th>
+
                         </tr>
 
                     </thead>
-
 
                     <tbody class="divide-y divide-slate-100">
 
@@ -341,7 +294,7 @@
                                                 <div class="flex items-center gap-3">
 
                                                     <div class="flex h-10 w-10 items-center justify-center rounded-xl
-                                                        {{ $riwayat['jenis'] === 'BCKS'
+                                                                                                                                                                                {{ $riwayat['jenis'] === 'BCKS'
                             ? 'bg-blue-50 text-blue-600'
                             : 'bg-violet-50 text-violet-600' }}">
                                                         📋
@@ -354,7 +307,7 @@
                                                         </p>
 
                                                         <span class="mt-1 inline-flex rounded-full px-2.5 py-1 text-xs font-medium
-                                                            {{ $riwayat['jenis'] === 'BCKS'
+                                                                                                                                                                                    {{ $riwayat['jenis'] === 'BCKS'
                             ? 'border border-blue-100 bg-blue-50 text-blue-700'
                             : 'border border-violet-100 bg-violet-50 text-violet-700' }}">
                                                             {{ $riwayat['instrumen'] }}
@@ -365,27 +318,6 @@
                                                 </div>
 
                                             </td>
-
-
-                                            {{-- =================================================
-                                            NAMA / UNIT
-                                            ================================================== --}}
-                                            <td class="min-w-[180px] px-6 py-5">
-
-                                                <p class="text-sm font-semibold text-slate-800">
-                                                    {{ $riwayat['nama'] ?: '-' }}
-                                                </p>
-
-                                                @if ($riwayat['unit_kerja'])
-
-                                                    <p class="mt-1 text-xs text-slate-500">
-                                                        {{ $riwayat['unit_kerja'] }}
-                                                    </p>
-
-                                                @endif
-
-                                            </td>
-
 
                                             {{-- =================================================
                                             RESPONDEN
@@ -539,6 +471,94 @@
                                                     </span>
 
                                                 @endif
+
+                                            </td>
+
+
+                                            {{-- =================================================
+                                            AKSI
+                                            ================================================== --}}
+                                            <td class="whitespace-nowrap px-6 py-5" onclick="event.stopPropagation()">
+
+                                                <div class="flex items-center justify-center gap-3">
+
+                                                    {{-- DETAIL --}}
+                                                    <a href="{{ $riwayat['show_route'] }}" title="Lihat Detail"
+                                                        class="text-slate-600 transition hover:text-blue-600">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                                        </svg>
+                                                    </a>
+
+                                                    {{-- EDIT --}}
+                                                    @if (!empty($riwayat['edit_route']))
+
+                                                        <a href="{{ $riwayat['edit_route'] }}" title="Edit"
+                                                            class="text-blue-400 transition hover:text-blue-600">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M16.862 4.487a2.1 2.1 0 1 1 2.97 2.97L9.37 18.02l-4.136 1.166 1.166-4.136 10.462-10.563Z" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="m15.232 5.232 3.536 3.536" />
+                                                            </svg>
+                                                        </a>
+
+                                                    @else
+
+                                                        <span title="Route edit belum tersedia" class="cursor-not-allowed text-slate-300">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M16.862 4.487a2.1 2.1 0 1 1 2.97 2.97L9.37 18.02l-4.136 1.166 1.166-4.136 10.462-10.563Z" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="m15.232 5.232 3.536 3.536" />
+                                                            </svg>
+                                                        </span>
+
+                                                    @endif
+
+                                                    {{-- HAPUS --}}
+                                                    @if (!empty($riwayat['delete_route']))
+
+                                                        <form action="{{ $riwayat['delete_route'] }}" method="POST" class="inline-flex"
+                                                            onsubmit="return confirm('Hapus data pengisian ini? Tindakan ini tidak dapat dibatalkan.');">
+                                                            @csrf
+                                                            @method('DELETE')
+
+                                                            <button type="submit" title="Hapus data" aria-label="Hapus data"
+                                                                class="text-red-500 transition hover:text-red-700">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                                    <path d="M3 6h18" />
+                                                                    <path d="M8 6V4h8v2" />
+                                                                    <path d="m19 6-1 14H6L5 6" />
+                                                                    <path d="M10 11v5M14 11v5" />
+                                                                </svg>
+                                                            </button>
+                                                        </form>
+
+                                                    @else
+
+                                                        <span title="Route hapus belum tersedia" class="cursor-not-allowed text-slate-300">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                                                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                                                stroke-linejoin="round">
+                                                                <path d="M3 6h18" />
+                                                                <path d="M8 6V4h8v2" />
+                                                                <path d="m19 6-1 14H6L5 6" />
+                                                                <path d="M10 11v5M14 11v5" />
+                                                            </svg>
+                                                        </span>
+
+                                                    @endif
+
+                                                </div>
 
                                             </td>
 

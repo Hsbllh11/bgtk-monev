@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,18 +14,13 @@
 
     <div class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
 
-        <div
-            class="flex w-full max-w-6xl overflow-hidden rounded-3xl bg-white shadow-2xl"
-            style="min-height: 650px;"
-        >
+        <div class="flex w-full max-w-6xl overflow-hidden rounded-3xl bg-white shadow-2xl" style="min-height: 650px;">
 
             {{-- =====================================================
-                 PANEL KIRI
+            PANEL KIRI
             ====================================================== --}}
-            <div
-                class="relative hidden w-[55%] overflow-hidden lg:flex"
-                style="background: linear-gradient(145deg, #1769ff 0%, #0754e8 55%, #0347c7 100%);"
-            >
+            <div class="relative hidden w-[55%] overflow-hidden lg:flex"
+                style="background: linear-gradient(145deg, #1769ff 0%, #0754e8 55%, #0347c7 100%);">
 
                 {{-- Decorative circles --}}
                 <div class="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/5"></div>
@@ -36,22 +32,11 @@
                     {{-- BRAND --}}
                     <div class="flex items-center gap-3">
 
-                        <div
-                            class="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-lg"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-7 w-7 text-blue-600"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                />
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-600" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </div>
 
@@ -75,32 +60,22 @@
 
                             {{-- Background shape --}}
                             <div
-                                class="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10"
-                            ></div>
+                                class="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10">
+                            </div>
 
                             {{-- Clipboard --}}
                             <div
-                                class="relative mx-auto flex h-60 w-50 -rotate-4 items-center justify-center rounded-3xl border-8 border-white/80 bg-white shadow-2xl"
-                            >
+                                class="relative mx-auto flex h-60 w-50 -rotate-4 items-center justify-center rounded-3xl border-8 border-white/80 bg-white shadow-2xl">
 
                                 {{-- Paper --}}
                                 <div class="w-40 space-y-5">
 
                                     <div class="flex items-center gap-3">
                                         <div class="flex h-7 w-7 items-center justify-center rounded-md bg-blue-100">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                class="h-4 w-4 text-blue-600"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                                stroke-width="2"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    d="M5 13l4 4L19 7"
-                                                />
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M5 13l4 4L19 7" />
                                             </svg>
                                         </div>
 
@@ -109,19 +84,10 @@
 
                                     <div class="flex items-center gap-3">
                                         <div class="flex h-7 w-7 items-center justify-center rounded-md bg-blue-100">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                class="h-4 w-4 text-blue-600"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                                stroke-width="2"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    d="M6 18L18 6M6 6l12 12"
-                                                />
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M6 18L18 6M6 6l12 12" />
                                             </svg>
                                         </div>
 
@@ -133,19 +99,10 @@
 
                                     <div class="flex items-center gap-3">
                                         <div class="flex h-7 w-7 items-center justify-center rounded-md bg-blue-100">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                class="h-4 w-4 text-blue-600"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                                stroke-width="2"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    d="M5 13l4 4L19 7"
-                                                />
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M5 13l4 4L19 7" />
                                             </svg>
                                         </div>
 
@@ -156,7 +113,7 @@
 
                             </div>
 
-                            
+
 
                             {{-- Decorative dots --}}
                             <div class="absolute -right-2 top-12 h-5 w-5 rounded-full bg-blue-200"></div>
@@ -197,7 +154,7 @@
 
 
             {{-- =====================================================
-                 PANEL KANAN - LOGIN
+            PANEL KANAN - LOGIN
             ====================================================== --}}
             <div class="flex w-full items-center justify-center bg-white px-7 py-10 sm:px-12 lg:w-[45%] lg:px-14">
 
@@ -207,21 +164,11 @@
                     <div class="mb-10 flex items-center gap-3 lg:hidden">
 
                         <div
-                            class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-4 w-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                />
+                            class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </div>
 
@@ -260,19 +207,10 @@
 
                             <div class="flex gap-3">
 
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="mt-0.5 h-5 w-5 shrink-0 text-red-500"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M12 8v4m0 4h.01M12 21a9 9 0 100-18 9 9 0 000 18z"
-                                    />
+                                <svg xmlns="http://www.w3.org/2000/svg" class="mt-0.5 h-5 w-5 shrink-0 text-red-500"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 8v4m0 4h.01M12 21a9 9 0 100-18 9 9 0 000 18z" />
                                 </svg>
 
                                 <div>
@@ -293,61 +231,33 @@
 
 
                     {{-- FORM --}}
-                    <form
-                        action="{{ route('login') }}"
-                        method="POST"
-                        class="space-y-6"
-                    >
+                    <form action="{{ route('login') }}" method="POST" class="space-y-6">
 
                         @csrf
 
 
-                        {{-- EMAIL --}}
-                        <div>
 
-                            <label
-                                for="email"
-                                class="mb-2 block text-sm font-semibold text-slate-700"
-                            >
-                                Email
+                        {{-- USERNAME --}}
+                        <div>
+                            <label for="username" class="mb-2 block text-sm font-semibold text-slate-700">
+                                Username
                             </label>
 
                             <div class="relative">
-
                                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="h-5 w-5 text-slate-400"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                        />
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M16 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2m16 0v-2a4 4 0 00-3-3.87M14 3.13a4 4 0 010 7.75M14 7a4 4 0 01-4 4 4 4 0 110-8 4 4 0 014 4z" />
                                     </svg>
-
                                 </div>
 
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    value="{{ old('email') }}"
-                                    autocomplete="email"
-                                    required
-                                    autofocus
-                                    placeholder="nama@email.com"
-                                    class="h-14 w-full rounded-xl border border-slate-200 bg-slate-50 pl-12 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
-                                >
-
+                                <input type="text" id="username" name="username" value="{{ old('username') }}"
+                                    autocomplete="username" required autofocus placeholder="Masukkan nama pengguna"
+                                    class="h-14 w-full rounded-xl border border-slate-200 bg-slate-50 pl-12 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100">
                             </div>
-
                         </div>
+
 
 
                         {{-- PASSWORD --}}
@@ -355,11 +265,8 @@
 
                             <div class="mb-2 flex items-center justify-between">
 
-                                <label
-                                    for="password"
-                                    class="block text-sm font-semibold text-slate-700"
-                                >
-                                    Password
+                                <label for="password" class="block text-sm font-semibold text-slate-700">
+                                    NIP
                                 </label>
 
                             </div>
@@ -368,74 +275,33 @@
 
                                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
 
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="h-5 w-5 text-slate-400"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-7a2 2 0 00-2-2H6a2 2 0 00-2 2v7a2 2 0 002 2zm10-11V7a4 4 0 00-8 0v3h8z"
-                                        />
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-7a2 2 0 00-2-2H6a2 2 0 00-2 2v7a2 2 0 002 2zm10-11V7a4 4 0 00-8 0v3h8z" />
                                     </svg>
 
                                 </div>
 
-                                <input
-                                    type="password"
-                                    id="password"
-                                    name="password"
-                                    autocomplete="current-password"
-                                    required
-                                    placeholder="Masukkan password"
-                                    class="h-14 w-full rounded-xl border border-slate-200 bg-slate-50 pl-12 pr-12 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
-                                >
+                                <input type="password" id="password" name="password" autocomplete="current-password"
+                                    placeholder="Masukkan NIP"
+                                    class="h-14 w-full rounded-xl border border-slate-200 bg-slate-50 pl-12 pr-12 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100">
 
-                                <button
-                                    type="button"
-                                    id="toggle-password"
+                                <button type="button" id="toggle-password"
                                     class="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400 transition hover:text-blue-600"
-                                    aria-label="Tampilkan password"
-                                >
-                                    <svg
-                                        id="eye-open"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="h-5 w-5"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                        />
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                        />
+                                    aria-label="Tampilkan password">
+                                    <svg id="eye-open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                     </svg>
 
-                                    <svg
-                                        id="eye-closed"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="hidden h-5 w-5"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.125-3.592M6.223 6.223A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.956 9.956 0 01-4.042 5.124M6.223 6.223L3 3m3.223 3.223l11.554 11.554M9.88 9.88a3 3 0 014.24 4.24"
-                                        />
+                                    <svg id="eye-closed" xmlns="http://www.w3.org/2000/svg" class="hidden h-5 w-5"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.125-3.592M6.223 6.223A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.956 9.956 0 01-4.042 5.124M6.223 6.223L3 3m3.223 3.223l11.554 11.554M9.88 9.88a3 3 0 014.24 4.24" />
                                     </svg>
                                 </button>
 
@@ -449,12 +315,8 @@
 
                             <label class="inline-flex cursor-pointer items-center gap-3">
 
-                                <input
-                                    type="checkbox"
-                                    name="remember"
-                                    value="1"
-                                    class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                                >
+                                <input type="checkbox" name="remember" value="1"
+                                    class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
 
                                 <span class="text-sm text-slate-600">
                                     Ingat saya
@@ -466,26 +328,14 @@
 
 
                         {{-- LOGIN BUTTON --}}
-                        <button
-                            type="submit"
-                            class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-4 focus:ring-blue-100 active:scale-[0.99]"
-                        >
+                        <button type="submit"
+                            class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-4 focus:ring-blue-100 active:scale-[0.99]">
 
                             <span>Masuk ke Sistem</span>
 
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-5 w-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                                />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
 
                         </button>
@@ -516,7 +366,7 @@
 
 
     {{-- =====================================================
-         TOGGLE PASSWORD
+    TOGGLE PASSWORD
     ====================================================== --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -540,8 +390,8 @@
                     togglePassword.setAttribute(
                         'aria-label',
                         isPassword
-                            ? 'Sembunyikan password'
-                            : 'Tampilkan password'
+                            ? 'Sembunyikan NIP'
+                            : 'Tampilkan NIP'
                     );
 
                 });
@@ -552,4 +402,5 @@
     </script>
 
 </body>
+
 </html>

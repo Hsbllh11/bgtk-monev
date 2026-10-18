@@ -37,6 +37,8 @@
 
                 'sekolah' => 'M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5',
 
+                'manajemen' => 'M16.5 7.5a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM3.75 21a8.25 8.25 0 0116.5 0M19.5 8.25a3 3 0 010 6M21.75 21a6 6 0 00-3.75-5.25',
+
                 'panduan' => 'M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z',
 
                 'profil' => 'M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z',
@@ -60,13 +62,13 @@
 
                 {{-- Brand --}}
                 <div class="flex h-20 flex-shrink-0 items-center border-b border-slate-800 px-6">
-                    <div
+                    <!-- <div
                         class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-lg font-bold text-white shadow-lg">
-                        B
-                    </div>
+                        M
+                    </div> -->
                     <div class="ml-3">
-                        <h1 class="text-lg font-bold leading-tight">BGTK NTB</h1>
-                        <p class="text-xs text-slate-400">Monev Dashboard</p>
+                        <h1 class="text-lg font-bold leading-tight">MANDALIKA</h1>
+                        <p class="text-xs text-slate-400">Monitoring-Analisis-Evaluasi BGTK Akurat</p>
                     </div>
                 </div>
 
@@ -82,7 +84,6 @@
                             <span class="text-sm font-medium">Dashboard</span>
                         </a>
                     </div>
-
                     <div>
                         <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Monitoring &
                             Evaluasi</p>
@@ -113,36 +114,51 @@
                             </a>
                         </div>
                     </div>
+                    <div class="space-y-6">
+                        @if (auth()->user()->isAdmin())
+                            <div>
+                                <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                    Administrator
+                                </p>
+                                <a href="{{ route('manajemen-akun.index') }}"
+                                    class="flex items-center gap-3 rounded-lg px-3 py-2.5 transition {{ $menu(request()->is('manajemen-akun*')) }}">
+                                    {!! $icon('manajemen') !!}
+                                    <span class="text-sm">Manajemen Akun</span>
+                                </a>
+                            </div>
+                        @endif
 
-                    <div>
-                        <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Bantuan</p>
+                        <div>
+                            <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Bantuan
+                            </p>
 
-                        <a href="{{ url('/panduan') }}"
-                            class="flex items-center gap-3 rounded-lg px-3 py-2.5 transition {{ $menu(request()->is('panduan*')) }}">
-                            {!! $icon('panduan') !!}
-                            <span class="text-sm">Panduan Pengisian</span>
-                        </a>
+                            <a href="{{ url('/panduan') }}"
+                                class="flex items-center gap-3 rounded-lg px-3 py-2.5 transition {{ $menu(request()->is('panduan*')) }}">
+                                {!! $icon('panduan') !!}
+                                <span class="text-sm">Panduan Pengisian</span>
+                            </a>
+                        </div>
+
+                        <div>
+                            <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Akun</p>
+
+                            <a href="{{ url('/profil') }}"
+                                class="flex items-center gap-3 rounded-lg px-3 py-2.5 transition {{ $menu(request()->is('profil*')) }}">
+                                {!! $icon('profil') !!}
+                                <span class="text-sm">Profil Saya</span>
+                            </a>
+
+                            <form action="{{ route('logout') }}" method="POST" class="mt-1">
+                                @csrf
+                                <button type="submit"
+                                    class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-slate-300 transition hover:bg-red-600 hover:text-white">
+                                    {!! $icon('keluar') !!}
+                                    <span class="text-sm">Keluar</span>
+                                </button>
+                            </form>
+                        </div>
+
                     </div>
-
-                    <div>
-                        <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Akun</p>
-
-                        <a href="{{ url('/profil') }}"
-                            class="flex items-center gap-3 rounded-lg px-3 py-2.5 transition {{ $menu(request()->is('profil*')) }}">
-                            {!! $icon('profil') !!}
-                            <span class="text-sm">Profil Saya</span>
-                        </a>
-
-                        <form action="{{ route('logout') }}" method="POST" class="mt-1">
-                            @csrf
-                            <button type="submit"
-                                class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-slate-300 transition hover:bg-red-600 hover:text-white">
-                                {!! $icon('keluar') !!}
-                                <span class="text-sm">Keluar</span>
-                            </button>
-                        </form>
-                    </div>
-
                 </nav>
 
                 {{-- Footer sidebar --}}
@@ -170,8 +186,13 @@
 
                     <div class="flex items-center gap-3">
                         <div class="text-right">
-                            <p class="text-sm font-semibold text-slate-700">{{ auth()->user()->name }}</p>
-                            <p class="text-xs text-slate-500">Administrator</p>
+                            <p class="text-sm font-semibold text-slate-700">
+                                {{ auth()->user()->name }}
+                            </p>
+
+                            <p class="text-xs text-slate-500">
+                                {{ auth()->user()->isAdmin() ? 'Administrator' : 'Petugas Monev' }}
+                            </p>
                         </div>
 
                         <div

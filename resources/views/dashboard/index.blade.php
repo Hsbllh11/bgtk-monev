@@ -277,15 +277,11 @@
                         Ringkasan progres tindak lanjut hasil monitoring.
                     </p>
                 </div>
-
                 <div class="h-72">
                     <canvas id="tindakLanjutChart"></canvas>
                 </div>
-
             </div>
-
         </div>
-
 
         {{-- =========================
         CHART WAWANCARA & TINDAK LANJUT

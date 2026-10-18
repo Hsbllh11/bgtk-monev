@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sekolah extends Model
 {
@@ -27,14 +28,42 @@ class Sekolah extends Model
     ];
 
     /**
-     * Relasi ke Wawancara
+     * Relasi ke instrumen BCKS.
      */
-    public function wawancaras()
+    public function bcksPengisians(): HasMany
     {
-        return $this->hasMany(Wawancara::class);
+        return $this->hasMany(BcksPengisian::class, 'sekolah_id');
     }
-    public function tindakLanjuts()
+
+    /**
+     * Relasi ke instrumen BK.
+     */
+    public function bkSubmissions(): HasMany
     {
-        return $this->hasMany(TindakLanjut::class);
+        return $this->hasMany(BKSubmission::class, 'sekolah_id');
+    }
+
+    /**
+     * Relasi ke instrumen TENDIK.
+     */
+    public function tendiks(): HasMany
+    {
+        return $this->hasMany(Tendik::class, 'sekolah_id');
+    }
+
+    /**
+     * Relasi ke data wawancara.
+     */
+    public function wawancaras(): HasMany
+    {
+        return $this->hasMany(Wawancara::class, 'sekolah_id');
+    }
+
+    /**
+     * Relasi ke tindak lanjut.
+     */
+    public function tindakLanjuts(): HasMany
+    {
+        return $this->hasMany(TindakLanjut::class, 'sekolah_id');
     }
 }

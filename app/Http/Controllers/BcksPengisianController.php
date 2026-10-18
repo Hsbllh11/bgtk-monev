@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BcksPengisian;
 use Illuminate\Http\Request;
+use App\Support\SekolahResolver;
 
 class BcksPengisianController extends Controller
 {
@@ -76,11 +77,11 @@ class BcksPengisianController extends Controller
             'skor.4_6' => ['required', 'integer', 'between:1,4'],
             'skor.4_7' => ['required', 'integer', 'between:1,4'],
 
-            'dampak_implementasi_rptks' => ['nullable', 'string'],
-            'kendala_strategi_mitigasi' => ['nullable', 'string'],
-            'perubahan_pengambilan_keputusan' => ['nullable', 'string'],
-            'dukungan_lingkungan_sekolah' => ['nullable', 'string'],
-            'keberlanjutan_program_inovasi' => ['nullable', 'string'],
+            // 'dampak_implementasi_rptks' => ['nullable', 'string'],
+            // 'kendala_strategi_mitigasi' => ['nullable', 'string'],
+            // 'perubahan_pengambilan_keputusan' => ['nullable', 'string'],
+            // 'dukungan_lingkungan_sekolah' => ['nullable', 'string'],
+            // 'keberlanjutan_program_inovasi' => ['nullable', 'string'],
         ]);
 
 
@@ -94,6 +95,9 @@ class BcksPengisianController extends Controller
 
 
         $pengisian = BcksPengisian::create([
+            'sekolah_id' => SekolahResolver::resolve(
+                $request->input('unit_kerja_responden')
+            )?->id,
             'nama_bcks' => $request->nama_bcks,
             'unit_kerja' => $request->unit_kerja,
             'angkatan_pelatihan' => $request->angkatan_pelatihan,
@@ -110,11 +114,11 @@ class BcksPengisianController extends Controller
             'nilai_akhir' => round($nilaiAkhir, 2),
             'predikat' => $predikat,
 
-            'dampak_implementasi_rptks' => $request->dampak_implementasi_rptks,
-            'kendala_strategi_mitigasi' => $request->kendala_strategi_mitigasi,
-            'perubahan_pengambilan_keputusan' => $request->perubahan_pengambilan_keputusan,
-            'dukungan_lingkungan_sekolah' => $request->dukungan_lingkungan_sekolah,
-            'keberlanjutan_program_inovasi' => $request->keberlanjutan_program_inovasi,
+            // 'dampak_implementasi_rptks' => $request->dampak_implementasi_rptks,
+            // 'kendala_strategi_mitigasi' => $request->kendala_strategi_mitigasi,
+            // 'perubahan_pengambilan_keputusan' => $request->perubahan_pengambilan_keputusan,
+            // 'dukungan_lingkungan_sekolah' => $request->dukungan_lingkungan_sekolah,
+            // 'keberlanjutan_program_inovasi' => $request->keberlanjutan_program_inovasi,
 
             'status_pengisian' => 'Selesai',
         ]);
@@ -205,11 +209,11 @@ class BcksPengisianController extends Controller
             'skor.4_6' => ['required', 'integer', 'between:1,4'],
             'skor.4_7' => ['required', 'integer', 'between:1,4'],
 
-            'dampak_implementasi_rptks' => ['nullable', 'string'],
-            'kendala_strategi_mitigasi' => ['nullable', 'string'],
-            'perubahan_pengambilan_keputusan' => ['nullable', 'string'],
-            'dukungan_lingkungan_sekolah' => ['nullable', 'string'],
-            'keberlanjutan_program_inovasi' => ['nullable', 'string'],
+            // 'dampak_implementasi_rptks' => ['nullable', 'string'],
+            // 'kendala_strategi_mitigasi' => ['nullable', 'string'],
+            // 'perubahan_pengambilan_keputusan' => ['nullable', 'string'],
+            // 'dukungan_lingkungan_sekolah' => ['nullable', 'string'],
+            // 'keberlanjutan_program_inovasi' => ['nullable', 'string'],
         ]);
 
 
@@ -239,11 +243,11 @@ class BcksPengisianController extends Controller
             'nilai_akhir' => round($nilaiAkhir, 2),
             'predikat' => $predikat,
 
-            'dampak_implementasi_rptks' => $request->dampak_implementasi_rptks,
-            'kendala_strategi_mitigasi' => $request->kendala_strategi_mitigasi,
-            'perubahan_pengambilan_keputusan' => $request->perubahan_pengambilan_keputusan,
-            'dukungan_lingkungan_sekolah' => $request->dukungan_lingkungan_sekolah,
-            'keberlanjutan_program_inovasi' => $request->keberlanjutan_program_inovasi,
+            // 'dampak_implementasi_rptks' => $request->dampak_implementasi_rptks,
+            // 'kendala_strategi_mitigasi' => $request->kendala_strategi_mitigasi,
+            // 'perubahan_pengambilan_keputusan' => $request->perubahan_pengambilan_keputusan,
+            // 'dukungan_lingkungan_sekolah' => $request->dukungan_lingkungan_sekolah,
+            // 'keberlanjutan_program_inovasi' => $request->keberlanjutan_program_inovasi,
 
             'status_pengisian' => 'Selesai',
         ]);
@@ -275,7 +279,7 @@ class BcksPengisianController extends Controller
         $bcksPengisian->delete();
 
         return redirect()
-            ->route('bcks.index')
+            ->route('instrumen.index')
             ->with('success', 'Data pengisian BCKS berhasil dihapus.');
     }
 

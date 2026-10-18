@@ -38,19 +38,34 @@
             ];
         }
 
+        $jabatanResponden = $submission->jabatan_responden;
+        if ($jabatanResponden === 'Lainnya' && filled($submission->jabatan_lainnya)) {
+            $jabatanResponden .= ' — ' . $submission->jabatan_lainnya;
+        }
+
         $responden = [
             ['Nama Responden', $submission->nama_responden],
-            ['Instansi Responden', $submission->instansi_responden],
-            ['Kabupaten / Kota', $submission->kab_kota],
+            ['Jabatan Responden', $jabatanResponden],
+            ['Satuan Pendidikan', $submission->satuan_pendidikan],
+            ['Masa Kerja', $submission->masa_kerja !== null ? $submission->masa_kerja . ' tahun' : null],
+            ['Nama Pelatihan', $submission->nama_pelatihan],
+            ['Tanggal Pengisian', $submission->tanggal_pengisian ? $submission->tanggal_pengisian->format('d/m/Y') : null],
         ];
 
-        $petugas = [
+                $petugas = [
             ['Nama Petugas Monev', $submission->nama_petugas_monev],
             ['Instansi Petugas', $submission->instansi_petugas],
             ['Tanggal Pelaksanaan', $submission->tanggal_pelaksanaan ? $submission->tanggal_pelaksanaan->format('d/m/Y') : null],
             ['Lokasi Monev', $submission->lokasi_monev],
         ];
+
+        // Variabel untuk tampilan Identitas Pengisian (gaya Tendik)
+        $jumlahButirBk = (int) ($submission->jumlah_soal ?? $answers->count());
+        $jumlahTerisiBk = $answers->count();
+        $statusPengisianLabel = $submission->status ?: ($jumlahTerisiBk === $jumlahButirBk ? 'Selesai' : 'Belum Lengkap');
+        $statusSelesai = $statusPengisianLabel === 'Selesai';
     @endphp
+    
 
 
     <div class="mx-auto max-w-6xl space-y-6">
@@ -62,9 +77,9 @@
 
             <div>
                 <nav class="flex items-center gap-2 text-sm text-slate-500">
-                    <a href="{{ route('instrumen.index') }}" class="transition hover:text-blue-600">Instrumen BK</a>
+                    <a href="{{ route('instrumen.index') }}" class="transition hover:text-blue-600">Instrumen</a>
                     <span class="text-slate-300">/</span>
-                    <span class="font-medium text-slate-700">Hasil Penilaian</span>
+                    <span class="font-medium text-slate-700">Hasil Penilaian BK</span>
                 </nav>
 
                 <h1 class="mt-3 text-3xl font-bold tracking-tight text-slate-800">Hasil Penilaian BK</h1>
@@ -76,7 +91,7 @@
 
             <div class="no-print flex flex-wrap items-center gap-3">
 
-            
+
                 {{-- Kembali (dengan ikon panah) --}}
                 <a href="{{ route('instrumen.index') }}"
                     class="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
@@ -88,10 +103,10 @@
                 </a>
 
                 {{-- Cetak Hasil (teks saja) --}}
-                <button type="button" onclick="window.print()"
+                <a href="{{ route('bk.cetak', ['submission' => $submission->id]) }}"
                     class="inline-flex h-12 items-center justify-center rounded-xl bg-blue-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
                     Cetak Hasil
-                </button>
+                </a>
 
                 {{-- Edit Data (teks saja) --}}
                 {{-- Edit Data --}}
@@ -194,62 +209,85 @@
         {{-- =========================================================
         IDENTITAS PENGISIAN
         ========================================================== --}}
-        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
 
-            <div
-                class="flex flex-col gap-3 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div class="border-b border-slate-200 px-6 py-5">
+                <h2 class="text-lg font-bold text-slate-900">Identitas Pengisian</h2>
+                <p class="mt-1 text-sm text-slate-500">
+                    Informasi responden dan petugas Monev.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-x-8 gap-y-5 p-6 md:grid-cols-2">
+
                 <div>
-                    <h2 class="text-lg font-bold text-slate-800">Identitas Pengisian</h2>
-                    <p class="mt-1 text-sm text-slate-500">Informasi responden dan petugas Monev.</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Nama Petugas Monev</p>
+                    <p class="mt-1 font-semibold text-slate-800">{{ $submission->nama_petugas_monev ?: '-' }}</p>
                 </div>
 
-                @if ($submission->status === 'Selesai')
-                    <span
-                        class="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-xs font-bold text-emerald-700">
-                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span> Selesai
-                    </span>
-                @else
-                    <span
-                        class="inline-flex items-center gap-2 rounded-full bg-amber-100 px-4 py-2 text-xs font-bold text-amber-700">
-                        <span class="h-2 w-2 rounded-full bg-amber-500"></span> {{ $submission->status }}
-                    </span>
-                @endif
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Instansi Petugas</p>
+                    <p class="mt-1 font-semibold text-slate-800">{{ $submission->instansi_petugas ?: '-' }}</p>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Lokasi Monev</p>
+                    <p class="mt-1 font-semibold text-slate-800">{{ $submission->lokasi_monev ?: '-' }}</p>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Tanggal Pelaksanaan</p>
+                    <p class="mt-1 font-semibold text-slate-800">
+                        {{ $submission->tanggal_pelaksanaan ? $submission->tanggal_pelaksanaan->format('d/m/Y') : '-' }}
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Nama Responden</p>
+                    <p class="mt-1 font-semibold text-slate-800">{{ $submission->nama_responden ?: '-' }}</p>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Jabatan Responden</p>
+                    <p class="mt-1 font-semibold text-slate-800">{{ $jabatanResponden ?: '-' }}</p>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Satuan Pendidikan</p>
+                    <p class="mt-1 font-semibold text-slate-800">{{ $submission->satuan_pendidikan ?: '-' }}</p>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Masa Kerja</p>
+                    <p class="mt-1 font-semibold text-slate-800">
+                        {{ $submission->masa_kerja !== null && $submission->masa_kerja !== '' ? $submission->masa_kerja . ' tahun' : '-' }}
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Nama Kegiatan/Pelatihan</p>
+                    <p class="mt-1 font-semibold text-slate-800">{{ $submission->nama_pelatihan ?: '-' }}</p>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Tanggal Pengisian</p>
+                    <p class="mt-1 font-semibold text-slate-800">
+                        {{ $submission->tanggal_pengisian ? $submission->tanggal_pengisian->format('d/m/Y') : '-' }}
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Status Pengisian</p>
+                    <div class="mt-1">
+                        <span
+                            class="inline-flex rounded-full px-3 py-1 text-xs font-bold {{ $statusSelesai ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
+                            {{ $statusPengisianLabel }} ({{ $jumlahTerisiBk }}/{{ $jumlahButirBk }} butir)
+                        </span>
+                    </div>
+                </div>
+
             </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2">
-
-                {{-- RESPONDEN --}}
-                <div class="border-b border-slate-100 p-6 lg:border-b-0 lg:border-r">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-blue-600">Responden</h3>
-
-                    <dl class="mt-4 space-y-4">
-                        @foreach ($responden as $item)
-                            <div>
-                                <dt class="text-xs font-medium text-slate-400">{{ $item[0] }}</dt>
-                                <dd class="mt-1 text-sm font-semibold text-slate-800">{{ $item[1] ?: '-' }}</dd>
-                            </div>
-                        @endforeach
-                    </dl>
-                </div>
-
-                {{-- PETUGAS --}}
-                <div class="p-6">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-blue-600">Petugas Monev</h3>
-
-                    <dl class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        @foreach ($petugas as $item)
-                            <div>
-                                <dt class="text-xs font-medium text-slate-400">{{ $item[0] }}</dt>
-                                <dd class="mt-1 text-sm font-semibold text-slate-800">{{ $item[1] ?: '-' }}</dd>
-                            </div>
-                        @endforeach
-                    </dl>
-                </div>
-
-            </div>
-
         </section>
-
 
         {{-- =========================================================
         REKAPITULASI LEVEL
@@ -427,117 +465,52 @@
         </section>
 
 
+
+
         {{-- =========================================================
-        PERTANYAAN TERBUKA
-        ========================================================== --}}
-        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        PRINT STYLE
+        (layout utama memakai tinggi tetap + scroll di <main>,
+            jadi saat cetak semuanya harus dilepas agar tidak terpotong)
+            ========================================================== --}}
+            <style>
+                @media print {
 
-            <div class="border-b border-slate-200 px-6 py-5">
-                <h2 class="text-lg font-bold text-slate-800">Pertanyaan Terbuka</h2>
-                <p class="mt-1 text-sm text-slate-500">Catatan dan tanggapan dari hasil evaluasi.</p>
-            </div>
+                    aside,
+                    header,
+                    .no-print {
+                        display: none !important;
+                    }
 
-            <div class="space-y-5 p-6">
+                    html,
+                    body {
+                        height: auto !important;
+                        overflow: visible !important;
+                        background: white !important;
+                    }
 
-                @forelse ($submission->essayAnswers as $essay)
+                    body>div,
+                    body>div>div {
+                        display: block !important;
+                        height: auto !important;
+                    }
 
-                    <div class="flex gap-4">
+                    main {
+                        overflow: visible !important;
+                    }
 
-                        <span
-                            class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
-                            {{ $essay->nomor }}
-                        </span>
+                    .shadow-sm {
+                        box-shadow: none !important;
+                    }
 
-                        <div class="min-w-0 flex-1">
-                            <p class="text-sm font-semibold leading-6 text-slate-800">{{ $essay->pertanyaan }}</p>
+                    .max-w-6xl {
+                        max-width: none !important;
+                    }
 
-                            <div class="mt-3 rounded-xl border border-slate-100 bg-slate-50 p-4">
-                                @if ($essay->jawaban)
-                                    <p class="whitespace-pre-line text-sm leading-6 text-slate-600">{{ $essay->jawaban }}</p>
-                                @else
-                                    <p class="text-sm italic text-slate-400">Tidak ada jawaban.</p>
-                                @endif
-                            </div>
-                        </div>
-
-                    </div>
-
-                @empty
-
-                    <div class="rounded-xl bg-slate-50 p-6 text-center">
-                        <p class="text-sm text-slate-400">Belum ada pertanyaan terbuka.</p>
-                    </div>
-
-                @endforelse
-
-            </div>
-
-        </section>
-
-
-        {{-- FOOTER --}}
-        <div
-            class="no-print flex flex-col gap-3 border-t border-slate-200 pb-2 pt-6 sm:flex-row sm:items-center sm:justify-between">
-
-            <a href="{{ route('instrumen.index') }}"
-                class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
-                ← Kembali ke Instrumen Pemantauan
-            </a>
-
-            <button type="button" onclick="window.print()"
-                class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
-                🖨 Cetak Hasil
-            </button>
-
-        </div>
-
-    </div>
-
-
-    {{-- =========================================================
-    PRINT STYLE
-    (layout utama memakai tinggi tetap + scroll di <main>,
-        jadi saat cetak semuanya harus dilepas agar tidak terpotong)
-        ========================================================== --}}
-        <style>
-            @media print {
-
-                aside,
-                header,
-                .no-print {
-                    display: none !important;
+                    section,
+                    tr {
+                        break-inside: avoid;
+                    }
                 }
-
-                html,
-                body {
-                    height: auto !important;
-                    overflow: visible !important;
-                    background: white !important;
-                }
-
-                body>div,
-                body>div>div {
-                    display: block !important;
-                    height: auto !important;
-                }
-
-                main {
-                    overflow: visible !important;
-                }
-
-                .shadow-sm {
-                    box-shadow: none !important;
-                }
-
-                .max-w-6xl {
-                    max-width: none !important;
-                }
-
-                section,
-                tr {
-                    break-inside: avoid;
-                }
-            }
-        </style>
+            </style>
 
 @endsection

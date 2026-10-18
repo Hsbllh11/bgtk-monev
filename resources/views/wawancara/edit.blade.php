@@ -1,440 +1,340 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Wawancara')
-
-@section('page-title', 'Edit Wawancara')
+@section('title', 'Edit Wawancara BCKS')
+@section('page-title', 'Edit Wawancara BCKS')
 
 @section('content')
+    @php
+        $pertanyaan = [
+            1 => [
+                'judul' => 'Dampak Implementasi RPTKS',
+                'isi' => 'Dari seluruh RPTKS (Rancangan Projek Integratif dan Transformatif Kepala Sekolah) yang Anda susun setelah pelatihan, apakah berdampak setelah diimplementasikan di sekolah? Apa kunci keberhasilannya?',
+            ],
+            2 => [
+                'judul' => 'Kendala dan Strategi Mitigasi',
+                'isi' => 'Kendala (sistem, anggaran, maupun resistensi SDM) apa yang Anda hadapi saat menerapkan Rancangan Projek tersebut? Bagaimana Anda mengatasinya?',
+            ],
+            3 => [
+                'judul' => 'Perubahan Kepemimpinan dan Pengambilan Keputusan',
+                'isi' => 'Bagaimana Anda merasakan perubahan pada cara Anda mengambil keputusan strategis dan mengelola konflik di sekolah setelah mengikuti pelatihan BCKS?',
+            ],
+            4 => [
+                'judul' => 'Dukungan Lingkungan Sekolah',
+                'isi' => 'Sejauh mana dukungan dari Kepala Sekolah (saat ini), rekan guru, dan pengawas sekolah membantu Anda mengeksekusi ide-ide baru di sekolah?',
+            ],
+            5 => [
+                'judul' => 'Keberlanjutan Program Inovasi',
+                'isi' => 'Bagaimana cara Anda memastikan program inovasi yang telah dimulai tetap berjalan berkelanjutan meskipun terjadi pergantian kepemimpinan atau personil?',
+            ],
+        ];
+    @endphp
 
-<div class="space-y-6">
+    <div class="mx-auto max-w-6xl space-y-6 pb-10">
 
-    {{-- Header --}}
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        {{-- Header --}}
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <div class="mb-2 flex items-center gap-2 text-sm text-slate-500">
+                    <a href="{{ route('wawancara.index') }}" class="hover:text-blue-600">
+                        Wawancara
+                    </a>
+                    <span>/</span>
+                    <span>Edit BCKS</span>
+                </div>
 
-        <div>
-            <h1 class="text-2xl font-bold text-slate-800">
-                Edit Wawancara
-            </h1>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-800">
+                    Edit Wawancara BCKS
+                </h1>
 
-            <p class="mt-1 text-sm text-slate-500">
-                Perbarui informasi data wawancara.
-            </p>
-        </div>
-
-        <a
-            href="{{ route('wawancara.show', ['wawancara' => $wawancara->id]) }}"
-            class="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15 19l-7-7 7-7"
-                />
-            </svg>
-
-            Kembali
-        </a>
-
-    </div>
-
-
-    {{-- Error Validation --}}
-    @if ($errors->any())
-
-        <div class="rounded-xl border border-red-200 bg-red-50 p-5">
-
-            <div class="flex gap-3">
-
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="mt-0.5 h-5 w-5 shrink-0 text-red-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M12 9v2m0 4h.01M10.29 3.86l-7.82 13.5A2 2 0 004.2 20.5h15.6a2 2 0 001.73-3.14l-7.82-13.5a2 2 0 00-3.42 0z"
-                    />
+                <p class="mt-2 text-sm text-slate-500">
+                    Perbarui identitas pelaksanaan, responden, petugas Monev, dan jawaban wawancara.
+                </p>
+            </div>
+            <a href="{{ route('wawancara.show', $wawancara->id) }}"
+                class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                 </svg>
-
-                <div>
-                    <p class="font-semibold text-red-700">
-                        Terdapat kesalahan pada data.
-                    </p>
-
-                    <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-red-600">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-
-            </div>
-
-        </div>
-
-    @endif
-
-
-    {{-- Form --}}
-    <form
-        action="{{ route('wawancara.update', ['wawancara' => $wawancara->id]) }}"
-        method="POST"
-        class="space-y-6"
-    >
-
-        @csrf
-        @method('PUT')
-
-
-        {{-- Data Utama --}}
-        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
-
-            <div class="border-b border-slate-200 px-6 py-4">
-
-                <h2 class="text-base font-bold text-slate-800">
-                    Data Pelaksanaan
-                </h2>
-
-                <p class="mt-1 text-sm text-slate-500">
-                    Perbarui instrumen, sekolah, tanggal, dan status wawancara.
-                </p>
-
-            </div>
-
-
-            <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
-
-                {{-- Instrumen --}}
-                <div>
-
-                    <label
-                        for="instrumen_id"
-                        class="mb-2 block text-sm font-semibold text-slate-700"
-                    >
-                        Instrumen
-                        <span class="text-red-500">*</span>
-                    </label>
-
-                    <select
-                        id="instrumen_id"
-                        name="instrumen_id"
-                        required
-                        class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-
-                        <option value="">
-                            -- Pilih Instrumen --
-                        </option>
-
-                        @foreach ($instrumens as $instrumen)
-
-                            <option
-                                value="{{ $instrumen->id }}"
-                                {{ old('instrumen_id', $wawancara->instrumen_id) == $instrumen->id ? 'selected' : '' }}
-                            >
-                                {{ $instrumen->kode_instrumen }}
-                                - {{ $instrumen->nama_instrumen }}
-                            </option>
-
-                        @endforeach
-
-                    </select>
-
-                </div>
-
-
-                {{-- Sekolah --}}
-                <div>
-
-                    <label
-                        for="sekolah_id"
-                        class="mb-2 block text-sm font-semibold text-slate-700"
-                    >
-                        Sekolah
-                        <span class="text-red-500">*</span>
-                    </label>
-
-                    <select
-                        id="sekolah_id"
-                        name="sekolah_id"
-                        required
-                        class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-
-                        <option value="">
-                            -- Pilih Sekolah --
-                        </option>
-
-                        @foreach ($sekolahs as $sekolah)
-
-                            <option
-                                value="{{ $sekolah->id }}"
-                                {{ old('sekolah_id', $wawancara->sekolah_id) == $sekolah->id ? 'selected' : '' }}
-                            >
-                                {{ $sekolah->npsn }}
-                                - {{ $sekolah->nama_sekolah }}
-                            </option>
-
-                        @endforeach
-
-                    </select>
-
-                </div>
-
-
-                {{-- Tanggal --}}
-                <div>
-
-                    <label
-                        for="tanggal_wawancara"
-                        class="mb-2 block text-sm font-semibold text-slate-700"
-                    >
-                        Tanggal Wawancara
-                        <span class="text-red-500">*</span>
-                    </label>
-
-                    <input
-                        type="date"
-                        id="tanggal_wawancara"
-                        name="tanggal_wawancara"
-                        value="{{ old('tanggal_wawancara', $wawancara->tanggal_wawancara?->format('Y-m-d')) }}"
-                        required
-                        class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-
-                </div>
-
-
-                {{-- Status --}}
-                <div>
-
-                    <label
-                        for="status"
-                        class="mb-2 block text-sm font-semibold text-slate-700"
-                    >
-                        Status
-                        <span class="text-red-500">*</span>
-                    </label>
-
-                    <select
-                        id="status"
-                        name="status"
-                        required
-                        class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-
-                        <option
-                            value="Belum Dilaksanakan"
-                            {{ old('status', $wawancara->status) === 'Belum Dilaksanakan' ? 'selected' : '' }}
-                        >
-                            Belum Dilaksanakan
-                        </option>
-
-                        <option
-                            value="Selesai"
-                            {{ old('status', $wawancara->status) === 'Selesai' ? 'selected' : '' }}
-                        >
-                            Selesai
-                        </option>
-
-                    </select>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        {{-- Data Narasumber --}}
-        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
-
-            <div class="border-b border-slate-200 px-6 py-4">
-
-                <h2 class="text-base font-bold text-slate-800">
-                    Data Narasumber
-                </h2>
-
-                <p class="mt-1 text-sm text-slate-500">
-                    Perbarui informasi narasumber dan pewawancara.
-                </p>
-
-            </div>
-
-
-            <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
-
-                {{-- Nama Narasumber --}}
-                <div>
-
-                    <label
-                        for="nama_narasumber"
-                        class="mb-2 block text-sm font-semibold text-slate-700"
-                    >
-                        Nama Narasumber
-                        <span class="text-red-500">*</span>
-                    </label>
-
-                    <input
-                        type="text"
-                        id="nama_narasumber"
-                        name="nama_narasumber"
-                        value="{{ old('nama_narasumber', $wawancara->nama_narasumber) }}"
-                        required
-                        placeholder="Masukkan nama narasumber"
-                        class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-
-                </div>
-
-
-                {{-- Jabatan --}}
-                <div>
-
-                    <label
-                        for="jabatan_narasumber"
-                        class="mb-2 block text-sm font-semibold text-slate-700"
-                    >
-                        Jabatan Narasumber
-                    </label>
-
-                    <input
-                        type="text"
-                        id="jabatan_narasumber"
-                        name="jabatan_narasumber"
-                        value="{{ old('jabatan_narasumber', $wawancara->jabatan_narasumber) }}"
-                        placeholder="Contoh: Kepala Sekolah"
-                        class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-
-                </div>
-
-
-                {{-- Pewawancara --}}
-                <div class="md:col-span-2">
-
-                    <label
-                        for="nama_pewawancara"
-                        class="mb-2 block text-sm font-semibold text-slate-700"
-                    >
-                        Nama Pewawancara
-                        <span class="text-red-500">*</span>
-                    </label>
-
-                    <input
-                        type="text"
-                        id="nama_pewawancara"
-                        name="nama_pewawancara"
-                        value="{{ old('nama_pewawancara', $wawancara->nama_pewawancara) }}"
-                        required
-                        placeholder="Masukkan nama pewawancara"
-                        class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        {{-- Hasil dan Catatan --}}
-        <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
-
-            <div class="border-b border-slate-200 px-6 py-4">
-
-                <h2 class="text-base font-bold text-slate-800">
-                    Hasil dan Catatan
-                </h2>
-
-                <p class="mt-1 text-sm text-slate-500">
-                    Perbarui hasil wawancara dan catatan tambahan.
-                </p>
-
-            </div>
-
-
-            <div class="space-y-6 p-6">
-
-                {{-- Hasil Wawancara --}}
-                <div>
-
-                    <label
-                        for="hasil_wawancara"
-                        class="mb-2 block text-sm font-semibold text-slate-700"
-                    >
-                        Hasil Wawancara
-                    </label>
-
-                    <textarea
-                        id="hasil_wawancara"
-                        name="hasil_wawancara"
-                        rows="6"
-                        placeholder="Masukkan hasil wawancara..."
-                        class="w-full resize-y rounded-lg border border-slate-300 px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >{{ old('hasil_wawancara', $wawancara->hasil_wawancara) }}</textarea>
-
-                </div>
-
-
-                {{-- Catatan --}}
-                <div>
-
-                    <label
-                        for="catatan"
-                        class="mb-2 block text-sm font-semibold text-slate-700"
-                    >
-                        Catatan
-                    </label>
-
-                    <textarea
-                        id="catatan"
-                        name="catatan"
-                        rows="4"
-                        placeholder="Masukkan catatan tambahan..."
-                        class="w-full resize-y rounded-lg border border-slate-300 px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >{{ old('catatan', $wawancara->catatan) }}</textarea>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        {{-- Tombol --}}
-        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-
-            <a
-                href="{{ route('wawancara.show', ['wawancara' => $wawancara->id]) }}"
-                class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-            >
-                Batal
+                Kembali
             </a>
-
-            <button
-                type="submit"
-                class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
-            >
-                Simpan Perubahan
-            </button>
-
         </div>
 
-    </form>
+        {{-- Informasi --}}
+        <div class="rounded-xl border border-blue-200 bg-blue-50 p-4">
+            <div class="flex gap-3">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 110-20 10 10 0 010 20z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-semibold text-blue-900">Perubahan data wawancara</p>
+                    <p class="mt-1 text-sm leading-6 text-blue-800">
+                        Perubahan hanya diterapkan setelah tombol Simpan Perubahan dipilih.
+                        Periksa kembali jawaban sebelum menyimpan.
+                    </p>
+                </div>
+            </div>
+        </div>
 
-</div>
+        {{-- Validasi --}}
+        @if ($errors->any())
+            <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <p class="font-semibold">Data belum dapat disimpan.</p>
+                <ul class="mt-2 list-inside list-disc space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
+        <form action="{{ route('wawancara.update', $wawancara->id) }}" method="POST" class="space-y-6">
+            @csrf
+            @method('PUT')
+
+            {{-- Identitas BCKS --}}
+            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-100 px-6 py-5">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 font-bold text-indigo-700">
+                            02
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-slate-800">Identitas BCKS</h2>
+                            <p class="mt-1 text-sm text-slate-500">
+                                Data peserta bakal calon kepala sekolah.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+                    @foreach ([
+                            'nama_bcks' => 'Nama BCKS',
+                            'unit_kerja_bcks' => 'Unit Kerja BCKS',
+                            'angkatan_pelatihan_bcks' => 'Angkatan Pelatihan BCKS',
+                        ] as $field => $label)
+                        <div class="{{ $field === 'angkatan_pelatihan_bcks' ? 'md:col-span-2' : '' }}">
+                            <label for="{{ $field }}" class="mb-2 block text-sm font-semibold text-slate-700">
+                                {{ $label }} <span class="text-red-500">*</span>
+                            </label>
+
+                            <input id="{{ $field }}" name="{{ $field }}" type="text" required maxlength="255"
+                                value="{{ old($field, $wawancara->{$field}) }}"
+                                class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+
+                            @error($field)
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+
+            {{-- Identitas responden --}}
+            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-100 px-6 py-5">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 font-bold text-violet-700">
+                            03
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-slate-800">Identitas Responden</h2>
+                            <p class="mt-1 text-sm text-slate-500">
+                                Data pihak yang memberikan informasi evaluasi.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+                    @foreach ([
+                            'nama_responden' => 'Nama Responden',
+                            'unit_kerja_responden' => 'Unit Kerja Responden',
+                            'status_responden' => 'Status Responden',
+                        ] as $field => $label)
+                        <div class="{{ $field === 'status_responden' ? 'md:col-span-2' : '' }}">
+                            <label for="{{ $field }}" class="mb-2 block text-sm font-semibold text-slate-700">
+                                {{ $label }} <span class="text-red-500">*</span>
+                            </label>
+
+                            <input id="{{ $field }}" name="{{ $field }}" type="text" required maxlength="255"
+                                value="{{ old($field, $wawancara->{$field} ?: ($field === 'nama_responden' ? $wawancara->nama_narasumber : ($field === 'status_responden' ? $wawancara->jabatan_narasumber : ''))) }}"
+                                class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+
+                            @error($field)
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+
+            {{-- Petugas Monev --}}
+            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-100 px-6 py-5">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 font-bold text-emerald-700">
+                            04
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-slate-800">Petugas Monitoring dan Evaluasi</h2>
+                            <p class="mt-1 text-sm text-slate-500">
+                                Identitas petugas yang melaksanakan kegiatan.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+                    <div>
+                        <label for="nama_petugas_monev" class="mb-2 block text-sm font-semibold text-slate-700">
+                            Nama Petugas Monev <span class="text-red-500">*</span>
+                        </label>
+
+                        <input id="nama_petugas_monev" name="nama_petugas_monev" type="text" required maxlength="255"
+                            value="{{ old('nama_petugas_monev', $wawancara->nama_petugas_monev ?: $wawancara->nama_pewawancara) }}"
+                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+
+                        @error('nama_petugas_monev')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- Tanggal Monitoring dan Evaluasi --}}
+                    <div class="grid grid-cols-1 gap-5 px-6 pb-6 md:grid-cols-2">
+                        <div>
+                            <label for="tanggal_evaluasi" class="mb-2 block text-sm font-semibold text-slate-700">
+                                Tanggal Monitoring dan Evaluasi
+                                <span class="text-red-500">*</span>
+                            </label>
+
+                            <input id="tanggal_evaluasi" name="tanggal_evaluasi" type="date" required
+                                value="{{ old('tanggal_evaluasi', optional($wawancara->tanggal_evaluasi)->format('Y-m-d') ?? optional($wawancara->tanggal_wawancara)->format('Y-m-d')) }}"
+                                class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+
+                            @error('tanggal_evaluasi')
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="unit_kerja_petugas" class="mb-2 block text-sm font-semibold text-slate-700">
+                            Unit Kerja Petugas <span class="text-red-500">*</span>
+                        </label>
+
+                        <input id="unit_kerja_petugas" name="unit_kerja_petugas" type="text" required maxlength="255"
+                            value="{{ old('unit_kerja_petugas', $wawancara->unit_kerja_petugas) }}"
+                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+
+                        @error('unit_kerja_petugas')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                </div>
+            </section>
+
+            {{-- Jawaban esai --}}
+            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-100 px-6 py-5">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 font-bold text-amber-700">
+                            05
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-slate-800">Jawaban Wawancara BCKS</h2>
+                            <p class="mt-1 text-sm text-slate-500">
+                                Periksa dan perbarui jawaban untuk setiap pertanyaan.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-7 p-6">
+                    @foreach ($pertanyaan as $nomor => $item)
+                        <div>
+                            <label for="jawaban_{{ $nomor }}" class="block text-base font-bold text-slate-800">
+                                {{ $nomor }}. {{ $item['judul'] }}
+                            </label>
+
+                            <p class="mt-2 text-sm leading-6 text-slate-600">
+                                {{ $item['isi'] }}
+                            </p>
+
+                            <textarea id="jawaban_{{ $nomor }}" name="jawaban_{{ $nomor }}" rows="5"
+                                class="mt-3 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm leading-6 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                placeholder="Tuliskan jawaban wawancara di sini...">{{ old('jawaban_' . $nomor, $wawancara->{'jawaban_' . $nomor}) }}</textarea>
+
+                            @error('jawaban_' . $nomor)
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        @if (!$loop->last)
+                            <div class="border-t border-slate-100"></div>
+                        @endif
+                    @endforeach
+                </div>
+            </section>
+
+            {{-- Ringkasan dan catatan --}}
+            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-100 px-6 py-5">
+                    <h2 class="font-bold text-slate-800">Ringkasan dan Catatan</h2>
+                    <p class="mt-1 text-sm text-slate-500">
+                        Informasi tambahan hasil monitoring dan evaluasi.
+                    </p>
+                </div>
+
+                <div class="space-y-5 p-6">
+                    <div>
+                        <label for="hasil_wawancara" class="mb-2 block text-sm font-semibold text-slate-700">
+                            Ringkasan Hasil Wawancara
+                        </label>
+
+                        <textarea id="hasil_wawancara" name="hasil_wawancara" rows="4"
+                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm leading-6 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            placeholder="Tuliskan ringkasan hasil wawancara...">{{ old('hasil_wawancara', $wawancara->hasil_wawancara) }}</textarea>
+
+                        @error('hasil_wawancara')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="catatan" class="mb-2 block text-sm font-semibold text-slate-700">
+                            Catatan Tambahan
+                        </label>
+
+                        <textarea id="catatan" name="catatan" rows="3"
+                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm leading-6 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            placeholder="Tuliskan catatan tambahan jika ada...">{{ old('catatan', $wawancara->catatan) }}</textarea>
+
+                        @error('catatan')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+            </section>
+
+            {{-- Tombol aksi --}}
+            <div
+                class="sticky bottom-0 z-10 -mx-2 flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50/95 p-4 backdrop-blur sm:flex-row sm:justify-end">
+                <button type="submit"
+                    class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
 @endsection

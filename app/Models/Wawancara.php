@@ -12,7 +12,7 @@ class Wawancara extends Model
     protected $table = 'wawancaras';
 
     protected $fillable = [
-        // Informasi wawancara
+        'jenis_wawancara',
         'instrumen_id',
         'sekolah_id',
         'tanggal_wawancara',
@@ -23,25 +23,28 @@ class Wawancara extends Model
         'unit_kerja_bcks',
         'angkatan_pelatihan_bcks',
 
-        // Identitas Responden
+        // Identitas responden
         'nama_responden',
         'unit_kerja_responden',
         'status_responden',
 
-        // Petugas Monev
+        // Identitas petugas Monev
         'nama_petugas_monev',
         'unit_kerja_petugas',
+        'tanggal_evaluasi',
 
-        // Pertanyaan dan hasil wawancara
+        // Jawaban esai
         'jawaban_1',
         'jawaban_2',
         'jawaban_3',
         'jawaban_4',
         'jawaban_5',
+
+        // Hasil dan catatan
         'hasil_wawancara',
         'catatan',
 
-        // Kompatibilitas dengan data wawancara lama
+        // Kolom lama untuk menjaga kompatibilitas data
         'nama_narasumber',
         'jabatan_narasumber',
         'nama_pewawancara',
@@ -51,6 +54,7 @@ class Wawancara extends Model
     {
         return [
             'tanggal_wawancara' => 'date',
+            'tanggal_evaluasi' => 'date',
         ];
     }
 

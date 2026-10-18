@@ -13,43 +13,48 @@ class LoginController extends Controller
      */
     public function showLoginForm()
     {
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+
         return view('auth.login');
     }
 
     /**
-     * Memproses login pengguna.
+     * Memproses login menggunakan username dan NIP.
+     * NIP digunakan sebagai password sesuai kebutuhan sistem.
      */
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => [
-                'required',
-                'email',
-            ],
-            'password' => [
-                'required',
-                'string',
-            ],
+            'username' => ['required', 'string'],
+            'password' => ['required', 'string'],
+        ], [
+            'username.required' => 'Username wajib diisi.',
+            'password.required' => 'NIP wajib diisi.',
         ]);
 
         $remember = $request->boolean('remember');
 
-        if (Auth::attempt($credentials, $remember)) {
+        if (
+            Auth::attempt([
+                'username' => $credentials['username'],
+                'password' => $credentials['password'],
+                'is_active' => true,
+            ], $remember)
+        ) {
             $request->session()->regenerate();
 
             return redirect()
                 ->intended(route('dashboard'))
-                ->with(
-                    'success',
-                    'Selamat datang kembali di BGTK Monev.'
-                );
+                ->with('success', 'Selamat datang di BGTK Monev.');
         }
 
         return back()
             ->withErrors([
-                'email' => 'Email atau password yang dimasukkan tidak sesuai.',
+                'username' => 'Username, NIP, atau status akun tidak sesuai.',
             ])
-            ->onlyInput('email');
+            ->onlyInput('username');
     }
 
     /**
@@ -60,14 +65,10 @@ class LoginController extends Controller
         Auth::logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect()
             ->route('login')
-            ->with(
-                'success',
-                'Anda berhasil keluar dari sistem.'
-            );
+            ->with('success', 'Anda berhasil keluar dari sistem.');
     }
 }

@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Instrumen;
 use App\Models\BcksPengisian;
 use App\Models\BKSubmission;
+use App\Models\Tendik;
+
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Route;
 
 class InstrumenController extends Controller
 {
@@ -52,6 +55,15 @@ class InstrumenController extends Controller
             ->latest('id')
             ->get();
 
+        /*
+        |--------------------------------------------------------------------------
+        | AMBIL RIWAYAT TENDIK
+        |--------------------------------------------------------------------------
+        */
+        $tendik = Tendik::query()
+            ->latest('tanggal_pengisian')
+            ->latest('id')
+            ->get();
 
         /*
         |--------------------------------------------------------------------------
@@ -115,6 +127,18 @@ class InstrumenController extends Controller
                     ]
                 ),
 
+                /*
+                |----------------------------------------------------------------
+                | 'bcks.destroy' dicek dulu dengan Route::has() supaya halaman
+                | tidak error kalau route-nya belum didaftarkan di web.php.
+                | Setelah route 'bcks.destroy' ditambahkan, link hapus akan
+                | otomatis aktif tanpa perlu ubah apa pun di sini.
+                |----------------------------------------------------------------
+                */
+                'delete_route' => Route::has('bcks.destroy')
+                    ? route('bcks.destroy', ['bcksPengisian' => $item->id])
+                    : null,
+
                 'cetak_route' => route(
                     'bcks.cetak',
                     [
@@ -174,13 +198,98 @@ class InstrumenController extends Controller
                     ]
                 ),
 
-                'edit_route' => null,
+                /*
+                |----------------------------------------------------------------
+                | BK belum punya halaman edit saat ini. Tetap dicek dengan
+                | Route::has() supaya begitu route 'bk.edit' dibuat, link
+                | ini otomatis aktif tanpa perlu ubah controller lagi.
+                |----------------------------------------------------------------
+                */
+                'edit_route' => Route::has('bk.edit')
+                    ? route('bk.edit', ['submission' => $item->id])
+                    : null,
+
+                'delete_route' => Route::has('bk.destroy')
+                    ? route('bk.destroy', ['submission' => $item->id])
+                    : null,
 
                 'cetak_route' => null,
             ]);
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | MASUKKAN TENDIK
+        |--------------------------------------------------------------------------
+        */
 
+        foreach ($tendik as $item) {
+            $nomorJawaban = range(1, 43);
+            $totalSkor = 0;
+            $jumlahTerisi = 0;
+
+            foreach ($nomorJawaban as $nomor) {
+                $kolomJawaban = 'jawaban_' . $nomor;
+                $nilaiJawaban = $item->{$kolomJawaban};
+
+                if ($nilaiJawaban !== null && $nilaiJawaban !== '') {
+                    $totalSkor += (int) $nilaiJawaban;
+                    $jumlahTerisi++;
+                }
+            }
+
+            $nilaiRataRata = $jumlahTerisi > 0
+                ? $totalSkor / $jumlahTerisi
+                : 0;
+
+            $riwayat->push([
+                'id' => $item->id,
+
+                'jenis' => 'TENDIK',
+
+                'instrumen' => 'Monitoring & Evaluasi TENDIK',
+
+                'nama' => $item->nama_kegiatan
+                    ?? $item->nama_pelatihan
+                    ?? '-',
+
+                'unit_kerja' => $item->satuan_pendidikan ?? '-',
+
+                'responden' => $item->nama_responden ?? '-',
+
+                'status_responden' => $item->jabatan_responden
+                    ?? $item->jabatan_lainnya
+                    ?? '-',
+
+                'tanggal' => $item->tanggal_pengisian
+                    ? \Illuminate\Support\Carbon::parse($item->tanggal_pengisian)
+                    : null,
+
+                'nilai' => $nilaiRataRata,
+
+                'skor' => $totalSkor,
+
+                'skor_maksimal' => 172,
+
+                'predikat' => $item->predikat ?? '-',
+
+                'status' => 'Selesai',
+
+                'show_route' => route('tendik.show', [
+                    'tendik' => $item->id,
+                ]),
+
+                'edit_route' => \Illuminate\Support\Facades\Route::has('tendik.edit')
+                    ? route('tendik.edit', ['tendik' => $item->id])
+                    : null,
+
+                'delete_route' => \Illuminate\Support\Facades\Route::has('tendik.destroy')
+                    ? route('tendik.destroy', ['tendik' => $item->id])
+                    : null,
+
+                'cetak_route' => null,
+            ]);
+        }
         /*
         |--------------------------------------------------------------------------
         | FILTER JENIS INSTRUMEN
@@ -193,7 +302,7 @@ class InstrumenController extends Controller
 
             $riwayat = $riwayat
                 ->filter(
-                    fn ($item) =>
+                    fn($item) =>
                         $item['jenis'] === $jenis
                 )
                 ->values();

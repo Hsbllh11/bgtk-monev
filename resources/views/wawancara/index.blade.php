@@ -4,271 +4,461 @@
 @section('page-title', 'Lembar Wawancara')
 
 @section('content')
-@php
-    // Warna ditulis sebagai hex lewat atribut style, karena kelas warna Tailwind seperti
-    // bg-purple-600 / bg-emerald-600 tidak ada di CSS hasil build proyek ini.
-    $kartu = [
-        ['kode' => 'BCKS',   'no' => '01', 'solid' => '#1457f5', 'soft' => '#eef4ff', 'border' => '#dbe7ff', 'text' => '#1d4ed8'],
-        ['kode' => 'BK',     'no' => '02', 'solid' => '#8b1cf5', 'soft' => '#f6efff', 'border' => '#e8d5ff', 'text' => '#7e22ce'],
-        ['kode' => 'TENDIK', 'no' => '03', 'solid' => '#059669', 'soft' => '#ecfdf5', 'border' => '#c7f0dc', 'text' => '#047857'],
-    ];
-@endphp
+    @php
+        $kartu = [
+            [
+                'kode' => 'BCKS',
+                'no' => '01',
+                'solid' => '#1457f5',
+                'soft' => '#eef4ff',
+                'border' => '#dbe7ff',
+                'text' => '#1d4ed8',
+                'aktif' => true,
+            ],
+            [
+                'kode' => 'BK',
+                'no' => '02',
+                'solid' => '#8b1cf5',
+                'soft' => '#f6efff',
+                'border' => '#e8d5ff',
+                'text' => '#7e22ce',
+                'aktif' => false,
+            ],
+            [
+                'kode' => 'TENDIK',
+                'no' => '03',
+                'solid' => '#059669',
+                'soft' => '#ecfdf5',
+                'border' => '#c7f0dc',
+                'text' => '#047857',
+                'aktif' => false,
+            ],
+        ];
+    @endphp
 
-<div class="w-full space-y-6 pb-8">
+    <div class="w-full space-y-6 pb-8">
 
-    {{-- Judul halaman --}}
-    <div>
-        <h1 class="text-2xl font-bold tracking-tight text-slate-900">Lembar Wawancara</h1>
-        <p class="mt-1 text-sm text-slate-500">Pilih instrumen monitoring dan evaluasi yang akan digunakan.</p>
-    </div>
-
-    {{-- Notifikasi --}}
-    @if (session('success'))
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-            ✓ {{ session('success') }}
+        {{-- HEADER --}}
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900">
+                Lembar Wawancara
+            </h1>
+            <p class="mt-1 text-sm text-slate-500">
+                Kelola lembar wawancara monitoring dan evaluasi.
+            </p>
         </div>
-    @endif
 
-    {{-- Kartu pilihan instrumen --}}
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-        @foreach ($kartu as $k)
-            <div class="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-md">
-                <div class="w-full" style="height:6px;background:{{ $k['solid'] }}"></div>
+        {{-- NOTIFIKASI --}}
+        @foreach (['success' => 'emerald', 'info' => 'blue'] as $jenisPesan => $warna)
+            @if (session($jenisPesan))
+                <div id="alert-{{ $jenisPesan }}" role="alert"
+                    class="flex items-center justify-between gap-4 rounded-xl border px-4 py-3 text-sm transition-all duration-300"
+                    style="
+                                                                        border-color: {{ $warna === 'emerald' ? '#a7f3d0' : '#bfdbfe' }};
+                                                                        background: {{ $warna === 'emerald' ? '#ecfdf5' : '#eff6ff' }};
+                                                                        color: {{ $warna === 'emerald' ? '#047857' : '#1d4ed8' }};
+                                                                    ">
+                    <div class="flex items-center gap-2">
+                        @if ($jenisPesan === 'success')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                        @else
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01" />
+                            </svg>
+                        @endif
 
-                <div class="p-5">
-                    <span class="inline-flex rounded-full border px-3 py-1 text-xs font-medium"
-                          style="background:{{ $k['soft'] }};border-color:{{ $k['border'] }};color:{{ $k['text'] }}">
-                        Instrumen {{ $k['no'] }}
-                    </span>
-
-                    <h2 class="mt-4 text-lg font-bold text-slate-900">Instrumen {{ $k['kode'] }}</h2>
-                    <p class="mt-2 text-sm text-slate-500">Instrumen monitoring dan evaluasi {{ $k['kode'] }}.</p>
-
-                    <div class="mt-5 flex gap-3">
-                        <a href="{{ route('wawancara.create', ['jenis_instrumen' => $k['kode']]) }}"
-                           class="wc-solid inline-flex flex-1 items-center justify-center rounded-xl px-4 text-sm font-semibold text-white"
-                           style="height:44px;background:{{ $k['solid'] }}">
-                            + Isi Wawancara
-                        </a>
-
-                        <button type="button"
-                                onclick="window.print()"
-                                class="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                                style="height:44px">
-                            Cetak Blanko
-                        </button>
+                        <span>{{ session($jenisPesan) }}</span>
                     </div>
-                </div>
-            </div>
-        @endforeach
-    </div>
 
-    {{-- Panel filter --}}
-    <div class="rounded-2xl border border-slate-100 bg-white p-5 shadow-md">
-        <form action="{{ route('wawancara.index') }}" method="GET">
-            <div class="flex flex-wrap items-end gap-4">
-
-                <div>
-                    <label for="jenis_instrumen" class="mb-2 block text-sm font-medium text-slate-700">Jenis Instrumen</label>
-                    <select id="jenis_instrumen" name="jenis_instrumen"
-                            class="rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none"
-                            style="height:44px;min-width:140px">
-                        <option value="">Semua jenis</option>
-                        <option value="BCKS" {{ request('jenis_instrumen') === 'BCKS' ? 'selected' : '' }}>BCKS</option>
-                        <option value="BK" {{ request('jenis_instrumen') === 'BK' ? 'selected' : '' }}>BK</option>
-                        <option value="TENDIK" {{ request('jenis_instrumen') === 'TENDIK' ? 'selected' : '' }}>TENDIK</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="status" class="mb-2 block text-sm font-medium text-slate-700">Status</label>
-                    <select id="status" name="status"
-                            class="rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none"
-                            style="height:44px;min-width:140px">
-                        <option value="">Semua status</option>
-                        <option value="Belum Dilaksanakan" {{ request('status') === 'Belum Dilaksanakan' ? 'selected' : '' }}>Belum Dilaksanakan</option>
-                        <option value="Selesai" {{ request('status') === 'Selesai' ? 'selected' : '' }}>Selesai</option>
-                    </select>
-                </div>
-
-                <div class="flex-1" style="min-width:220px">
-                    <label for="search" class="mb-2 block text-sm font-medium text-slate-700">Pencarian</label>
-                    <input id="search" type="text" name="search" value="{{ request('search') }}"
-                           placeholder="Nama sekolah, responden, atau unit kerja"
-                           class="w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-700 outline-none placeholder:text-slate-400"
-                           style="height:44px">
-                </div>
-
-                <div class="flex gap-3">
-                    <button type="submit"
-                            class="wc-solid inline-flex items-center justify-center rounded-xl px-5 text-sm font-semibold text-white"
-                            style="height:44px;background:#1457f5">
-                        Cari
+                    <button type="button" onclick="tutupNotifikasi('alert-{{ $jenisPesan }}')"
+                        class="shrink-0 text-xl font-semibold opacity-70 hover:opacity-100" aria-label="Tutup notifikasi">
+                        &times;
                     </button>
-
-                    <a href="{{ route('wawancara.index') }}"
-                       class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                       style="height:44px">
-                        Reset
-                    </a>
                 </div>
-            </div>
-        </form>
-    </div>
+            @endif
+        @endforeach
 
-    {{-- Tabel riwayat --}}
-    <div class="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-md">
-
-        <div class="border-b border-slate-200 px-6 py-5">
-            <h2 class="text-lg font-bold text-slate-900">Riwayat Wawancara</h2>
-            <p class="mt-1 text-sm text-slate-500">Daftar pengisian wawancara monitoring dan evaluasi yang telah dilakukan.</p>
-        </div>
-
-        <div class="overflow-x-auto">
-            <table class="w-full text-left" style="min-width:900px">
-                <thead class="border-b border-slate-200 bg-slate-50">
-                    <tr class="text-xs font-bold uppercase tracking-wide text-slate-500">
-                        <th class="px-6 py-4">Instrumen</th>
-                        <th class="px-6 py-4">Nama / Unit</th>
-                        <th class="px-6 py-4">Responden</th>
-                        <th class="px-6 py-4">Tanggal Wawancara</th>
-                        <th class="px-6 py-4">Status</th>
-                        <th class="px-6 py-4 text-center">Aksi</th>
-                    </tr>
-                </thead>
-
-                <tbody class="divide-y divide-slate-100">
-                    @forelse ($wawancaras as $wawancara)
-                        @php
-                            $namaInstrumen = strtoupper($wawancara->instrumen->nama_instrumen ?? '-');
-
-                            if (str_contains($namaInstrumen, 'BCKS')) {
-                                $labelInstrumen = 'BCKS';
-                                $warna = ['bg' => '#eef4ff', 'text' => '#1d4ed8'];
-                            } elseif (str_contains($namaInstrumen, 'TENDIK')) {
-                                $labelInstrumen = 'TENDIK';
-                                $warna = ['bg' => '#ecfdf5', 'text' => '#047857'];
-                            } elseif (preg_match('/\bBK\b/', $namaInstrumen)) {
-                                $labelInstrumen = 'BK';
-                                $warna = ['bg' => '#f6efff', 'text' => '#7e22ce'];
-                            } else {
-                                $labelInstrumen = $wawancara->instrumen->nama_instrumen ?? '-';
-                                $warna = ['bg' => '#f1f5f9', 'text' => '#475569'];
-                            }
-
-                            if (($wawancara->status ?? 'Belum Dilaksanakan') === 'Selesai') {
-                                $labelStatus = 'Selesai';
-                                $warnaStatus = ['bg' => '#d1fae5', 'text' => '#047857'];
-                            } else {
-                                $labelStatus = 'Belum Dilaksanakan';
-                                $warnaStatus = ['bg' => '#fef3c7', 'text' => '#b45309'];
-                            }
-                        @endphp
-
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-6 py-5">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex shrink-0 items-center justify-center rounded-xl"
-                                         style="width:40px;height:40px;background:{{ $warna['bg'] }};color:{{ $warna['text'] }}">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></svg>
-                                    </div>
-
-                                    <div>
-                                        <p class="text-sm font-bold text-slate-900">{{ $labelInstrumen }}</p>
-                                        <span class="mt-1 inline-flex rounded-full px-3 py-1 text-xs font-semibold"
-                                              style="background:{{ $warna['bg'] }};color:{{ $warna['text'] }}">
-                                            {{ $wawancara->instrumen->nama_instrumen ?? 'Instrumen Pemantauan' }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </td>
-
-                            <td class="px-6 py-5">
-                                <p class="text-sm font-bold text-slate-900">{{ $wawancara->sekolah->nama_sekolah ?? '-' }}</p>
-                                <p class="mt-1 text-xs text-slate-500">{{ $wawancara->sekolah->npsn ?? 'Unit sekolah' }}</p>
-                            </td>
-
-                            <td class="px-6 py-5">
-                                <p class="text-sm font-bold text-slate-900">{{ $wawancara->nama_narasumber }}</p>
-                                <p class="mt-1 text-xs text-slate-500">{{ $wawancara->jabatan_narasumber ?: 'Narasumber' }}</p>
-                                <p class="mt-1 text-xs text-slate-500">Pewawancara: {{ $wawancara->nama_pewawancara }}</p>
-                            </td>
-
-                            <td class="whitespace-nowrap px-6 py-5 text-sm text-slate-700">
-                                {{ $wawancara->tanggal_wawancara
-                                    ? \Carbon\Carbon::parse($wawancara->tanggal_wawancara)->format('d/m/Y')
-                                    : '-' }}
-                            </td>
-
-                            <td class="px-6 py-5">
-                                <span class="inline-flex items-center whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold"
-                                      style="background:{{ $warnaStatus['bg'] }};color:{{ $warnaStatus['text'] }}">
-                                    <span style="margin-right:6px;font-size:8px">●</span>{{ $labelStatus }}
-                                </span>
-                            </td>
-
-                            <td class="px-6 py-5">
-                                <div class="flex items-center justify-center gap-2">
-                                    {{-- Lihat --}}
-                                    <a href="{{ route('wawancara.show', $wawancara->id) }}" title="Lihat detail"
-                                       class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-blue-50 hover:text-blue-600"
-                                       style="width:32px;height:32px">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
-                                    </a>
-
-                                    {{-- Edit --}}
-                                    <a href="{{ route('wawancara.edit', $wawancara->id) }}" title="Edit wawancara"
-                                       class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-amber-50 hover:text-amber-600"
-                                       style="width:32px;height:32px">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                                    </a>
-
-                                    {{-- Hapus --}}
-                                    <form action="{{ route('wawancara.destroy', $wawancara->id) }}" method="POST"
-                                          onsubmit="return confirm('Yakin ingin menghapus wawancara ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" title="Hapus wawancara"
-                                                class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-red-50 hover:text-red-600"
-                                                style="width:32px;height:32px">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="px-6 py-14 text-center">
-                                <p class="text-sm font-bold text-slate-700">Belum ada data wawancara</p>
-                                <p class="mt-1 text-xs text-slate-500">Tambahkan wawancara untuk menampilkan riwayat di sini.</p>
-
-                                <a href="{{ route('wawancara.create') }}"
-                                   class="wc-solid mt-4 inline-flex items-center rounded-xl px-5 text-sm font-semibold text-white"
-                                   style="height:44px;background:#1457f5">
-                                    + Tambah Wawancara
-                                </a>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        @if ($wawancaras->hasPages())
-            <div class="border-t border-slate-200 px-6 py-4">
-                {{ $wawancaras->withQueryString()->links() }}
+        {{-- ERROR VALIDASI --}}
+        @if ($errors->any())
+            <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <p class="mb-2 font-semibold">Periksa kembali data berikut:</p>
+                @foreach ($errors->all() as $error)
+                    <p>{{ $error }}</p>
+                @endforeach
             </div>
         @endif
+
+        {{-- PILIHAN JENIS WAWANCARA --}}
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
+            @foreach ($kartu as $k)
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
+                    <div style="height: 5px; background: {{ $k['solid'] }}"></div>
+
+                    <div class="p-5">
+                        <span class="inline-flex rounded-full border px-3 py-1 text-xs font-semibold" style="
+                                                                background: {{ $k['soft'] }};
+                                                                border-color: {{ $k['border'] }};
+                                                                color: {{ $k['text'] }};
+                                                            ">
+                            Instrumen {{ $k['no'] }}
+                        </span>
+
+                        <h2 class="mt-4 text-lg font-bold text-slate-900">
+                            Wawancara {{ $k['kode'] }}
+                        </h2>
+
+                        <p class="mt-2 min-h-10 text-sm leading-6 text-slate-500">
+                            @if ($k['kode'] === 'BCKS')
+                                Form wawancara BCKS 
+                            @elseif ($k['kode'] === 'BK')
+                                Form wawancara BK
+                            @else
+                                Form wawancara TENDIK 
+                            @endif
+                        </p>
+
+
+                        <div class="mt-5">
+                            @if ($k['kode'] === 'BCKS')
+                                <a href="{{ route('wawancara.bcks.create') }}"
+                                    class="inline-flex w-full items-center justify-center rounded-xl px-4 text-sm font-semibold text-white transition hover:opacity-90"
+                                    style="height: 44px; background: {{ $k['solid'] }}">
+                                    + Isi Wawancara BCKS
+                                </a>
+                            @elseif ($k['kode'] === 'BK')
+                                <a href="{{ route('wawancara.bk.create') }}"
+                                    class="inline-flex w-full items-center justify-center rounded-xl px-4 text-sm font-semibold text-white transition hover:opacity-90"
+                                    style="height: 44px; background: {{ $k['solid'] }}">
+                                    + Isi Wawancara BK
+                                </a>
+                            @else
+                                <a href="{{ route('wawancara.tendik.create') }}" 
+                                 class="inline-flex w-full items-center justify-center rounded-xl px-4 text-sm font-semibold text-white transition hover:opacity-90"
+                                    style="height: 44px; background: {{ $k['solid'] }}">
+                                     + Isi Wawancara TENDIK
+                                 </a>
+                            @endif
+                        </div>
+
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        {{-- FILTER DAN PENCARIAN --}}
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <form action="{{ route('wawancara.index') }}" method="GET">
+                <div class="grid grid-cols-1 items-end gap-4 md:grid-cols-2 xl:grid-cols-4">
+
+                    <div>
+                        <label for="jenis_instrumen" class="mb-2 block text-sm font-medium text-slate-700">
+                            Jenis Wawancara
+                        </label>
+                        <select id="jenis_instrumen" name="jenis_instrumen"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                            style="height: 44px">
+                            <option value="">Semua jenis</option>
+                            <option value="BCKS" @selected(request('jenis_instrumen') === 'BCKS')>Wawancara BCKS</option>
+                            <option value="BK" @selected(request('jenis_instrumen') === 'BK')>Wawancara BK</option>
+                            <option value="TENDIK" @selected(request('jenis_instrumen') === 'TENDIK')>Wawancara TENDIK
+                            </option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="status" class="mb-2 block text-sm font-medium text-slate-700">
+                            Status
+                        </label>
+                        <select id="status" name="status"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                            style="height: 44px">
+                            <option value="">Semua status</option>
+                            <option value="Belum Dilaksanakan" @selected(request('status') === 'Belum Dilaksanakan')>Belum
+                                Dilaksanakan</option>
+                            <option value="Selesai" @selected(request('status') === 'Selesai')>Selesai</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="search" class="mb-2 block text-sm font-medium text-slate-700">
+                            Pencarian
+                        </label>
+                        <input id="search" type="text" name="search" value="{{ request('search') }}"
+                            placeholder="Nama, responden, atau sekolah"
+                            class="w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                            style="height: 44px">
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button type="submit"
+                            class="inline-flex flex-1 items-center justify-center rounded-xl px-5 text-sm font-semibold text-white transition hover:opacity-90"
+                            style="height: 44px; background: #1457f5">
+                            Cari
+                        </button>
+                        <a href="{{ route('wawancara.index') }}"
+                            class="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                            style="height: 44px">
+                            Reset
+                        </a>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        {{-- RIWAYAT WAWANCARA --}}
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+            <div class="border-b border-slate-200 px-6 py-5">
+                <h2 class="text-lg font-bold text-slate-900">Riwayat Wawancara</h2>
+                <p class="mt-1 text-sm text-slate-500">
+                    Daftar wawancara monitoring dan evaluasi yang telah diisi.
+                </p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left" style="min-width: 1000px">
+                    <thead class="border-b border-slate-200 bg-slate-50">
+                        <tr class="text-xs font-bold uppercase tracking-wide text-slate-500">
+                            <th class="px-6 py-4">Jenis Wawancara</th>
+                            <th class="px-6 py-4">BCKS / Narasumber</th>
+                            <th class="px-6 py-4">Responden</th>
+                            <th class="px-6 py-4">Tanggal Evaluasi</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-slate-100">
+                        @forelse ($wawancaras as $wawancara)
+                            @php
+                                $jenisData = strtoupper(trim($wawancara->jenis_wawancara ?? ''));
+                                $namaInstrumen = strtoupper($wawancara->instrumen->nama_instrumen ?? '');
+
+                                if ($jenisData === 'BCKS' || str_contains($namaInstrumen, 'BCKS')) {
+                                    $labelJenis = 'Wawancara BCKS';
+                                    $kodeJenis = 'BCKS';
+                                } elseif ($jenisData === 'BK') {
+                                    $labelJenis = 'Wawancara BK';
+                                    $kodeJenis = 'BK';
+                                } elseif ($jenisData === 'TENDIK') {
+                                    $labelJenis = 'Wawancara TENDIK';
+                                    $kodeJenis = 'TENDIK';
+                                } else {
+                                    $labelJenis = $wawancara->instrumen->nama_instrumen ?? 'Wawancara Lama';
+                                    $kodeJenis = 'LAMA';
+                                }
+
+                                $namaBcks = $wawancara->nama_bcks
+                                    ?: $wawancara->nama_narasumber
+                                    ?: '-';
+
+                                $unitBcks = $wawancara->unit_kerja_bcks
+                                    ?: $wawancara->jabatan_narasumber;
+
+                                $namaResponden = $wawancara->nama_responden
+                                    ?: $wawancara->nama_narasumber
+                                    ?: '-';
+
+                                $unitResponden = $wawancara->unit_kerja_responden
+                                    ?: $wawancara->jabatan_narasumber;
+
+                                $tanggal = $wawancara->tanggal_evaluasi
+                                    ?: $wawancara->tanggal_wawancara;
+
+                                $statusWawancara = $wawancara->status ?: 'Belum Dilaksanakan';
+                                $isSelesai = $statusWawancara === 'Selesai';
+                            @endphp
+
+                            <tr class="transition hover:bg-slate-50">
+
+                                {{-- JENIS --}}
+                                <td class="px-6 py-5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                                            style="background: #f3f0ff; color: #7c3aed">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24"
+                                                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path d="M8 3h8l4 4v14H4V3z" />
+                                                <path d="M8 3v5h8V3" />
+                                                <path d="M8 13h8M8 17h5" />
+                                            </svg>
+                                        </div>
+
+                                        <div>
+                                            <p class="text-sm font-semibold text-slate-900">
+                                                {{ $labelJenis }}
+                                            </p>
+                                            <span class="mt-1 inline-flex rounded-full px-2.5 py-1 text-xs font-medium" style="
+                                                                                    background: {{ $kodeJenis === 'BCKS' ? '#eef4ff' : ($kodeJenis === 'BK' ? '#f6efff' : '#f1f5f9') }};
+                                                                                    color: {{ $kodeJenis === 'BCKS' ? '#1d4ed8' : ($kodeJenis === 'BK' ? '#7e22ce' : '#475569') }};
+                                                                                ">
+                                                {{ $kodeJenis }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                {{-- BCKS / NARASUMBER --}}
+                                <td class="px-6 py-5">
+                                    <p class="text-sm font-semibold text-slate-900">{{ $namaBcks }}</p>
+                                    @if ($unitBcks)
+                                        <p class="mt-1 text-xs text-slate-500">{{ $unitBcks }}</p>
+                                    @endif
+                                </td>
+
+                                {{-- RESPONDEN --}}
+                                <td class="px-6 py-5">
+                                    <p class="text-sm font-semibold text-slate-900">{{ $namaResponden }}</p>
+                                    @if ($unitResponden)
+                                        <p class="mt-1 text-xs text-slate-500">{{ $unitResponden }}</p>
+                                    @endif
+                                </td>
+
+                                {{-- TANGGAL --}}
+                                <td class="whitespace-nowrap px-6 py-5 text-sm text-slate-700">
+                                    {{ $tanggal ? \Illuminate\Support\Carbon::parse($tanggal)->format('d/m/Y') : '-' }}
+                                </td>
+
+                                {{-- STATUS --}}
+                                <td class="px-6 py-5">
+                                    <span
+                                        class="inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold"
+                                        style="
+                                                                            background: {{ $isSelesai ? '#d1fae5' : '#fef3c7' }};
+                                                                            color: {{ $isSelesai ? '#047857' : '#b45309' }};
+                                                                        ">
+                                        <span class="h-1.5 w-1.5 rounded-full" style="background: currentColor"></span>
+                                        {{ $statusWawancara }}
+                                    </span>
+                                </td>
+
+
+                                {{-- AKSI --}}
+                                <td class="px-6 py-5">
+                                    <div class="flex items-center justify-center gap-5">
+
+                                        {{-- DETAIL: IKON MATA --}}
+                                        <a href="{{ route('wawancara.show', $wawancara->id) }}" title="Lihat detail"
+                                            aria-label="Lihat detail" class="text-slate-500 transition hover:text-blue-600">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                        </a>
+
+                                        {{-- EDIT: IKON PENSIL --}}
+                                        <a href="{{ route('wawancara.edit', $wawancara->id) }}" title="Edit data"
+                                            aria-label="Edit data" class="text-slate-600 transition hover:text-blue-600">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path d="M12 20h9" />
+                                                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z" />
+                                            </svg>
+                                        </a>
+
+                                        {{-- HAPUS: IKON TEMPAT SAMPAH --}}
+                                        <form action="{{ route('wawancara.destroy', $wawancara->id) }}" method="POST"
+                                            class="inline-flex"
+                                            onsubmit="return confirm('Yakin ingin menghapus data wawancara ini?');">
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button type="submit" title="Hapus data" aria-label="Hapus data"
+                                                class="text-red-500 transition hover:text-red-700">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M3 6h18" />
+                                                    <path d="M8 6V4h8v2" />
+                                                    <path d="m19 6-1 14H6L5 6" />
+                                                    <path d="M10 11v5M14 11v5" />
+                                                </svg>
+                                            </button>
+                                        </form>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-6 py-16 text-center">
+
+                                    <div class="flex flex-col items-center">
+
+                                        <div
+                                            class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-2xl">
+                                            📋
+                                        </div>
+
+                                        <h3 class="mt-4 text-base font-bold text-slate-800">
+                                            Belum Ada Data Wawancara
+                                        </h3>
+
+                                        <p class="mt-1 text-sm text-slate-500">
+                                            Belum ada wawancara yang telah diisi.
+                                        </p>
+
+                                    </div>
+
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- PAGINATION --}}
+            @if ($wawancaras->hasPages())
+                <div class="border-t border-slate-200 px-6 py-4">
+                    {{ $wawancaras->links() }}
+                </div>
+            @endif
+        </div>
     </div>
-</div>
 
-<style>
-    .wc-solid { transition: filter .15s; }
-    .wc-solid:hover { filter: brightness(.92); }
+    {{-- JAVASCRIPT NOTIFIKASI DAN IKON --}}
+    <script>
+        function tutupNotifikasi(id) {
+            const elemen = document.getElementById(id);
 
-    @media print {
-        .wc-solid { print-color-adjust: exact; }
-    }
-</style>
+            if (!elemen) return;
+
+            elemen.style.opacity = '0';
+            elemen.style.transform = 'translateY(-6px)';
+
+            setTimeout(() => {
+                elemen.remove();
+            }, 350);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Hilangkan notifikasi setelah 3 detik.
+            ['success', 'info'].forEach(function (jenis) {
+                const elemen = document.getElementById('alert-' + jenis);
+
+                if (elemen) {
+                    setTimeout(function () {
+                        tutupNotifikasi('alert-' + jenis);
+                    }, 3000);
+                }
+            });
+
+            // Tampilkan ikon Lucide apabila library tersedia.
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        });
+    </script>
 @endsection
