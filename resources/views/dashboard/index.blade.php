@@ -1,810 +1,390 @@
 @extends('layouts.app')
 
 @section('title', 'Dashboard')
-
 @section('page-title', 'Dashboard')
 
 @section('content')
+@php
+    $persen = fn ($a, $b) => $b > 0 ? min(round(($a / $b) * 100), 100) : 0;
+    $delta  = fn ($b) => $b['ini'] - $b['lalu'];
 
-    <div class="space-y-6">
+    $pctSekolah = $persen($sekolahTerjangkau, $totalSekolah);
+    $pctTl      = $persen($tlSelesai, $tlTotal);
+@endphp
 
-        {{-- =========================
-        HEADER
-        ========================== --}}
-        <div>
-            <h1 class="text-2xl font-bold text-slate-800">
-                Dashboard Monev
-            </h1>
+<div class="space-y-6">
 
-            <p class="mt-1 text-sm text-slate-500">
-                Ringkasan monitoring dan evaluasi BGTK Provinsi NTB.
+    {{-- ================= HERO ================= --}}
+    <section class="relative overflow-hidden rounded-3xl p-8 text-white shadow-lg" 
+             style="background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #4f46e5 100%);">
+        
+        <div class="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/10"></div>
+        <div class="pointer-events-none absolute -bottom-24 right-40 h-56 w-56 rounded-full bg-white/5"></div>
+
+        <div class="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <p class="text-sm font-medium text-blue-100">{{ $tanggalHariIni }}</p>
+                <h1 class="mt-1 text-3xl font-bold tracking-tight text-white">
+                    {{ $salam }}, {{ \Illuminate\Support\Str::of(auth()->user()->name)->before(' ') }} 👋
+                </h1>
+                <p class="mt-2 max-w-xl text-sm leading-6 text-blue-100">
+                    Ringkasan monitoring dan evaluasi BGTK Provinsi NTB:
+                    <strong class="text-white">{{ $totalInstrumen }}</strong> pengisian instrumen,
+                    <strong class="text-white">{{ $totalWawancara }}</strong> wawancara, dan
+                    <strong class="text-white">{{ $sekolahTerjangkau }}</strong> sekolah sudah memiliki data monev.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <a href="{{ route('instrumen.index') }}"
+                   class="inline-flex h-11 items-center gap-2 rounded-xl bg-white px-5 text-sm font-semibold text-blue-700 shadow-sm transition hover:bg-blue-50">
+                    + Isi Instrumen
+                </a>
+                <a href="{{ route('wawancara.index') }}"
+                   class="inline-flex h-11 items-center gap-2 rounded-xl border border-white/30 bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20">
+                    + Isi Wawancara
+                </a>
+                <a href="{{ route('cetak-gabungan.index') }}"
+                   class="inline-flex h-11 items-center gap-2 rounded-xl border border-white/30 bg-white/10 px-5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20">
+                    Gabung &amp; Cetak PDF
+                </a>
+            </div>
+        </div>
+    </section>
+
+    {{-- ================= KPI ================= --}}
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+
+        {{-- Instrumen --}}
+        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-sm font-medium text-slate-500">Pengisian Instrumen</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-900">{{ $totalInstrumen }}</p>
+                </div>
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>
+                </span>
+            </div>
+            <p class="mt-3 text-xs {{ $delta($bulanInstrumen) >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
+                <span class="font-semibold">{{ $delta($bulanInstrumen) >= 0 ? '▲' : '▼' }} {{ abs($delta($bulanInstrumen)) }}</span>
+                dibanding bulan lalu · {{ $bulanInstrumen['ini'] }} bulan ini
             </p>
         </div>
 
-
-        {{-- =========================
-        SUMMARY CARDS
-        ========================== --}}
-        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-
-            {{-- Total Sekolah --}}
-            <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-                <div class="flex items-start justify-between">
-
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">
-                            Total Sekolah
-                        </p>
-
-                        <p class="mt-2 text-3xl font-bold text-slate-800">
-                            {{ $totalSekolah }}
-                        </p>
-
-                        <p class="mt-2 text-xs text-slate-500">
-                            {{ $sekolahSudahDimonitor }} sudah dimonitor
-                        </p>
-                    </div>
-
-                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 9h.01M15 9h.01" />
-                        </svg>
-                    </div>
-
+        {{-- Wawancara --}}
+        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-sm font-medium text-slate-500">Lembar Wawancara</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-900">{{ $totalWawancara }}</p>
                 </div>
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h8M8 14h5M6 20l-3 1 1-3a8 8 0 111.5 1.5L6 20z"/></svg>
+                </span>
             </div>
-
-
-            {{-- Total Instrumen --}}
-            <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-                <div class="flex items-start justify-between">
-
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">
-                            Total Instrumen
-                        </p>
-
-                        <p class="mt-2 text-3xl font-bold text-slate-800">
-                            {{ $totalInstrumen }}
-                        </p>
-
-                        <p class="mt-2 text-xs text-slate-500">
-                            {{ $instrumenAktif }} instrumen aktif
-                        </p>
-                    </div>
-
-                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
-                        </svg>
-                    </div>
-
-                </div>
-            </div>
-
-
-            {{-- Total Wawancara --}}
-            <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-                <div class="flex items-start justify-between">
-
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">
-                            Total Wawancara
-                        </p>
-
-                        <p class="mt-2 text-3xl font-bold text-slate-800">
-                            {{ $totalWawancara }}
-                        </p>
-
-                        <p class="mt-2 text-xs text-slate-500">
-                            {{ $wawancaraSelesai }} sudah selesai
-                        </p>
-                    </div>
-
-                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M8 10h8M8 14h5M6 20l-3 1 1-3a8 8 0 111.5 1.5L6 20z" />
-                        </svg>
-                    </div>
-
-                </div>
-            </div>
-
-
-            {{-- Total Tindak Lanjut --}}
-            <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-                <div class="flex items-start justify-between">
-
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">
-                            Tindak Lanjut
-                        </p>
-
-                        <p class="mt-2 text-3xl font-bold text-slate-800">
-                            {{ $totalTindakLanjut }}
-                        </p>
-
-                        <p class="mt-2 text-xs text-slate-500">
-                            {{ $tindakLanjutSelesai }} sudah selesai
-                        </p>
-                    </div>
-
-                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-
-                </div>
-            </div>
-
+            <p class="mt-3 text-xs {{ $delta($bulanWawancara) >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
+                <span class="font-semibold">{{ $delta($bulanWawancara) >= 0 ? '▲' : '▼' }} {{ abs($delta($bulanWawancara)) }}</span>
+                dibanding bulan lalu · {{ $bulanWawancara['ini'] }} bulan ini
+            </p>
         </div>
 
-
-        {{-- =========================
-        CHART UTAMA
-        ========================== --}}
-        {{-- =========================
-        CHART STATUS
-        ========================== --}}
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-
-            {{-- Rata-rata Capaian --}}
-            <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-
-                <div class="mb-4">
-                    <h2 class="text-lg font-semibold text-slate-800">
-                        Rata-rata Capaian
-                    </h2>
-
-                    <p class="mt-1 text-sm text-slate-500">
-                        Persentase rata-rata capaian seluruh instrumen.
+        {{-- Sekolah --}}
+        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-sm font-medium text-slate-500">Sekolah Terjangkau</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-900">
+                        {{ $sekolahTerjangkau }}<span class="text-lg font-medium text-slate-400"> / {{ $totalSekolah }}</span>
                     </p>
                 </div>
-
-                <div class="relative mx-auto h-64 w-full max-w-xs">
-                    <canvas id="capaianChart"></canvas>
-
-                    <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                        <span class="text-3xl font-bold text-blue-600">
-                            {{ number_format($rataCapaian, 2) }}%
-                        </span>
-
-                        <span class="mt-1 text-xs text-slate-500">
-                            Capaian
-                        </span>
-                    </div>
-                </div>
-
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
+                </span>
             </div>
-
-
-            {{-- Monitoring Sekolah --}}
-            <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-
-                <div class="mb-4">
-                    <h2 class="text-lg font-semibold text-slate-800">
-                        Status Monitoring
-                    </h2>
-
-                    <p class="mt-1 text-sm text-slate-500">
-                        Status monitoring sekolah.
-                    </p>
-                </div>
-
-                <div class="relative mx-auto h-64 w-full max-w-xs">
-                    <canvas id="monitoringChart"></canvas>
-
-                    @php
-                        $persenMonitoring = $totalSekolah > 0
-                            ? ($sekolahSudahDimonitor / $totalSekolah) * 100
-                            : 0;
-                    @endphp
-
-                    <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                        <span class="text-3xl font-bold text-emerald-600">
-                            {{ number_format($persenMonitoring, 0) }}%
-                        </span>
-
-                        <span class="mt-1 text-xs text-slate-500">
-                            Sudah Dimonitor
-                        </span>
-                    </div>
-                </div>
-
+            <div class="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                <div class="h-full rounded-full bg-violet-500" style="width: {{ $pctSekolah }}%"></div>
             </div>
-
-
-            {{-- Status Wawancara --}}
-            <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-
-                <div class="mb-4">
-                    <h2 class="text-lg font-semibold text-slate-800">
-                        Status Wawancara
-                    </h2>
-
-                    <p class="mt-1 text-sm text-slate-500">
-                        Status pelaksanaan wawancara.
-                    </p>
-                </div>
-
-                <div class="relative mx-auto h-64 w-full max-w-xs">
-                    <canvas id="wawancaraChart"></canvas>
-
-                    @php
-                        $persenWawancara = $totalWawancara > 0
-                            ? ($wawancaraSelesai / $totalWawancara) * 100
-                            : 0;
-                    @endphp
-
-                    <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                        <span class="text-3xl font-bold text-emerald-600">
-                            {{ number_format($persenWawancara, 0) }}%
-                        </span>
-
-                        <span class="mt-1 text-xs text-slate-500">
-                            Selesai
-                        </span>
-                    </div>
-                </div>
-
-            </div>
-
+            <p class="mt-2 text-xs text-slate-500">{{ $pctSekolah }}% sekolah sudah memiliki data monev</p>
         </div>
 
-
-        {{-- =========================
-        CHART TINDAK LANJUT
-        ========================== --}}
-        <div class="mt-6">
-
-            <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-
-                <div class="mb-5">
-                    <h2 class="text-lg font-semibold text-slate-800">
-                        Status Tindak Lanjut
-                    </h2>
-
-                    <p class="mt-1 text-sm text-slate-500">
-                        Ringkasan progres tindak lanjut hasil monitoring.
+        {{-- Tindak lanjut --}}
+        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-sm font-medium text-slate-500">Tindak Lanjut Selesai</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-900">
+                        {{ $tlSelesai }}<span class="text-lg font-medium text-slate-400"> / {{ $tlTotal }}</span>
                     </p>
                 </div>
-                <div class="h-72">
-                    <canvas id="tindakLanjutChart"></canvas>
-                </div>
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </span>
             </div>
+            <div class="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                <div class="h-full rounded-full bg-amber-500" style="width: {{ $pctTl }}%"></div>
+            </div>
+            <p class="mt-2 text-xs {{ $tlTerlambat > 0 ? 'font-semibold text-rose-600' : 'text-slate-500' }}">
+                {{ $tlTerlambat > 0 ? $tlTerlambat . ' melewati target waktu' : 'Tidak ada yang terlambat' }}
+            </p>
         </div>
-
-        {{-- =========================
-        CHART WAWANCARA & TINDAK LANJUT
-        ========================== --}}
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-
-            {{-- Status Wawancara --}}
-            <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-
-                <div class="mb-5">
-                    <h2 class="text-lg font-semibold text-slate-800">
-                        Status Wawancara
-                    </h2>
-
-                    <p class="mt-1 text-sm text-slate-500">
-                        Perbandingan wawancara yang selesai dan belum dilaksanakan.
-                    </p>
-                </div>
-
-                <div class="relative mx-auto h-64 w-full max-w-xs">
-                    <canvas id="wawancaraChart"></canvas>
-
-                    @php
-                        $persenWawancara = $totalWawancara > 0
-                            ? ($wawancaraSelesai / $totalWawancara) * 100
-                            : 0;
-                    @endphp
-
-                    <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                        <span class="text-3xl font-bold text-emerald-600">
-                            {{ number_format($persenWawancara, 0) }}%
-                        </span>
-
-                        <span class="mt-1 text-xs text-slate-500">
-                            Selesai
-                        </span>
-                    </div>
-                </div>
-
-            </div>
-
-
-            {{-- Status Tindak Lanjut --}}
-            <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-
-                <div class="mb-5">
-                    <h2 class="text-lg font-semibold text-slate-800">
-                        Status Tindak Lanjut
-                    </h2>
-
-                    <p class="mt-1 text-sm text-slate-500">
-                        Ringkasan progres tindak lanjut hasil monitoring.
-                    </p>
-                </div>
-
-                <div class="h-64">
-                    <canvas id="tindakLanjutChart"></canvas>
-                </div>
-
-            </div>
-
-        </div>
-
-
-        {{-- =========================
-        DATA TERBARU
-        ========================== --}}
-        <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
-
-            {{-- Instrumen Terbaru --}}
-            <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-
-                <div class="border-b border-slate-200 px-6 py-5">
-                    <h2 class="text-lg font-semibold text-slate-800">
-                        Instrumen Terbaru
-                    </h2>
-
-                    <p class="mt-1 text-sm text-slate-500">
-                        Lima instrumen terakhir yang ditambahkan.
-                    </p>
-                </div>
-
-                @if ($instrumenTerbaru->count() > 0)
-
-                    <div class="divide-y divide-slate-100">
-
-                        @foreach ($instrumenTerbaru as $instrumen)
-
-                            <a href="{{ route('instrumen.show', $instrumen) }}"
-                                class="block px-6 py-4 transition hover:bg-slate-50">
-
-                                <div class="flex items-center justify-between gap-4">
-
-                                    <div class="min-w-0">
-
-                                        <p class="truncate font-semibold text-slate-800">
-                                            {{ $instrumen->nama_instrumen }}
-                                        </p>
-
-                                        <p class="mt-1 text-xs text-slate-500">
-                                            {{ $instrumen->kode_instrumen }}
-                                            ·
-                                            {{ $instrumen->jenis_instrumen }}
-                                        </p>
-
-                                    </div>
-
-                                    <div class="shrink-0 text-right">
-
-                                        <p class="text-sm font-bold text-blue-600">
-                                            {{ number_format((float) $instrumen->capaian, 2) }}%
-                                        </p>
-
-                                        <p class="mt-1 text-xs text-slate-500">
-                                            {{ $instrumen->status }}
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-                            </a>
-
-                        @endforeach
-
-                    </div>
-
-                @else
-
-                    <div class="px-6 py-10 text-center">
-                        <p class="text-sm font-medium text-slate-600">
-                            Belum ada data instrumen.
-                        </p>
-
-                        <p class="mt-1 text-xs text-slate-400">
-                            Data instrumen akan muncul di sini setelah ditambahkan.
-                        </p>
-                    </div>
-
-                @endif
-
-            </div>
-
-
-            {{-- Tindak Lanjut Terbaru --}}
-            <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-
-                <div class="border-b border-slate-200 px-6 py-5">
-                    <h2 class="text-lg font-semibold text-slate-800">
-                        Tindak Lanjut Terbaru
-                    </h2>
-
-                    <p class="mt-1 text-sm text-slate-500">
-                        Lima tindak lanjut terakhir yang ditambahkan.
-                    </p>
-                </div>
-
-                @if ($tindakLanjutTerbaru->count() > 0)
-
-                    <div class="divide-y divide-slate-100">
-
-                        @foreach ($tindakLanjutTerbaru as $tindakLanjut)
-
-                            <a href="{{ route('tindak-lanjut.show', $tindakLanjut) }}"
-                                class="block px-6 py-4 transition hover:bg-slate-50">
-
-                                <div class="flex items-center justify-between gap-4">
-
-                                    <div class="min-w-0">
-
-                                        <p class="truncate font-semibold text-slate-800">
-                                            {{ $tindakLanjut->judul_tindak_lanjut }}
-                                        </p>
-
-                                        <p class="mt-1 truncate text-xs text-slate-500">
-                                            {{ $tindakLanjut->sekolah?->nama_sekolah ?? 'Sekolah tidak tersedia' }}
-                                        </p>
-
-                                    </div>
-
-                                    <div class="shrink-0">
-
-                                        @if ($tindakLanjut->status === 'Selesai')
-
-                                            <span
-                                                class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-                                                Selesai
-                                            </span>
-
-                                        @elseif ($tindakLanjut->status === 'Dalam Proses')
-
-                                            <span
-                                                class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-                                                Dalam Proses
-                                            </span>
-
-                                        @else
-
-                                            <span
-                                                class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                                                Belum Dimulai
-                                            </span>
-
-                                        @endif
-
-                                    </div>
-
-                                </div>
-
-                            </a>
-
-                        @endforeach
-
-                    </div>
-
-                @else
-
-                    <div class="px-6 py-10 text-center">
-                        <p class="text-sm font-medium text-slate-600">
-                            Belum ada data tindak lanjut.
-                        </p>
-
-                        <p class="mt-1 text-xs text-slate-400">
-                            Data tindak lanjut akan muncul di sini setelah ditambahkan.
-                        </p>
-                    </div>
-
-                @endif
-
-            </div>
-
-        </div>
-
     </div>
 
-
-    {{-- =========================
-    CHART.JS
-    ========================== --}}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-
-            /*
-            |--------------------------------------------------------------------------
-            | DATA DARI DATABASE
-            |--------------------------------------------------------------------------
-            */
-
-            const rataCapaian = {{ min(max((float) $rataCapaian, 0), 100) }};
-
-            const sekolahSudahDimonitor = {{ $sekolahSudahDimonitor }};
-            const sekolahBelumDimonitor = {{ $sekolahBelumDimonitor }};
-
-            const wawancaraSelesai = {{ $wawancaraSelesai }};
-            const wawancaraBelum = {{ $wawancaraBelum }};
-
-            const tindakLanjutBelum = {{ $tindakLanjutBelum }};
-            const tindakLanjutDalamProses = {{ $tindakLanjutDalamProses }};
-            const tindakLanjutSelesai = {{ $tindakLanjutSelesai }};
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | KONFIGURASI UMUM DOUGHNUT
-            |--------------------------------------------------------------------------
-            */
-
-            const doughnutOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-
-                cutout: '72%',
-
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-
-                        labels: {
-                            usePointStyle: true,
-                            pointStyle: 'circle',
-                            padding: 20,
-
-                            font: {
-                                size: 12
-                            }
-                        }
-                    },
-
-                    tooltip: {
-                        padding: 10,
-
-                        bodyFont: {
-                            size: 12
-                        },
-
-                        titleFont: {
-                            size: 12
-                        }
-                    }
-                }
-            };
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | RATA-RATA CAPAIAN
-            |--------------------------------------------------------------------------
-            */
-
-            const capaianCanvas = document.getElementById('capaianChart');
-
-            if (capaianCanvas) {
-
-                new Chart(capaianCanvas, {
-
-                    type: 'doughnut',
-
-                    data: {
-                        labels: [
-                            'Capaian',
-                            'Belum Tercapai'
-                        ],
-
-                        datasets: [{
-                            data: [
-                                rataCapaian,
-                                100 - rataCapaian
-                            ],
-
-                            backgroundColor: [
-                                '#2563eb',
-                                '#e2e8f0'
-                            ],
-
-                            borderWidth: 0,
-
-                            hoverOffset: 4
-                        }]
-                    },
-
-                    options: doughnutOptions
-
-                });
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | MONITORING SEKOLAH
-            |--------------------------------------------------------------------------
-            */
-
-            const monitoringCanvas = document.getElementById('monitoringChart');
-
-            if (monitoringCanvas) {
-
-                new Chart(monitoringCanvas, {
-
-                    type: 'doughnut',
-
-                    data: {
-                        labels: [
-                            'Sudah Dimonitor',
-                            'Belum Dimonitor'
-                        ],
-
-                        datasets: [{
-                            data: [
-                                sekolahSudahDimonitor,
-                                sekolahBelumDimonitor
-                            ],
-
-                            backgroundColor: [
-                                '#10b981',
-                                '#f59e0b'
-                            ],
-
-                            borderWidth: 0,
-
-                            hoverOffset: 4
-                        }]
-                    },
-
-                    options: doughnutOptions
-
-                });
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | STATUS WAWANCARA
-            |--------------------------------------------------------------------------
-            */
-
-            const wawancaraCanvas = document.getElementById('wawancaraChart');
-
-            if (wawancaraCanvas) {
-
-                new Chart(wawancaraCanvas, {
-
-                    type: 'doughnut',
-
-                    data: {
-                        labels: [
-                            'Selesai',
-                            'Belum Dilaksanakan'
-                        ],
-
-                        datasets: [{
-                            data: [
-                                wawancaraSelesai,
-                                wawancaraBelum
-                            ],
-
-                            backgroundColor: [
-                                '#10b981',
-                                '#f59e0b'
-                            ],
-
-                            borderWidth: 0,
-
-                            hoverOffset: 4
-                        }]
-                    },
-
-                    options: doughnutOptions
-
-                });
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | STATUS TINDAK LANJUT
-            |--------------------------------------------------------------------------
-            */
-
-            const tindakLanjutCanvas = document.getElementById('tindakLanjutChart');
-
-            if (tindakLanjutCanvas) {
-
-                new Chart(tindakLanjutCanvas, {
-
-                    type: 'bar',
-
-                    data: {
-                        labels: [
-                            'Belum Dimulai',
-                            'Dalam Proses',
-                            'Selesai'
-                        ],
-
-                        datasets: [{
-                            label: 'Jumlah',
-
-                            data: [
-                                tindakLanjutBelum,
-                                tindakLanjutDalamProses,
-                                tindakLanjutSelesai
-                            ],
-
-                            backgroundColor: [
-                                '#94a3b8',
-                                '#3b82f6',
-                                '#10b981'
-                            ],
-
-                            borderRadius: 8,
-
-                            borderSkipped: false
-                        }]
-                    },
-
-                    options: {
-
-                        responsive: true,
-
-                        maintainAspectRatio: false,
-
-                        plugins: {
-
-                            legend: {
-                                display: false
-                            },
-
-                            tooltip: {
-                                padding: 10
-                            }
-
-                        },
-
-                        scales: {
-
-                            y: {
-                                beginAtZero: true,
-
-                                ticks: {
-                                    precision: 0,
-
-                                    stepSize: 1
-                                },
-
-                                grid: {
-                                    color: '#e2e8f0'
-                                }
-                            },
-
-                            x: {
-                                grid: {
-                                    display: false
-                                }
-                            }
-
-                        }
-                    }
-
-                });
-            }
-
-        });
-    </script>
-
+    {{-- ================= PERHATIAN ================= --}}
+    @if ($perluDiperbarui > 0)
+        <div class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
+            <span class="mt-0.5 text-lg">💡</span>
+            <p class="text-sm leading-6 text-amber-900">
+                <strong>{{ $perluDiperbarui }} sekolah</strong> sudah memiliki data instrumen/wawancara,
+                tetapi statusnya masih <strong>"Belum Dimonitor"</strong>.
+                <a href="{{ route('sekolah.index', ['status_monitoring' => 'Belum Dimonitor']) }}"
+                   class="font-semibold underline underline-offset-2 hover:text-amber-700">Perbarui di Data Sekolah →</a>
+            </p>
+        </div>
+    @endif
+
+    {{-- ================= TREN + KOMPOSISI ================= --}}
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+
+        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 xl:col-span-2">
+            <div class="mb-4 flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-800">Tren Aktivitas Monev</h2>
+                    <p class="mt-1 text-sm text-slate-500">Jumlah pengisian instrumen dan wawancara 6 bulan terakhir.</p>
+                </div>
+            </div>
+            <div class="h-72"><canvas id="trenChart"></canvas></div>
+        </div>
+
+        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+            <h2 class="text-lg font-semibold text-slate-800">Komposisi Instrumen</h2>
+            <p class="mt-1 text-sm text-slate-500">Pengisian berdasarkan jenis instrumen.</p>
+
+            @if ($totalInstrumen > 0)
+                <div class="relative mx-auto mt-4 h-64 max-w-xs">
+                    <canvas id="komposisiChart"></canvas>
+                    <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center" style="padding-bottom: 38px">
+                        <span class="text-3xl font-bold text-slate-800">{{ $totalInstrumen }}</span>
+                        <span class="text-xs text-slate-500">Pengisian</span>
+                    </div>
+                </div>
+            @else
+                <div class="flex h-64 items-center justify-center text-sm text-slate-400">Belum ada pengisian instrumen.</div>
+            @endif
+        </div>
+    </div>
+
+    {{-- ================= CAPAIAN + WAWANCARA + TINDAK LANJUT ================= --}}
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-800">Rata-rata Capaian</h2>
+                    <p class="mt-1 text-sm text-slate-500">Nilai rata-rata per instrumen (%).</p>
+                </div>
+                <span class="rounded-full bg-blue-50 px-3 py-1 text-sm font-bold text-blue-700">
+                    {{ $rataCapaian !== null ? number_format($rataCapaian, 1, ',', '.') . '%' : '-' }}
+                </span>
+            </div>
+            <div class="mt-4 h-64"><canvas id="capaianChart"></canvas></div>
+        </div>
+
+        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+            <h2 class="text-lg font-semibold text-slate-800">Wawancara per Jenis</h2>
+            <p class="mt-1 text-sm text-slate-500">Jumlah lembar wawancara yang telah diisi.</p>
+            <div class="mt-4 h-64"><canvas id="wawancaraChart"></canvas></div>
+        </div>
+
+        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+            <h2 class="text-lg font-semibold text-slate-800">Status Tindak Lanjut</h2>
+            <p class="mt-1 text-sm text-slate-500">Progres rencana tindak lanjut hasil monev.</p>
+
+            @if ($tlTotal > 0)
+                <div class="relative mx-auto mt-4 h-64 max-w-xs">
+                    <canvas id="tlChart"></canvas>
+                    <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center" style="padding-bottom: 38px">
+                        <span class="text-3xl font-bold text-emerald-600">{{ $pctTl }}%</span>
+                        <span class="text-xs text-slate-500">Selesai</span>
+                    </div>
+                </div>
+            @else
+                <div class="flex h-64 flex-col items-center justify-center gap-3 text-center text-sm text-slate-400">
+                    Belum ada rencana tindak lanjut.
+                    <a href="{{ route('tindak-lanjut.create') }}" class="font-semibold text-blue-600 hover:text-blue-800">+ Tambah tindak lanjut</a>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- ================= AKTIVITAS + SIDE ================= --}}
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+
+        {{-- Aktivitas terbaru --}}
+        <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 xl:col-span-2">
+            <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-800">Aktivitas Terbaru</h2>
+                    <p class="mt-1 text-sm text-slate-500">Pengisian instrumen dan wawancara terakhir.</p>
+                </div>
+                <a href="{{ route('instrumen.index') }}" class="text-sm font-semibold text-blue-600 hover:text-blue-800">Lihat semua →</a>
+            </div>
+
+            @forelse ($terbaru as $a)
+                @php $meta = $jenisMeta[$a['jenis']] ?? ['solid' => '#64748b', 'soft' => '#f1f5f9', 'text' => '#475569']; @endphp
+                <a href="{{ $a['url'] }}" class="flex items-center gap-4 border-b border-slate-100 px-6 py-4 transition last:border-0 hover:bg-slate-50">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xs font-bold"
+                          style="background: {{ $meta['soft'] }}; color: {{ $meta['text'] }}">
+                        {{ $a['tipe'] === 'Wawancara' ? '💬' : '📋' }}
+                    </span>
+
+                    <div class="min-w-0 flex-1">
+                        <p class="truncate text-sm font-semibold text-slate-800">{{ $a['nama'] }}</p>
+                        <p class="mt-0.5 truncate text-xs text-slate-500">
+                            {{ $a['tipe'] }} {{ $a['jenis'] }}
+                            @if ($a['petugas'] !== '') · oleh {{ $a['petugas'] }} @endif
+                        </p>
+                    </div>
+
+                    <div class="shrink-0 text-right">
+                        @if ($a['nilai'] !== null)
+                            <p class="text-sm font-bold" style="color: {{ $meta['text'] }}">{{ number_format($a['nilai'], 1, ',', '.') }}%</p>
+                        @else
+                            <span class="rounded-full px-2.5 py-1 text-xs font-semibold" style="background: {{ $meta['soft'] }}; color: {{ $meta['text'] }}">{{ $a['jenis'] }}</span>
+                        @endif
+                        <p class="mt-1 text-xs text-slate-400">{{ $a['dibuat']?->locale('id')->diffForHumans() }}</p>
+                    </div>
+                </a>
+            @empty
+                <div class="px-6 py-14 text-center text-sm text-slate-400">Belum ada aktivitas monev.</div>
+            @endforelse
+        </div>
+
+        {{-- Sisi kanan --}}
+        <div class="space-y-6">
+
+            {{-- Tindak lanjut mendesak --}}
+            <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+                <div class="border-b border-slate-200 px-6 py-5">
+                    <h2 class="text-lg font-semibold text-slate-800">Perlu Ditindaklanjuti</h2>
+                    <p class="mt-1 text-sm text-slate-500">Diurutkan berdasarkan target selesai.</p>
+                </div>
+
+                @forelse ($tlMendesak as $tl)
+                    @php $terlambat = $tl->target_selesai && $tl->target_selesai->isPast(); @endphp
+                    <a href="{{ route('tindak-lanjut.show', $tl) }}" class="block border-b border-slate-100 px-6 py-4 transition last:border-0 hover:bg-slate-50">
+                        <p class="truncate text-sm font-semibold text-slate-800">{{ $tl->judul_tindak_lanjut }}</p>
+                        <p class="mt-0.5 truncate text-xs text-slate-500">{{ $tl->sekolah->nama_sekolah ?? 'Sekolah tidak tersedia' }}</p>
+                        <div class="mt-2 flex items-center gap-2 text-xs">
+                            <span class="rounded-full px-2 py-0.5 font-semibold {{ $tl->status === 'Dalam Proses' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600' }}">{{ $tl->status }}</span>
+                            <span class="{{ $terlambat ? 'font-semibold text-rose-600' : 'text-slate-400' }}">
+                                {{ $tl->target_selesai ? ($terlambat ? 'Terlambat · ' : 'Target · ') . $tl->target_selesai->format('d/m/Y') : 'Tanpa target' }}
+                            </span>
+                        </div>
+                    </a>
+                @empty
+                    <div class="px-6 py-10 text-center text-sm text-slate-400">🎉 Tidak ada tindak lanjut yang tertunda.</div>
+                @endforelse
+            </div>
+
+            {{-- Petugas teraktif --}}
+            <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+                <h2 class="text-lg font-semibold text-slate-800">Petugas Monev Teraktif</h2>
+                <p class="mt-1 text-sm text-slate-500">Berdasarkan jumlah pengisian.</p>
+
+                @php $maks = max($petugasTeraktif->max('jumlah') ?? 0, 1); @endphp
+                <div class="mt-4 space-y-4">
+                    @forelse ($petugasTeraktif as $i => $p)
+                        <div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="truncate font-medium text-slate-700">{{ $i + 1 }}. {{ $p['nama'] }}</span>
+                                <span class="ml-3 shrink-0 font-bold text-slate-800">{{ $p['jumlah'] }}</span>
+                            </div>
+                            <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100">
+                                <div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500" style="width: {{ ($p['jumlah'] / $maks) * 100 }}%"></div>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="py-6 text-center text-sm text-slate-400">Belum ada data petugas.</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ================= CHART.JS ================= --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const D = @json($chart);
+
+    Chart.defaults.font.family = "'Instrument Sans', ui-sans-serif, system-ui, sans-serif";
+    Chart.defaults.color = '#64748b';
+
+    const grid = { color: '#eef2f7' };
+    const legendBawah = {
+        position: 'bottom',
+        labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 12 } }
+    };
+    const buat = (id, config) => {
+        const el = document.getElementById(id);
+        if (el) new Chart(el, config);
+    };
+
+    // Tren
+    buat('trenChart', {
+        type: 'line',
+        data: {
+            labels: D.bulan,
+            datasets: [
+                { label: 'Instrumen', data: D.trenInstrumen, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,.12)', fill: true, tension: .35, borderWidth: 3, pointRadius: 4, pointBackgroundColor: '#fff', pointBorderWidth: 2 },
+                { label: 'Wawancara', data: D.trenWawancara, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.10)', fill: true, tension: .35, borderWidth: 3, pointRadius: 4, pointBackgroundColor: '#fff', pointBorderWidth: 2 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { ...legendBawah, position: 'top', align: 'end' } },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 }, grid }, x: { grid: { display: false } } }
+        }
+    });
+
+    // Komposisi instrumen
+    buat('komposisiChart', {
+        type: 'doughnut',
+        data: { labels: D.jenis, datasets: [{ data: D.instrumen, backgroundColor: D.warna, borderWidth: 3, borderColor: '#fff', hoverOffset: 6 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: legendBawah } }
+    });
+
+    // Capaian per instrumen
+    buat('capaianChart', {
+        type: 'bar',
+        data: { labels: D.jenis, datasets: [{ data: D.capaian, backgroundColor: D.warna, borderRadius: 8, borderSkipped: false, barThickness: 18 }] },
+        options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw === null ? 'Belum ada data' : c.raw + '%' } } },
+            scales: { x: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid }, y: { grid: { display: false } } }
+        }
+    });
+
+    // Wawancara per jenis
+    buat('wawancaraChart', {
+        type: 'bar',
+        data: { labels: D.jenis, datasets: [{ data: D.wawancara, backgroundColor: D.warna, borderRadius: 8, borderSkipped: false, maxBarThickness: 34 }] },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 }, grid }, x: { grid: { display: false }, ticks: { font: { size: 11 } } } }
+        }
+    });
+
+    // Tindak lanjut
+    buat('tlChart', {
+        type: 'doughnut',
+        data: { labels: ['Belum Dimulai', 'Dalam Proses', 'Selesai'], datasets: [{ data: D.tl, backgroundColor: ['#cbd5e1', '#3b82f6', '#10b981'], borderWidth: 3, borderColor: '#fff', hoverOffset: 6 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: legendBawah } }
+    });
+});
+</script>
 @endsection
