@@ -42,6 +42,15 @@
                 'text' => '#b45309',
                 'aktif' => true,
             ],
+            [
+                'kode' => 'PKGSD MBI',
+                'no' => '05',
+                'solid' => '#0891b2',
+                'soft' => '#ecfeff',
+                'border' => '#a5f3fc',
+                'text' => '#0e7490',
+                'aktif' => true,
+            ],
         ];
 
         $routeGembiraSiap = \Illuminate\Support\Facades\Route::has('wawancara.gembira.create');
@@ -105,7 +114,7 @@
         @endif
 
         {{-- PILIHAN JENIS WAWANCARA --}}
-        <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
             @foreach ($kartu as $k)
                 <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
                     <div style="height: 5px; background: {{ $k['solid'] }}"></div>
@@ -134,6 +143,8 @@
                                 Form wawancara BK
                             @elseif ($k['kode'] === 'TENDIK')
                                 Form wawancara TENDIK
+                            @elseif ($k['kode'] === 'PKGSD MBI')
+                                Form wawancara PKGSD MBI
                             @else
                                 Form wawancara Matematika GEMBIRA
                             @endif
@@ -145,6 +156,7 @@
             'BK' => 'wawancara.bk.create',
             'TENDIK' => 'wawancara.tendik.create',
             'GEMBIRA' => 'wawancara.gembira.create',
+            'PKGSD MBI' => 'wawancara.pkgsd-mbi.create',
         };
 
         $labelTombol = match ($k['kode']) {
@@ -152,6 +164,7 @@
             'BK' => '+ Isi Wawancara BK',
             'TENDIK' => '+ Isi Wawancara TENDIK',
             'GEMBIRA' => '+ Isi Wawancara GEMBIRA',
+            'PKGSD MBI' => '+ Isi Wawancara PKGSD MBI',
         };
     @endphp
 
@@ -185,6 +198,7 @@
                             </option>
                             <option value="GEMBIRA" @selected(request('jenis_instrumen') === 'GEMBIRA')>Wawancara Matematika
                                 GEMBIRA</option>
+                            <option value="PKGSD MBI" @selected(request('jenis_instrumen') === 'PKGSD MBI')>Wawancara PKGSD MBI</option>
                         </select>
                     </div>
 
@@ -270,6 +284,9 @@
                                 } elseif ($jenisData === 'GEMBIRA') {
                                     $labelJenis = 'Wawancara Matematika GEMBIRA';
                                     $kodeJenis = 'GEMBIRA';
+                                } elseif ($jenisData === 'PKGSD MBI') {
+                                    $labelJenis = 'Wawancara PKGSD MBI';
+                                    $kodeJenis = 'PKGSD MBI';
                                 } else {
                                     $labelJenis = $wawancara->instrumen->nama_instrumen ?? 'Wawancara Lama';
                                     $kodeJenis = 'LAMA';
@@ -280,6 +297,7 @@
                                     'BK' => '#f6efff',
                                     'TENDIK' => '#ecfdf5',
                                     'GEMBIRA' => '#fffbeb',
+                                    'PKGSD MBI' => '#ecfeff',
                                     default => '#f1f5f9',
                                 };
 
@@ -288,6 +306,7 @@
                                     'BK' => '#7e22ce',
                                     'TENDIK' => '#047857',
                                     'GEMBIRA' => '#b45309',
+                                    'PKGSD MBI' => '#0e7490',
                                     default => '#475569',
                                 };
 

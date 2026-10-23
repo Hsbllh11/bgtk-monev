@@ -39,6 +39,9 @@ class Wawancara extends Model
         'jawaban_3',
         'jawaban_4',
         'jawaban_5',
+        'jawaban_6',
+        'jawaban_7',
+        'jawaban_8',
 
         // Hasil dan catatan
         'hasil_wawancara',
@@ -48,7 +51,7 @@ class Wawancara extends Model
         'nama_narasumber',
         'jabatan_narasumber',
         'nama_pewawancara',
-    ];  
+    ];
 
     protected function casts(): array
     {

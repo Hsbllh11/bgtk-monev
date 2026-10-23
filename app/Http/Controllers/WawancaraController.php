@@ -12,6 +12,11 @@ use Illuminate\Validation\Rule;
 class WawancaraController extends Controller
 {
     /**
+     * Konstanta jenis wawancara PKGSD MBI.
+     */
+    private const JENIS_PKGSD = 'PKGSD MBI';
+
+    /**
      * Daftar wawancara, pencarian, filter, dan statistik.
      */
     public function index(Request $request)
@@ -204,12 +209,120 @@ class WawancaraController extends Controller
     {
         return view('wawancara.create-tendik');
     }
+
     /**
      * Form wawancara Matematika GEMBIRA.
      */
     public function createGembira()
     {
         return view('wawancara.create-gembira');
+    }
+
+    /**
+     * Form wawancara PKGSD MBI.
+     */
+    public function createPkgsdMbi()
+    {
+        return view('wawancara.create-pkgsd-mbi');
+    }
+
+    /**
+     * Menyimpan hasil wawancara PKGSD MBI.
+     */
+    public function storePkgsdMbi(Request $request)
+    {
+        $validated = $request->validate($this->rulesPkgsdMbi());
+
+        $wawancara = Wawancara::create($this->payloadPkgsdMbi($validated));
+
+        return redirect()
+            ->route('wawancara.show', $wawancara->id)
+            ->with('success', 'Data wawancara PKGSD MBI berhasil disimpan.');
+    }
+
+    /**
+     * Aturan validasi wawancara PKGSD MBI.
+     */
+    private function rulesPkgsdMbi(): array
+    {
+        $rules = [
+            'nama_petugas_monev' => ['required', 'string', 'max:255'],
+            'instansi_petugas' => ['required', 'string', 'max:255'],
+            'lokasi_monev' => ['required', 'string', 'max:255'],
+            'tanggal_pelaksanaan' => ['required', 'date'],
+            'tanggal_wawancara' => ['required', 'date'],
+
+            'nama_responden' => ['required', 'string', 'max:255'],
+            'jabatan_responden' => [
+                'required',
+                'string',
+                Rule::in(config('pkgsd_wawancara.jabatan')),
+            ],
+            'satuan_pendidikan' => ['required', 'string', 'max:255'],
+            'masa_kerja' => ['required', 'numeric', 'min:0', 'max:100'],
+            'nama_pelatihan' => ['required', 'string', 'max:255'],
+        ];
+
+        foreach (array_keys(config('pkgsd_wawancara.pertanyaan')) as $nomor) {
+            $rules['jawaban_' . $nomor] = ['required', 'string'];
+        }
+
+        return $rules;
+    }
+
+    /**
+     * Payload penyimpanan wawancara PKGSD MBI.
+     */
+    private function payloadPkgsdMbi(array $v): array
+    {
+        $metadata = [
+            'instansi_petugas' => $v['instansi_petugas'],
+            'lokasi_monev' => $v['lokasi_monev'],
+            'tanggal_pelaksanaan' => $v['tanggal_pelaksanaan'],
+            'jabatan_responden' => $v['jabatan_responden'],
+            'satuan_pendidikan' => $v['satuan_pendidikan'],
+            'masa_kerja' => $v['masa_kerja'],
+            'nama_pelatihan' => $v['nama_pelatihan'],
+        ];
+
+        $payload = [
+            'jenis_wawancara' => self::JENIS_PKGSD,
+            'instrumen_id' => null,
+            'sekolah_id' => SekolahResolver::resolve($v['satuan_pendidikan'])?->id,
+
+            'tanggal_wawancara' => $v['tanggal_wawancara'],
+            'tanggal_evaluasi' => $v['tanggal_pelaksanaan'],
+            'status' => 'Selesai',
+
+            'nama_petugas_monev' => $v['nama_petugas_monev'],
+            'unit_kerja_petugas' => $v['instansi_petugas'],
+            'nama_pewawancara' => $v['nama_petugas_monev'],
+
+            'nama_responden' => $v['nama_responden'],
+            'unit_kerja_responden' => $v['satuan_pendidikan'],
+            'status_responden' => $v['jabatan_responden'],
+
+            'nama_narasumber' => $v['nama_responden'],
+            'jabatan_narasumber' => $v['jabatan_responden'],
+
+            'hasil_wawancara' => json_encode($metadata, JSON_UNESCAPED_UNICODE),
+        ];
+
+        foreach (array_keys(config('pkgsd_wawancara.pertanyaan')) as $nomor) {
+            $payload['jawaban_' . $nomor] = $v['jawaban_' . $nomor];
+        }
+
+        return $payload;
+    }
+
+    /**
+     * Mendekode metadata wawancara dari kolom hasil_wawancara.
+     */
+    private function metadataWawancara(Wawancara $wawancara): array
+    {
+        $metadata = json_decode($wawancara->hasil_wawancara ?? '{}', true);
+
+        return is_array($metadata) ? $metadata : [];
     }
 
     /**
@@ -324,12 +437,6 @@ class WawancaraController extends Controller
     /**
      * Menyimpan hasil wawancara TENDIK.
      */
-
-    /**
-     * Menyimpan hasil wawancara TENDIK.
-     */
-
-
     public function storeTendik(Request $request)
     {
         $validated = $request->validate([
@@ -408,9 +515,6 @@ class WawancaraController extends Controller
             ->route('wawancara.show', $wawancara->id)
             ->with('success', 'Data wawancara TENDIK berhasil disimpan.');
     }
-
-
-
 
     /**
      * Form BCKS.
@@ -513,7 +617,6 @@ class WawancaraController extends Controller
     /**
      * Menyimpan wawancara BK.
      */
-
     public function storeBk(Request $request)
     {
         $validated = $request->validate([
@@ -607,11 +710,9 @@ class WawancaraController extends Controller
             ->with('success', 'Data wawancara BK berhasil disimpan.');
     }
 
-
     /**
      * Menampilkan detail wawancara.
      */
-
     public function show(Wawancara $wawancara)
     {
         $wawancara->load([
@@ -639,6 +740,14 @@ class WawancaraController extends Controller
             );
         }
 
+        // Detail PKGSD MBI.
+        if ($jenis === self::JENIS_PKGSD) {
+            return view('wawancara.show-pkgsd-mbi', [
+                'wawancara' => $wawancara,
+                'metadata' => $this->metadataWawancara($wawancara),
+            ]);
+        }
+
         // Detail TENDIK.
         if ($jenis === 'TENDIK') {
             return view('wawancara.show-tendik', compact('wawancara'));
@@ -653,7 +762,6 @@ class WawancaraController extends Controller
         return view('wawancara.show', compact('wawancara'));
     }
 
-
     /**
      * Form edit wawancara.
      */
@@ -666,6 +774,7 @@ class WawancaraController extends Controller
         ]);
 
         $jenis = strtoupper(trim($wawancara->jenis_wawancara ?? ''));
+
         if ($jenis === 'GEMBIRA') {
             $metadata = json_decode(
                 $wawancara->hasil_wawancara ?? '{}',
@@ -681,6 +790,15 @@ class WawancaraController extends Controller
                 compact('wawancara', 'metadata')
             );
         }
+
+        // Form edit PKGSD MBI.
+        if ($jenis === self::JENIS_PKGSD) {
+            return view('wawancara.edit-pkgsd-mbi', [
+                'wawancara' => $wawancara,
+                'metadata' => $this->metadataWawancara($wawancara),
+            ]);
+        }
+
         // Form edit TENDIK.
         if ($jenis === 'TENDIK') {
             $metadata = json_decode(
@@ -712,16 +830,25 @@ class WawancaraController extends Controller
             'instrumens',
             'sekolahs'
         ));
-
     }
 
     /**
      * Memperbarui data wawancara.
      */
-
     public function update(Request $request, Wawancara $wawancara)
     {
         $jenis = strtoupper(trim($wawancara->jenis_wawancara ?? ''));
+
+        // Update PKGSD MBI.
+        if ($jenis === self::JENIS_PKGSD) {
+            $validated = $request->validate($this->rulesPkgsdMbi());
+
+            $wawancara->update($this->payloadPkgsdMbi($validated));
+
+            return redirect()
+                ->route('wawancara.show', $wawancara->id)
+                ->with('success', 'Data wawancara PKGSD MBI berhasil diperbarui.');
+        }
 
         if ($jenis === 'GEMBIRA') {
             $validated = $request->validate([
@@ -1188,6 +1315,7 @@ class WawancaraController extends Controller
                 'Data wawancara berhasil diperbarui.'
             );
     }
+
     public function cetakBcks(\App\Models\Wawancara $wawancara)
     {
         abort_unless(
@@ -1201,6 +1329,7 @@ class WawancaraController extends Controller
     public function cetak(Wawancara $wawancara)
     {
         $jenis = strtoupper(trim($wawancara->jenis_wawancara ?? ''));
+
         if ($jenis === 'GEMBIRA') {
             $metadata = json_decode(
                 $wawancara->hasil_wawancara ?? '{}',
@@ -1216,6 +1345,14 @@ class WawancaraController extends Controller
                 compact('wawancara', 'metadata')
             );
         }
+
+        if ($jenis === self::JENIS_PKGSD) {
+            return view('wawancara.cetak-pkgsd-mbi', [
+                'wawancara' => $wawancara,
+                'metadata' => $this->metadataWawancara($wawancara),
+            ]);
+        }
+
         if ($jenis === 'TENDIK') {
             $metadata = json_decode(
                 $wawancara->hasil_wawancara ?? '{}',

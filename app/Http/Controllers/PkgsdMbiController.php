@@ -26,10 +26,7 @@ class PkgsdMbiController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi menerima data array dari Request.
         $validated = $this->validasiPengisian($request->all());
-
-        // Validasi dan rapikan jawaban setiap level.
         $jawaban = $this->ambilJawabanLevel($request);
 
         $namaSekolah = preg_replace(
@@ -106,9 +103,6 @@ class PkgsdMbiController extends Controller
             ->with('success', 'Pengisian PKGSD MBI berhasil dihapus.');
     }
 
-    /**
-     * Validasi biodata dan semua skor indikator aktif.
-     */
     private function validasiPengisian(array $data): array
     {
         $rules = [
@@ -150,7 +144,6 @@ class PkgsdMbiController extends Controller
         $jabatan = $data['jabatan_penilai'] ?? null;
         $peserta = $jabatan === 'Peserta PKGSD MBI';
 
-        // Level 1 dan 2 hanya untuk peserta PKGSD MBI.
         $levelAktif = $peserta
             ? [1 => 29, 2 => 10, 3 => 22, 4 => 12]
             : [3 => 22, 4 => 12];
@@ -174,7 +167,6 @@ class PkgsdMbiController extends Controller
                 $attributes[$skorField] =
                     "Skor Level {$level}, indikator {$i}";
 
-                // Bukti wajib untuk skor 3 atau 4 pada Level 3 dan 4.
                 if (in_array($level, [3, 4], true)) {
                     $buktiField = "{$field}.{$i}.bukti";
 
@@ -201,9 +193,6 @@ class PkgsdMbiController extends Controller
         )->validate();
     }
 
-    /**
-     * Ambil dan bersihkan jawaban level aktif.
-     */
     private function ambilJawabanLevel(Request $request): array
     {
         $peserta = $request->input('jabatan_penilai')
@@ -285,7 +274,6 @@ class PkgsdMbiController extends Controller
                     $jawabanBersih[$nomor]['bukti'] = $bukti;
                 }
 
-                // Alasan TD tetap opsional.
                 if ($level === 3 && $skor === 'TD') {
                     $jawabanBersih[$nomor]['alasan_td'] = $alasanTd;
                 }
@@ -301,9 +289,6 @@ class PkgsdMbiController extends Controller
         return $hasil;
     }
 
-    /**
-     * Cari sekolah berdasarkan nama atau buat jika belum tersedia.
-     */
     private function cariAtauBuatSekolah(string $namaSekolah): Sekolah
     {
         $sekolah = Sekolah::query()

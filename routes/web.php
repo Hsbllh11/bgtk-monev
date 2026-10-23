@@ -242,6 +242,21 @@ Route::middleware('auth')->group(function () {
 
 
     // --------------------------------------------------------
+    // Wawancara PKGSD MBI
+    // --------------------------------------------------------
+
+    Route::get('/wawancara/pkgsd-mbi', [
+        WawancaraController::class,
+        'createPkgsdMbi',
+    ])->name('wawancara.pkgsd-mbi.create');
+
+    Route::post('/wawancara/pkgsd-mbi', [
+        WawancaraController::class,
+        'storePkgsdMbi',
+    ])->name('wawancara.pkgsd-mbi.store');
+
+
+    // --------------------------------------------------------
     // Cetak dan pengelolaan wawancara umum
     // --------------------------------------------------------
 

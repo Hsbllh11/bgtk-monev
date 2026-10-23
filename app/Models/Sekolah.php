@@ -27,52 +27,39 @@ class Sekolah extends Model
         'tahun_monitoring' => 'integer',
     ];
 
-    /**
-     * Relasi ke instrumen BCKS.
-     */
     public function bcksPengisians(): HasMany
     {
         return $this->hasMany(BcksPengisian::class, 'sekolah_id');
     }
 
-    /**
-     * Relasi ke instrumen BK.
-     */
     public function bkSubmissions(): HasMany
     {
         return $this->hasMany(BKSubmission::class, 'sekolah_id');
     }
 
-    /**
-     * Relasi ke instrumen TENDIK.
-     */
     public function tendiks(): HasMany
     {
         return $this->hasMany(Tendik::class, 'sekolah_id');
     }
 
-    /**
-     * Relasi ke instrumen Matematika GEMBIRA.
-     */
     public function gembiraPengisians(): HasMany
     {
         return $this->hasMany(GembiraPengisian::class, 'sekolah_id');
     }
+
+    /**
+     * Relasi ke instrumen PKGSD MBI.
+     */
     public function pkgsdMbiPengisians(): HasMany
     {
         return $this->hasMany(PkgsdMbiPengisian::class, 'sekolah_id');
     }
-    /**
-     * Relasi ke data wawancara.
-     */
+
     public function wawancaras(): HasMany
     {
         return $this->hasMany(Wawancara::class, 'sekolah_id');
     }
 
-    /**
-     * Relasi ke tindak lanjut.
-     */
     public function tindakLanjuts(): HasMany
     {
         return $this->hasMany(TindakLanjut::class, 'sekolah_id');

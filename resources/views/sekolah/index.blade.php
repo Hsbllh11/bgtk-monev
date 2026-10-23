@@ -267,7 +267,8 @@
                                     (int) ($sekolah->bcks_pengisians_count ?? 0) +
                                     (int) ($sekolah->bk_submissions_count ?? 0) +
                                     (int) ($sekolah->tendiks_count ?? 0) +
-                                    (int) ($sekolah->gembira_pengisians_count ?? 0);
+                                    (int) ($sekolah->gembira_pengisians_count ?? 0) +
+                                    (int) ($sekolah->pkgsd_mbi_pengisians_count ?? 0);
 
                                 $jumlahWawancara = (int) ($sekolah->wawancaras_count ?? 0);
 
@@ -293,6 +294,10 @@
 
                                 if (($sekolah->gembira_pengisians_count ?? 0) > 0) {
                                     $kategoriMonev[] = 'GEMBIRA';
+                                }
+
+                                if (($sekolah->pkgsd_mbi_pengisians_count ?? 0) > 0) {
+                                    $kategoriMonev[] = 'PKGSD MBI';
                                 }
 
                                 $kategoriWawancara = ($sekolah->wawancaras ?? collect())

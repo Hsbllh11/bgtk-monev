@@ -10,11 +10,6 @@
         |--------------------------------------------------------------------------
         | Konfigurasi instrumen
         |--------------------------------------------------------------------------
-        |
-        | Teks indikator dan rubrik dibaca dari config/pkgsd_mbi.php.
-        | Jika file config belum dibuat, halaman tetap tampil dengan label
-        | "Indikator N" dan jumlah indikator bawaan.
-        |
         */
 
         $instrumen = config('pkgsd_mbi.levels', []);
@@ -82,10 +77,6 @@
         |--------------------------------------------------------------------------
         | Rekap per level dan keseluruhan
         |--------------------------------------------------------------------------
-        |
-        | Rerata hanya dari skor numerik 1–4. TD tidak dihitung,
-        | indikator yang belum dinilai tidak dianggap bernilai nol.
-        |
         */
 
         $rekap = [];
@@ -163,7 +154,9 @@
                 </p>
             </div>
 
+            {{-- TOMBOL AKSI (MENYESUAIKAN REFERENSI TENDIK) --}}
             <div class="no-print flex flex-wrap items-center gap-3">
+                {{-- Kembali (dengan ikon panah) --}}
                 <a href="{{ route('instrumen.index') }}"
                     class="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -173,10 +166,13 @@
                     Kembali
                 </a>
 
+                {{-- Cetak Hasil (teks saja) --}}
                 <a href="{{ route('pkgsd-mbi.cetak', $pkgsdMbi) }}" target="_blank"
-                    class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
-                    Cetak / Simpan PDF
+                    class="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                    Cetak Hasil
                 </a>
+
+                {{-- Edit Data --}}
                 <a href="{{ route('pkgsd-mbi.edit', $pkgsdMbi) }}"
                     class="inline-flex h-12 items-center justify-center rounded-xl px-6 text-sm font-semibold text-white shadow-sm transition"
                     style="background-color: #f97316;" onmouseover="this.style.backgroundColor='#ea580c'"
@@ -529,4 +525,50 @@
         @endforeach
 
     </div>
+
+    {{-- CETAK: sembunyikan navigasi dan tombol aplikasi saat dicetak --}}
+    <style>
+        @media print {
+            body {
+                background: white !important;
+            }
+
+            aside,
+            nav,
+            header,
+            .no-print {
+                display: none !important;
+            }
+
+            body * {
+                visibility: visible;
+            }
+
+            .space-y-6 {
+                gap: 16px !important;
+            }
+
+            section,
+            .rounded-2xl {
+                break-inside: avoid;
+                box-shadow: none !important;
+            }
+
+            table {
+                width: 100% !important;
+                min-width: 0 !important;
+                font-size: 10px !important;
+            }
+
+            th,
+            td {
+                padding: 6px !important;
+            }
+
+            @page {
+                size: A4;
+                margin: 12mm;
+            }
+        }
+    </style>
 @endsection

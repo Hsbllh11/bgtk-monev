@@ -19,6 +19,7 @@ class SekolahController extends Controller
                 'bkSubmissions',
                 'tendiks',
                 'gembiraPengisians',
+                'pkgsdMbiPengisians',
                 'wawancaras',
             ])
             ->with('wawancaras:id,sekolah_id,jenis_wawancara');
