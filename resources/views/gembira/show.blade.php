@@ -187,6 +187,12 @@
                     class="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700">
                     Cetak Hasil
                 </a>
+
+                {{-- Gabung PDF --}}
+                <a href="{{ route('cetak-gabungan.index', ['pilih' => ['gembira-' . $gembira->id]]) }}"
+                    class="inline-flex h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+                    Gabung PDF
+                </a>
             </div>
         </div>
 

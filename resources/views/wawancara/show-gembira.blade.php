@@ -91,6 +91,12 @@
                     onmouseout="this.style.backgroundColor='#f97316'">
                     Cetak Hasil</a>
 
+                {{-- Gabung PDF --}}
+                <a href="{{ route('cetak-gabungan.index', ['pilih' => ['wwc-' . $wawancara->id]]) }}"
+                    class="inline-flex h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+                    Gabung PDF
+                </a>
+
                 <a href="{{ route('wawancara.edit', $wawancara->id) }}"
                     class="inline-flex h-12 items-center justify-center rounded-xl px-6 text-sm font-semibold text-white shadow-sm transition"
                     style="background-color: #141be8;" onmouseover="this.style.backgroundColor='#0d13cb'"

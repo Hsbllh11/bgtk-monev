@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('title', 'Hasil Penilaian BCKS')
@@ -204,6 +203,12 @@
                 <a href="{{ route('bcks.cetak', $bcksPengisian) }}" target="_blank"
                     class="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
                     Cetak Hasil
+                </a>
+
+                {{-- Gabung PDF --}}
+                <a href="{{ route('cetak-gabungan.index', ['pilih' => ['bcks-' . $bcksPengisian->id]]) }}"
+                    class="inline-flex h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+                    Gabung PDF
                 </a>
 
                 {{-- Edit Data --}}

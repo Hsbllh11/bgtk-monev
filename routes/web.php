@@ -18,6 +18,7 @@ use App\Http\Controllers\TendikController;
 use App\Http\Controllers\ManajemenAkunController;
 use App\Http\Controllers\GembiraController;
 use App\Http\Controllers\PkgsdMbiController;
+use App\Http\Controllers\CetakGabunganController;
 
 
 // ============================================================
@@ -169,6 +170,18 @@ Route::middleware('auth')->group(function () {
         ->name('pkgsd-mbi.cetak');
 
     // Pengelolaan instrumen PKGSD MBI
+
+
+    // ========================================================
+    // GABUNG & CETAK PDF
+    // ========================================================
+
+    Route::get('/cetak-gabungan', [CetakGabunganController::class, 'index'])
+        ->name('cetak-gabungan.index');
+
+    Route::post('/cetak-gabungan', [CetakGabunganController::class, 'cetak'])
+        ->name('cetak-gabungan.cetak');
+
 
     // ========================================================
     // DATA SEKOLAH

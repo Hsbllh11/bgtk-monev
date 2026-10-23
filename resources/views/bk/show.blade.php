@@ -131,6 +131,12 @@
                     Cetak Hasil
                 </a>
 
+                {{-- Gabung PDF --}}
+                <a href="{{ route('cetak-gabungan.index', ['pilih' => ['bk-' . $submission->id]]) }}"
+                    class="inline-flex h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+                    Gabung PDF
+                </a>
+
                 {{-- Edit Data (teks saja) --}}
                 {{-- Edit Data --}}
                 <a href="{{ route('bk.edit', ['submission' => $submission->id]) }}"
