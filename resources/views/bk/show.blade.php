@@ -20,8 +20,6 @@
         $blue = ['bar' => '#2563eb', 'text' => '#2563eb', 'badgeBg' => '#dbeafe', 'badgeText' => '#1d4ed8', 'row' => '#eff6ff'];
         $levelStyles = [1 => $blue, 2 => $blue, 3 => $blue, 4 => $blue];
 
-        $answers = $submission->answers->filter(fn($a) => $a->question);
-
         $jabatanResponden = $submission->jabatan_responden;
 
         if ($jabatanResponden === 'Lainnya' && filled($submission->jabatan_lainnya)) {
@@ -31,42 +29,41 @@
         $isBK = $submission->jabatan_responden === 'BK';
         $allowedLevels = $isBK ? [1, 2, 3, 4] : [3, 4];
 
-        // Hanya jawaban dari level yang berlaku untuk jabatan responden.
-        $answers = $answers->filter(
-            fn($answer) => in_array((int) $answer->question->level, $allowedLevels, true)
-        )->values();
+        // ---------------------------------------------------------
+        // (a) Jawaban + perhitungan skor baru
+        // ---------------------------------------------------------
+        $answers = $submission->answers
+            ->filter(fn($a) => $a->question && in_array((int) $a->question->level, $allowedLevels, true))
+            ->values();
+
+        $scored = $answers->filter(fn($a) => $a->skor !== null);
+        $adaSkor = $scored->isNotEmpty();
 
         $levelStats = [];
-
         foreach ($levelNames as $level => $name) {
             if (!in_array($level, $allowedLevels, true)) {
                 continue;
             }
 
-            $items = $answers->filter(
-                fn($answer) => (int) $answer->question->level === $level
-            );
-
-            $total = $items->count();
-            $yes = $items->filter(fn($answer) => (bool) $answer->jawaban)->count();
+            $items = $scored->filter(fn($a) => (int) $a->question->level === $level);
+            $max = $items->count() * 4;
+            $skor = (int) $items->sum('skor');
 
             $levelStats[$level] = [
-                'total' => $total,
-                'yes' => $yes,
-                'pct' => $total > 0 ? round(($yes / $total) * 100, 2) : 0,
+                'skor' => $skor,
+                'max' => $max,
+                'pct' => $max > 0 ? round(($skor / $max) * 100, 2) : 0,
             ];
         }
 
         $jumlahButirBk = $answers->count();
-        $jumlahTerisiBk = $jumlahButirBk;
-        $jumlahYaBk = $answers->filter(fn($answer) => (bool) $answer->jawaban)->count();
-        $jumlahTidak = max($jumlahButirBk - $jumlahYaBk, 0);
+        $jumlahTerisiBk = $scored->count();
+        $totalSkor = (int) $scored->sum('skor');
+        $skorMaks = $jumlahButirBk * 4;
+        $skorPersen = $skorMaks > 0 ? round(($totalSkor / $skorMaks) * 100, 2) : 0;
 
-        $skorPersen = $jumlahButirBk > 0
-            ? ($jumlahYaBk / $jumlahButirBk) * 100
-            : 0;
-
-        $isHigh = $skorPersen >= 50;
+        $kategori = \App\Support\BkSkor::kategori($skorPersen);
+        $kategoriClass = \App\Support\BkSkor::kelas($kategori);
 
         $statusPengisianLabel = $submission->status ?: 'Selesai';
         $statusSelesai = $statusPengisianLabel === 'Selesai';
@@ -137,7 +134,6 @@
                     Gabung PDF
                 </a>
 
-                {{-- Edit Data (teks saja) --}}
                 {{-- Edit Data --}}
                 <a href="{{ route('bk.edit', ['submission' => $submission->id]) }}"
                     class="inline-flex h-12 items-center justify-center rounded-xl px-6 text-sm font-semibold text-white shadow-sm transition"
@@ -162,76 +158,43 @@
 
 
         {{-- =========================================================
-        RINGKASAN HASIL
+        RINGKASAN HASIL (b) — kartu Total Skor, Nilai Akhir, Predikat
         ========================================================== --}}
         <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
-
-            {{-- TOTAL SKOR --}}
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <p class="text-sm font-medium text-slate-500">Total Skor</p>
-
                 <div class="mt-3 flex items-baseline gap-2">
-                    <span class="text-4xl font-bold tracking-tight text-slate-800">{{ $jumlahYaBk }}</span>
-                    <span class="text-lg font-medium text-slate-400">/ {{ $jumlahButirBk }}</span>
+                    <span class="text-4xl font-bold tracking-tight text-slate-800">{{ $adaSkor ? $totalSkor : '-' }}</span>
+                    <span class="text-lg font-medium text-slate-400">/ {{ $skorMaks }}</span>
                 </div>
-
-                <div class="mt-4 flex flex-wrap gap-2">
-                    <span
-                        class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                        {{ $jumlahYaBk }} Ya
-                    </span>
-                    <span
-                        class="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
-                        {{ $jumlahTidak }} Tidak
-                    </span>
-                </div>
-
-                <p class="mt-4 text-xs text-slate-400">Akumulasi skor dari {{ $jumlahButirBk }} indikator.</p>
+                <p class="mt-4 text-xs text-slate-400">Akumulasi skor {{ $jumlahButirBk }} indikator (skala 1–4).</p>
             </div>
 
-
-            {{-- NILAI AKHIR --}}
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <p class="text-sm font-medium text-slate-500">Nilai Akhir</p>
-
                 <div class="mt-3 flex items-baseline gap-1">
                     <span class="text-4xl font-bold tracking-tight text-blue-600">
-                        {{ number_format($skorPersen, 2, ',', '.') }}
+                        {{ $adaSkor ? number_format($skorPersen, 2, ',', '.') : '-' }}
                     </span>
                     <span class="text-lg font-medium text-slate-400">%</span>
                 </div>
-
                 <div class="mt-5 h-2 overflow-hidden rounded-full bg-slate-100">
-                    <div class="h-full rounded-full bg-blue-600" style="width: {{ $skorPersen }}%"></div>
+                    <div class="h-full rounded-full bg-blue-600" style="width: {{ $adaSkor ? $skorPersen : 0 }}%"></div>
                 </div>
-
-                <p class="mt-4 text-xs text-slate-400">Persentase capaian berdasarkan skor maksimum.</p>
+                <p class="mt-4 text-xs text-slate-400">Total skor ÷ skor maksimal × 100.</p>
             </div>
 
-
-            {{-- PREDIKAT --}}
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <p class="text-sm font-medium text-slate-500">Predikat</p>
-
                 <div class="mt-3">
-                    @if ($isHigh)
-                        <span
-                            class="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-700">
-                            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                            Baik / Kategori Tinggi
-                        </span>
+                    @if ($adaSkor)
+                        <span class="inline-flex rounded-full px-4 py-2 text-sm font-bold {{ $kategoriClass }}">{{ $kategori }}</span>
                     @else
-                        <span
-                            class="inline-flex items-center gap-2 rounded-full bg-red-100 px-4 py-2 text-sm font-bold text-red-700">
-                            <span class="h-2 w-2 rounded-full bg-red-500"></span>
-                            Kurang / Kategori Rendah
-                        </span>
+                        <span class="inline-flex rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600">Data lama (Ya/Tidak)</span>
                     @endif
                 </div>
-
-                <p class="mt-5 text-xs text-slate-400">Kategori hasil penilaian BK.</p>
+                <p class="mt-5 text-xs text-slate-400">Sesuai Pedoman Penskoran instrumen BK.</p>
             </div>
-
         </div>
 
 
@@ -314,7 +277,7 @@
         </section>
 
         {{-- =========================================================
-        REKAPITULASI LEVEL
+        REKAPITULASI LEVEL (c) — $st['skor'] / $st['max']
         ========================================================== --}}
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
@@ -346,8 +309,8 @@
 
                         <div class="mt-5 flex items-end justify-between">
                             <div>
-                                <span class="text-3xl font-bold" style="color: {{ $style['text'] }};">{{ $st['yes'] }}</span>
-                                <span class="text-sm text-slate-400">/ {{ $st['total'] }}</span>
+                                <span class="text-3xl font-bold" style="color: {{ $style['text'] }};">{{ $st['skor'] }}</span>
+                                <span class="text-sm text-slate-400">/ {{ $st['max'] }}</span>
                             </div>
 
                             <span class="text-sm font-bold text-slate-700">
@@ -369,7 +332,7 @@
 
 
         {{-- =========================================================
-        DETAIL INDIKATOR
+        DETAIL INDIKATOR (d) — header "Skor" + badge skor
         ========================================================== --}}
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
@@ -392,7 +355,7 @@
                                 Pertanyaan / Indikator</th>
                             <th
                                 class="w-36 border-b border-slate-200 px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-slate-500">
-                                Jawaban</th>
+                                Skor</th>
                         </tr>
                     </thead>
 
@@ -456,14 +419,13 @@
                                 </td>
 
                                 <td class="border-b border-slate-100 px-4 py-4 text-center align-top">
-                                    @if ($answer->jawaban)
-                                        <span
-                                            class="inline-block rounded-full bg-emerald-100 px-4 py-2 text-xs font-bold text-emerald-700">
-                                            Ya
+                                    @if ($answer->skor !== null)
+                                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 font-bold text-white">
+                                            {{ $answer->skor }}
                                         </span>
                                     @else
-                                        <span class="inline-block rounded-full bg-red-100 px-4 py-2 text-xs font-bold text-red-700">
-                                            Tidak
+                                        <span class="inline-block rounded-full bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600">
+                                            {{ $answer->jawaban ? 'Ya' : 'Tidak' }} (lama)
                                         </span>
                                     @endif
                                 </td>
@@ -493,9 +455,7 @@
 
         {{-- =========================================================
         PRINT STYLE
-        (layout utama memakai tinggi tetap + scroll di <main>,
-            jadi saat cetak semuanya harus dilepas agar tidak terpotong)
-            ========================================================== --}}
+        ========================================================== --}}
             <style>
                 @media print {
 

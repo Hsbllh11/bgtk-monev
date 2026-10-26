@@ -320,6 +320,16 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('admin')->group(function () {
 
+        // ----------------------------------------------------
+        // Route hapus custom — didaftarkan SEBELUM resource
+        // agar tidak tertimpa oleh route resource `destroy`
+        // dengan pola /manajemen-akun/{manajemen_akun}
+        // ----------------------------------------------------
+        Route::delete('manajemen-akun/{manajemen_akun}/hapus', [
+            ManajemenAkunController::class,
+            'hapus',
+        ])->name('manajemen-akun.hapus');
+
         Route::resource('manajemen-akun', ManajemenAkunController::class)
             ->parameters([
                 'manajemen-akun' => 'manajemen_akun',

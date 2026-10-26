@@ -183,9 +183,13 @@ class InstrumenController extends Controller
 
                 'nilai' => (float) $item->skor_persentase,
 
-                'skor' => $item->jumlah_ya,
+                // ---------------------------------------------------------
+                // (11) Skor: gunakan total_skor / skor_maksimal (skala 1–4),
+                // fallback ke jumlah_ya / jumlah_soal untuk data lama.
+                // ---------------------------------------------------------
+                'skor' => $item->total_skor ?? $item->jumlah_ya,
 
-                'skor_maksimal' => $item->jumlah_soal,
+                'skor_maksimal' => $item->skor_maksimal ?? $item->jumlah_soal,
 
                 'predikat' => $item->kategori,
 

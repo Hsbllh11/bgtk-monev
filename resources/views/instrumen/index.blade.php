@@ -457,10 +457,11 @@
 
                                 {{-- =================================================
                                 PREDIKAT
+                                (11) — BK ditampilkan dengan warna yang sama seperti BCKS
                                 ================================================== --}}
                                 <td class="whitespace-nowrap px-6 py-5">
 
-                                    @if ($riwayat['jenis'] === 'BCKS')
+                                    @if (in_array($riwayat['jenis'], ['BCKS', 'BK'], true))
 
                                         @if ($riwayat['predikat'] === 'Sangat Baik')
 
@@ -480,16 +481,16 @@
                                                 Cukup
                                             </span>
 
-                                        @elseif ($riwayat['predikat'] === 'Perlu Pembinaan')
+                                        @elseif (in_array($riwayat['predikat'], ['Perlu Pembinaan', 'Perlu pendampingan intensif'], true))
 
                                             <span class="inline-flex rounded-full bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-700">
-                                                Perlu Pembinaan
+                                                {{ $riwayat['predikat'] }}
                                             </span>
 
                                         @else
 
                                             <span class="text-xs text-slate-400">
-                                                -
+                                                {{ $riwayat['predikat'] ?: '-' }}
                                             </span>
 
                                         @endif

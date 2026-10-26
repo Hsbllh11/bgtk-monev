@@ -558,55 +558,33 @@
         $isBK = $submission->jabatan_responden === 'BK';
         $allowedLevels = $isBK ? [1, 2, 3, 4] : [3, 4];
 
+        // ---------------------------------------------------------
+        // (a) Jawaban + perhitungan skor baru
+        // ---------------------------------------------------------
         $answers = $submission->answers
             ->filter(fn($a) => $a->question)
-            ->filter(fn($a) => in_array(
-                (int) $a->question->level,
-                $allowedLevels,
-                true
-            ))
-            ->sortBy(fn($a) => [
-                (int) $a->question->level,
-                $a->question->urutan ?? $a->question->nomor,
-            ])
+            ->filter(fn($a) => in_array((int) $a->question->level, $allowedLevels, true))
+            ->sortBy(fn($a) => [(int) $a->question->level, $a->question->urutan ?? $a->question->nomor])
             ->values();
 
-        $answersByLevel = $answers
-            ->groupBy(fn($a) => (int) $a->question->level)
-            ->sortKeys();
+        $answersByLevel = $answers->groupBy(fn($a) => (int) $a->question->level)->sortKeys();
 
         $jumlahSoal = $answers->count();
-
-        $jumlahYa = $answers
-            ->filter(fn($a) => (bool) $a->jawaban)
-            ->count();
-
-        $jumlahTidak = max($jumlahSoal - $jumlahYa, 0);
-
-        $skorPersen = $jumlahSoal > 0
-            ? ($jumlahYa / $jumlahSoal) * 100
-            : 0;
-
-        $kategori = $skorPersen >= 50
-            ? 'Baik / Kategori Tinggi'
-            : 'Kurang / Kategori Rendah';
+        $totalSkor = (int) $answers->sum('skor');
+        $skorMaks = $jumlahSoal * 4;
+        $skorPersen = $skorMaks > 0 ? round(($totalSkor / $skorMaks) * 100, 2) : 0;
+        $kategori = \App\Support\BkSkor::kategori($skorPersen);
 
         $levelStats = [];
-
         foreach ($allowedLevels as $lv) {
-            $items = $answers->filter(
-                fn($a) => (int) $a->question->level === $lv
-            );
-
-            $total = $items->count();
-            $yes = $items->filter(fn($a) => (bool) $a->jawaban)->count();
+            $items = $answers->filter(fn($a) => (int) $a->question->level === $lv);
+            $max = $items->count() * 4;
+            $skor = (int) $items->sum('skor');
 
             $levelStats[$lv] = [
-                'total' => $total,
-                'yes' => $yes,
-                'pct' => $total > 0
-                    ? round(($yes / $total) * 100, 2)
-                    : 0,
+                'skor' => $skor,
+                'max' => $max,
+                'pct' => $max > 0 ? round(($skor / $max) * 100, 2) : 0,
             ];
         }
     @endphp
@@ -757,7 +735,7 @@
         </section>
 
 
-        {{-- RINGKASAN NILAI --}}
+        {{-- RINGKASAN NILAI (b) --}}
 
         <section class="section">
 
@@ -770,7 +748,7 @@
                 <div class="summary-card">
                     <div class="summary-label">Total Skor</div>
                     <div class="summary-value">
-                        {{ $jumlahYa }} / {{ $jumlahSoal }}
+                        {{ $totalSkor }} / {{ $skorMaks }}
                     </div>
                 </div>
 
@@ -790,24 +768,22 @@
 
             </div>
 
+            {{-- (c) Tabel rekap level --}}
             <table class="recap-table">
                 <thead>
                     <tr>
-                        <th style="width: 34%; text-align: left;">Level</th>
-                        <th>Ya</th>
-                        <th>Tidak</th>
-                        <th>Total</th>
+                        <th style="width: 40%; text-align: left;">Level</th>
+                        <th>Skor</th>
+                        <th>Skor Maks.</th>
                         <th>Persentase</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($levelStats as $lv => $st)
-                        @php $levelName = $levelNames[$lv]; @endphp
                         <tr>
-                            <td class="left">Level {{ $lv }} - {{ $levelName }}</td>
-                            <td>{{ $st['yes'] }}</td>
-                            <td>{{ $st['total'] - $st['yes'] }}</td>
-                            <td>{{ $st['total'] }}</td>
+                            <td class="left">Level {{ $lv }} - {{ $levelNames[$lv] }}</td>
+                            <td>{{ $st['skor'] }}</td>
+                            <td>{{ $st['max'] }}</td>
                             <td>{{ number_format($st['pct'], 2, ',', '.') }}%</td>
                         </tr>
                     @endforeach
@@ -817,7 +793,7 @@
         </section>
 
 
-        {{-- INDIKATOR --}}
+        {{-- INDIKATOR (d) --}}
 
         <section class="section">
 
@@ -849,7 +825,7 @@
                             <tr>
                                 <th class="number">No.</th>
                                 <th class="question">Pernyataan / Indikator</th>
-                                <th class="score">Jawaban</th>
+                                <th class="score">Skor</th>
                             </tr>
                         </thead>
 
@@ -876,8 +852,8 @@
 
                                     <td class="question">{{ $question->pernyataan }}</td>
 
-                                    <td class="score {{ $answer->jawaban ? 'answer-yes' : 'answer-no' }}">
-                                        {{ $answer->jawaban ? 'Ya' : 'Tidak' }}
+                                    <td class="score">
+                                        {{ $answer->skor ?? ($answer->jawaban ? 'Ya' : 'Tidak') }}
                                     </td>
                                 </tr>
                             @endforeach

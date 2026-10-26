@@ -5,9 +5,7 @@
 <div class="mx-auto max-w-7xl space-y-6">
 
     {{-- =========================================================
-
          HEADER
-
     ========================================================== --}}
 
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -43,11 +41,9 @@
         </div>
 
            <a href="{{ route('instrumen.index') }}"
-
                 class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
 
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-
                     stroke="currentColor" stroke-width="2">
 
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -61,9 +57,7 @@
     </div>
 
     {{-- =========================================================
-
          PETUNJUK + PROGRESS (satu kartu)
-
     ========================================================== --}}
 
     <style>
@@ -83,7 +77,6 @@
     </style>
 
     <div class="instr-card overflow-hidden rounded-2xl bg-white shadow-sm"
-
         style="border: 1px solid #e2e8f0; border-left: 4px solid #2563eb;">
 
         {{-- ===================== KIRI: PETUNJUK ===================== --}}
@@ -95,11 +88,9 @@
                 <div style="display: flex; align-items: center; justify-content: center; flex: 0 0 44px; width: 44px; height: 44px; border-radius: 12px; background: #eff6ff; color: #2563eb;">
 
                     <svg xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px;" fill="none"
-
                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 
                         <path stroke-linecap="round" stroke-linejoin="round"
-
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
 
                     </svg>
@@ -129,11 +120,9 @@
                 <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #1d4ed8;">
 
                     <svg xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;" fill="none"
-
                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 
                         <path stroke-linecap="round" stroke-linejoin="round"
-
                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 
                     </svg>
@@ -156,11 +145,7 @@
 
                         Bacalah setiap pernyataan pada Bagian A dengan cermat,
 
-                        kemudian pilih jawaban
-
-                        <strong>Ya</strong> atau
-
-                        <strong>Tidak</strong>.
+                        kemudian pilih skor <strong>1, 2, 3, atau 4</strong> sesuai tingkat ketercapaian kondisi riil di lapangan.
 
                     </li>
 
@@ -193,7 +178,6 @@
             <div style="margin-top: 8px; height: 8px; overflow: hidden; border-radius: 9999px; background: #e2e8f0;">
 
                 <div id="progressBar"
-
                     style="width: 0%; height: 100%; border-radius: 9999px; background: #2563eb; transition: width 0.3s;"></div>
 
             </div>
@@ -227,9 +211,7 @@
     </div>
 
     {{-- =========================================================
-
          ERROR VALIDATION
-
     ========================================================== --}}
 
     @if ($errors->any())
@@ -261,29 +243,20 @@
     @endif
 
     {{-- =========================================================
-
          FORM
-
     ========================================================== --}}
 
     <form
-
         id="bkForm"
-
         action="{{ route('bk.store') }}"
-
         method="POST"
-
         class="space-y-6"
-
     >
 
         @csrf
 
         {{-- =====================================================
-
              1. IDENTITAS PETUGAS MONEV
-
         ====================================================== --}}
 
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -319,11 +292,8 @@
                 <div>
 
                     <label
-
                         for="nama_petugas_monev"
-
                         class="mb-2 block text-sm font-semibold text-slate-700"
-
                     >
 
                         Nama Petugas Monev
@@ -333,21 +303,13 @@
                     </label>
 
                     <input
-
                         type="text"
-
                         id="nama_petugas_monev"
-
                         name="nama_petugas_monev"
-
                         value="{{ old('nama_petugas_monev') }}"
-
                         required
-
                         placeholder= "Masukkan nama petugas"
-
                         class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-
                     >
 
                 </div>
@@ -357,11 +319,8 @@
                 <div>
 
                     <label
-
                         for="instansi_petugas"
-
                         class="mb-2 block text-sm font-semibold text-slate-700"
-
                     >
 
                         Instansi
@@ -369,19 +328,12 @@
                     </label>
 
                     <input
-
                         type="text"
-
                         id="instansi_petugas"
-
                         name="instansi_petugas"
-
                         value="{{ old('instansi_petugas') }}"
-
                         placeholder="Masukkan instansi"
-
                         class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-
                     >
 
                 </div>
@@ -391,11 +343,8 @@
                 <div>
 
                     <label
-
                         for="lokasi_monev"
-
                         class="mb-2 block text-sm font-semibold text-slate-700"
-
                     >
 
                         Lokasi Monev
@@ -403,19 +352,12 @@
                     </label>
 
                     <input
-
                         type="text"
-
                         id="lokasi_monev"
-
                         name="lokasi_monev"
-
                         value="{{ old('lokasi_monev') }}"
-
                         placeholder="Masukkan lokasi Monev"
-
                         class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-
                     >
 
                 </div>
@@ -425,11 +367,8 @@
                 <div>
 
                     <label
-
                         for="tanggal_pelaksanaan"
-
                         class="mb-2 block text-sm font-semibold text-slate-700"
-
                     >
 
                         Tanggal Pelaksanaan
@@ -437,17 +376,11 @@
                     </label>
 
                     <input
-
                         type="date"
-
                         id="tanggal_pelaksanaan"
-
                         name="tanggal_pelaksanaan"
-
                         value="{{ old('tanggal_pelaksanaan') }}"
-
                         class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-
                     >
 
                 </div>
@@ -511,299 +444,17 @@
         </section>
 
         {{-- =====================================================
-
-     3. BAGIAN A
-
-====================================================== --}}
-
-<section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-    {{-- =====================================================
-
-         TABEL PERTANYAAN
-
-    ====================================================== --}}
-
-    <div class="overflow-x-auto">
-
-        <table class="w-full min-w-[850px] border-collapse">
-
-            {{-- LEBAR KOLOM --}}
-
-            <colgroup>
-
-                <col style="width: 80px;">
-
-                <col>
-
-                <col style="width: 110px;">
-
-                <col style="width: 110px;">
-
-            </colgroup>
-
-            {{-- =================================================
-
-                 ISI
-
-            ================================================== --}}
-
-            <tbody>
-
-                @php
-
-                    $currentLevel = null;
-
-                    $currentBagian = null;
-
-                @endphp
-
-                @forelse ($questions as $question)
-
-                    {{-- =========================================
-
-                         HEADER LEVEL
-
-                    ========================================== --}}
-
-                    @if ($currentLevel !== $question->level)
-
-                        @php
-
-                            $currentLevel = $question->level;
-
-                            $currentBagian = null;
-
-                        @endphp
-
-                        <tr class="level-header" data-level="{{ $question->level }}">
-
-                            <td
-
-                                colspan="4"
-
-                                class="border-b border-slate-200 bg-blue-50 px-6 py-5"
-
-                            >
-
-                                <div class="text-base font-bold text-slate-800">
-
-                                    Level {{ $question->level }}
-
-                                    — {{ $question->level_nama }}
-
-                                </div>
-
-                                <div class="mt-1 text-sm text-slate-500">
-
-                                    Pilih satu jawaban untuk setiap indikator.
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-                    @endif
-
-                    {{-- =========================================
-
-                         HEADER BAGIAN
-
-                    ========================================== --}}
-
-                    @if ($currentBagian !== $question->bagian)
-
-                        @php
-
-                            $currentBagian = $question->bagian;
-
-                        @endphp
-
-                        <tr class="bagian-header" data-level="{{ $question->level }}">
-
-                            <td
-
-                                colspan="4"
-
-                                class="border-b border-slate-200  px-6 py-3"
-
-                            >
-
-                                <div class="text-sm font-bold text-slate-800">
-
-                                    {{ $question->bagian }}
-
-                                    @if ($question->judul_bagian)
-
-                                        — {{ $question->judul_bagian }}
-
-                                    @endif
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-                    @endif
-
-                    {{-- =========================================
-
-                         PERTANYAAN
-
-                    ========================================== --}}
-
-                    <tr
-
-                        class="question-item transition hover:bg-slate-50"
-
-                        data-question-id="{{ $question->id }}"
-
-                        data-level="{{ $question->level }}"
-
-                    >
-
-                        {{-- NO --}}
-
-                        <td class="border-b border-slate-100 px-5 py-5 align-middle">
-
-                            <span class="text-sm font-semibold text-slate-600">
-
-                                {{ $question->nomor }}
-
-                            </span>
-
-                        </td>
-
-                        {{-- PERNYATAAN --}}
-
-                        <td class="border-b border-l border-slate-100 px-5 py-5 align-middle">
-
-                            <p class="text-sm leading-6 text-slate-700">
-
-                                {{ $question->pernyataan }}
-
-                            </p>
-
-                        </td>
-
-                        {{-- YA --}}
-
-                        <td class="border-b border-l border-slate-100 px-5 py-5 text-center align-middle">
-
-                            <label
-
-                                class="inline-flex cursor-pointer items-center justify-center"
-
-                                title="Ya"
-
-                            >
-
-                                <input
-
-                                    type="radio"
-
-                                    name="jawaban[{{ $question->id }}]"
-
-                                    value="1"
-
-                                    class="h-5 w-5 cursor-pointer accent-emerald-600"
-
-                                    {{ old("jawaban.{$question->id}") === '1' ? 'checked' : '' }}
-
-                                >
-
-                            </label>
-
-                        </td>
-
-                        {{-- TIDAK --}}
-
-                        <td class="border-b border-l border-slate-100 px-5 py-5 text-center align-middle">
-
-                            <label
-
-                                class="inline-flex cursor-pointer items-center justify-center"
-
-                                title="Tidak"
-
-                            >
-
-                                <input
-
-                                    type="radio"
-
-                                    name="jawaban[{{ $question->id }}]"
-
-                                    value="0"
-
-                                    class="h-5 w-5 cursor-pointer accent-red-600"
-
-                                    {{ old("jawaban.{$question->id}") === '0' ? 'checked' : '' }}
-
-                                >
-
-                            </label>
-
-                        </td>
-
-                    </tr>
-
-                @empty
-
-                    {{-- =========================================
-
-                         DATA KOSONG
-
-                    ========================================== --}}
-
-                    <tr>
-
-                        <td
-
-                            colspan="4"
-
-                            class="px-6 py-12 text-center"
-
-                        >
-
-                            <div class="text-lg font-bold text-slate-700">
-
-                                Data instrumen belum tersedia
-
-                            </div>
-
-                            <p class="mt-2 text-sm text-slate-500">
-
-                                Pastikan BKQuestionSeeder sudah dijalankan.
-
-                            </p>
-
-                        </td>
-
-                    </tr>
-
-                @endforelse
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-</section>
+             3. BAGIAN A — TABEL PERTANYAAN (dipindah ke partial)
+        ====================================================== --}}
+        @include('bk.partials.tabel-pertanyaan', ['answers' => collect()])
 
         {{-- =====================================================
-
              TOMBOL
-
         ====================================================== --}}
 
          <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
 
                 <button id="submitButton" type="submit"
-
                     class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
 
                     Simpan Pengisian
@@ -817,9 +468,7 @@
 </div>
 
 {{-- =========================================================
-
      JAVASCRIPT
-
 ========================================================== --}}
 
 <script>
@@ -886,45 +535,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateProgress() {
         let answered = 0;
-        let yes = 0;
-        let no = 0;
+        let totalSkor = 0;
 
         const visibleQuestions = questions.filter(function (question) {
             return !question.hidden;
         });
 
         visibleQuestions.forEach(function (question) {
-            const checked = question.querySelector(
-                'input[type="radio"]:checked'
-            );
+            const checked = question.querySelector('input[type="radio"]:checked');
 
             if (checked) {
                 answered++;
-
-                if (checked.value === '1') {
-                    yes++;
-                } else {
-                    no++;
-                }
+                totalSkor += Number(checked.value);
             }
         });
 
         const total = visibleQuestions.length;
-        const percentage = total > 0
-            ? Math.round((answered / total) * 100)
-            : 0;
+        const percentage = total > 0 ? Math.round((answered / total) * 100) : 0;
 
         answeredCount.textContent = answered;
 
-        // Perbarui jumlah butir pada tampilan progres yang sudah ada.
         const totalLabel = answeredCount.parentElement;
         if (totalLabel) {
-            const textNodes = Array.from(totalLabel.childNodes);
-            textNodes.forEach(function (node) {
-                if (
-                    node.nodeType === Node.TEXT_NODE &&
-                    node.textContent.includes('/ ')
-                ) {
+            Array.from(totalLabel.childNodes).forEach(function (node) {
+                if (node.nodeType === Node.TEXT_NODE && node.textContent.includes('/ ')) {
                     node.textContent = ' / ' + total + ' butir';
                 }
             });
@@ -934,7 +568,7 @@ document.addEventListener('DOMContentLoaded', function () {
         progressPercent.textContent = percentage + '%';
 
         jawabanSummary.textContent = answered > 0
-            ? yes + ' Ya · ' + no + ' Tidak'
+            ? totalSkor + ' / ' + (total * 4) + ' poin'
             : 'Belum ada jawaban';
     }
 

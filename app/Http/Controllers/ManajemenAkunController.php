@@ -209,4 +209,30 @@ class ManajemenAkunController extends Controller
             ->route('manajemen-akun.index')
             ->with('success', "Akun berhasil {$status}.");
     }
+
+    /**
+     * Menghapus akun secara permanen.
+     */
+    public function hapus(User $manajemen_akun)
+    {
+        abort_unless(
+            $manajemen_akun->role === 'petugas_monev',
+            404
+        );
+
+        // Cegah admin menghapus akunnya sendiri.
+        if ($manajemen_akun->id === auth()->id()) {
+            return redirect()
+                ->route('manajemen-akun.index')
+                ->with('error', 'Anda tidak dapat menghapus akun yang sedang digunakan.');
+        }
+
+        $nama = $manajemen_akun->name;
+
+        $manajemen_akun->delete();
+
+        return redirect()
+            ->route('manajemen-akun.index')
+            ->with('success', "Akun {$nama} berhasil dihapus permanen.");
+    }
 }

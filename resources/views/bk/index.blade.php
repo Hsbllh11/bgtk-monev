@@ -187,11 +187,7 @@
                         </th>
 
                         <th class="border-b border-slate-200 px-5 py-4 text-center">
-                            Ya
-                        </th>
-
-                        <th class="border-b border-slate-200 px-5 py-4 text-center">
-                            Tidak
+                            Skor
                         </th>
 
                         <th class="border-b border-slate-200 px-5 py-4 text-center">
@@ -271,23 +267,12 @@
                             </td>
 
 
-                            {{-- YA --}}
+                            {{-- SKOR --}}
                             <td class="border-b border-slate-100 px-5 py-4 text-center">
-
-                                <span class="font-semibold text-emerald-600">
-                                    {{ $submission->jumlah_ya }}
+                                <span class="font-semibold text-slate-700">
+                                    {{ $submission->total_skor ?? $submission->jumlah_ya }}
+                                    <span class="text-xs font-normal text-slate-400">/ {{ $submission->skor_maksimal ?? $submission->jumlah_soal }}</span>
                                 </span>
-
-                            </td>
-
-
-                            {{-- TIDAK --}}
-                            <td class="border-b border-slate-100 px-5 py-4 text-center">
-
-                                <span class="font-semibold text-red-500">
-                                    {{ $submission->jumlah_tidak }}
-                                </span>
-
                             </td>
 
 
@@ -308,21 +293,9 @@
 
                             {{-- KATEGORI --}}
                             <td class="border-b border-slate-100 px-5 py-4 text-center">
-
-                                @if ($submission->kategori === 'Baik / Kategori Tinggi')
-
-                                    <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-                                        Baik / Tinggi
-                                    </span>
-
-                                @else
-
-                                    <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
-                                        Kurang / Rendah
-                                    </span>
-
-                                @endif
-
+                                <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {{ \App\Support\BkSkor::kelas($submission->kategori) }}">
+                                    {{ $submission->kategori ?: '-' }}
+                                </span>
                             </td>
 
 
@@ -345,7 +318,7 @@
                         <tr>
 
                             <td
-                                colspan="9"
+                                colspan="8"
                                 class="px-6 py-14 text-center"
                             >
 

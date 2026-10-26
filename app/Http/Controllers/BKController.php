@@ -138,9 +138,10 @@ class BKController extends Controller
                 'array',
                 'min:1',
             ],
+            // (5a) Skala baru 1-4 — menggantikan Ya/Tidak (0/1)
             'jawaban.*' => [
                 'required',
-                Rule::in(['0', '1', 0, 1]),
+                Rule::in(['1', '2', '3', '4', 1, 2, 3, 4]),
             ],
             'essay' => [
                 'nullable',
@@ -159,40 +160,38 @@ class BKController extends Controller
 
     /**
      * Menghitung skor dari pertanyaan yang berlaku saja.
+     * (5b) Skala 1–4 dengan total_skor / skor_maksimal.
      */
     private function calculateScore($questions, array $answers): array
     {
         $jumlahSoal = $questions->count();
-        $jumlahYa = 0;
+        $totalSkor = 0;
 
         foreach ($questions as $question) {
-            if ((string) $answers[$question->id] === '1') {
-                $jumlahYa++;
-            }
+            $totalSkor += (int) $answers[$question->id];
         }
 
-        $jumlahTidak = $jumlahSoal - $jumlahYa;
+        $skorMaksimal = $jumlahSoal * 4;
 
-        $skorPersentase = $jumlahSoal > 0
-            ? round(($jumlahYa / $jumlahSoal) * 100, 2)
+        $persen = $skorMaksimal > 0
+            ? round(($totalSkor / $skorMaksimal) * 100, 2)
             : 0;
-
-        $kategori = $skorPersentase >= 50
-            ? 'Baik / Kategori Tinggi'
-            : 'Kurang / Kategori Rendah';
 
         return [
             'jumlah_soal' => $jumlahSoal,
-            'jumlah_ya' => $jumlahYa,
-            'jumlah_tidak' => $jumlahTidak,
-            'skor_persentase' => $skorPersentase,
-            'kategori' => $kategori,
+            'total_skor' => $totalSkor,
+            'skor_maksimal' => $skorMaksimal,
+            'skor_persentase' => $persen,
+            'kategori' => \App\Support\BkSkor::kategori($persen),
+            'jumlah_ya' => 0,      // membersihkan sisa data lama saat diedit
+            'jumlah_tidak' => 0,
             'status' => 'Selesai',
         ];
     }
 
     /**
      * Simpan jawaban indikator yang berlaku.
+     * (5c) Menyimpan skor 1–4 dan mengosongkan jawaban boolean lama.
      */
     private function saveAnswers(
         BKSubmission $submission,
@@ -204,8 +203,8 @@ class BKController extends Controller
 
         foreach ($questions as $question) {
             $data = [
-                'jawaban' =>
-                    (string) $answers[$question->id] === '1',
+                'skor' => (int) $answers[$question->id],
+                'jawaban' => null,
             ];
 
             if ($update) {
@@ -264,8 +263,6 @@ class BKController extends Controller
 
     /**
      * Form pengisian BK.
-     * Semua pertanyaan dikirim ke view agar pilihan jabatan
-     * dapat mengatur visibilitas level melalui JavaScript.
      */
     public function create()
     {
@@ -279,7 +276,6 @@ class BKController extends Controller
     /**
      * Simpan pengisian baru.
      */
-
     public function store(Request $request)
     {
         $validated = $request->validate($this->validationRules());
@@ -293,7 +289,6 @@ class BKController extends Controller
         $allowedIds = $questions->pluck('id')
             ->map(fn($id) => (string) $id)
             ->all();
-
 
         foreach (array_keys($answers) as $id) {
             if (!in_array((string) $id, $allowedIds, true)) {
@@ -374,7 +369,6 @@ class BKController extends Controller
             'essayAnswers',
         ]);
 
-        // Tampilkan hanya level yang berlaku untuk jabatan tersimpan.
         $questions = $this->getQuestionsForJabatan(
             $submission->jabatan_responden
         );

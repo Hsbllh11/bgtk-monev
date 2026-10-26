@@ -9,9 +9,7 @@
     <div class="mx-auto max-w-7xl space-y-6">
 
         {{-- =========================================================
-
         HEADER
-
         ========================================================== --}}
 
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -63,9 +61,7 @@
         </div>
 
         {{-- =========================================================
-
         PETUNJUK + PROGRESS (satu kartu)
-
         ========================================================== --}}
 
         <style>
@@ -168,11 +164,7 @@
 
                             Bacalah setiap pernyataan pada Bagian A dengan cermat,
 
-                            kemudian pilih jawaban
-
-                            <strong>Ya</strong> atau
-
-                            <strong>Tidak</strong>.
+                            kemudian pilih skor <strong>1, 2, 3, atau 4</strong> sesuai tingkat ketercapaian kondisi riil di lapangan.
 
                         </li>
 
@@ -240,9 +232,7 @@
         </div>
 
         {{-- =========================================================
-
         ERROR VALIDATION
-
         ========================================================== --}}
 
         @if ($errors->any())
@@ -274,9 +264,7 @@
         @endif
 
         {{-- =========================================================
-
         FORM
-
         ========================================================== --}}
 
         <form id="bkEditForm" action="{{ route('bk.update', $submission) }}" method="POST" class="space-y-6">
@@ -285,9 +273,7 @@
             @method('PUT')
 
             {{-- =====================================================
-
             1. IDENTITAS PETUGAS MONEV
-
             ====================================================== --}}
 
             <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -472,244 +458,12 @@
             </section>
 
             {{-- =====================================================
-
-            3. BAGIAN A
-
+            3. BAGIAN A — TABEL PERTANYAAN (dipindah ke partial)
             ====================================================== --}}
-
-            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                {{-- =====================================================
-
-                TABEL PERTANYAAN
-
-                ====================================================== --}}
-
-                <div class="overflow-x-auto">
-
-                    <table class="w-full min-w-[850px] border-collapse">
-
-                        {{-- LEBAR KOLOM --}}
-
-                        <colgroup>
-
-                            <col style="width: 80px;">
-
-                            <col>
-
-                            <col style="width: 110px;">
-
-                            <col style="width: 110px;">
-
-                        </colgroup>
-
-                        {{-- =================================================
-
-                        ISI
-
-                        ================================================== --}}
-
-                        <tbody>
-
-                            @php
-
-                                $currentLevel = null;
-
-                                $currentBagian = null;
-
-                            @endphp
-
-                            @forelse ($questions as $question)
-
-                                @php
-                                    $existingAnswer = $answers->get($question->id);
-                                    $currentAnswer = old(
-                                        "jawaban.{$question->id}",
-                                        $existingAnswer
-                                        ? ($existingAnswer->jawaban ? '1' : '0')
-                                        : null
-                                    );
-                                @endphp
-
-                                {{-- =========================================
-
-                                HEADER LEVEL
-
-                                ========================================== --}}
-
-                                @if ($currentLevel !== $question->level)
-
-                                    @php
-
-                                        $currentLevel = $question->level;
-
-                                        $currentBagian = null;
-
-                                    @endphp
-
-                                    <tr class="level-header" data-level="{{ $question->level }}">
-
-                                        <td colspan="4" class="border-b border-slate-200 bg-blue-50 px-6 py-5">
-
-                                            <div class="text-base font-bold text-slate-800">
-
-                                                Level {{ $question->level }}
-
-                                                — {{ $question->level_nama }}
-
-                                            </div>
-
-                                            <div class="mt-1 text-sm text-slate-500">
-
-                                                Pilih satu jawaban untuk setiap indikator.
-
-                                            </div>
-
-                                        </td>
-
-                                    </tr>
-
-                                @endif
-
-                                {{-- =========================================
-
-                                HEADER BAGIAN
-
-                                ========================================== --}}
-
-                                @if ($currentBagian !== $question->bagian)
-
-                                    @php
-
-                                        $currentBagian = $question->bagian;
-
-                                    @endphp
-
-                                    <tr class="bagian-header" data-level="{{ $question->level }}">
-
-                                        <td colspan="4" class="border-b border-slate-200  px-6 py-3">
-
-                                            <div class="text-sm font-bold text-slate-800">
-
-                                                {{ $question->bagian }}
-
-                                                @if ($question->judul_bagian)
-
-                                                    — {{ $question->judul_bagian }}
-
-                                                @endif
-
-                                            </div>
-
-                                        </td>
-
-                                    </tr>
-
-                                @endif
-
-                                {{-- =========================================
-
-                                PERTANYAAN
-
-                                ========================================== --}}
-
-                                <tr class="question-item transition hover:bg-slate-50" data-question-id="{{ $question->id }}"
-                                    data-level="{{ $question->level }}">
-
-                                    {{-- NO --}}
-
-                                    <td class="border-b border-slate-100 px-5 py-5 align-middle">
-
-                                        <span class="text-sm font-semibold text-slate-600">
-
-                                            {{ $question->nomor }}
-
-                                        </span>
-
-                                    </td>
-
-                                    {{-- PERNYATAAN --}}
-
-                                    <td class="border-b border-l border-slate-100 px-5 py-5 align-middle">
-
-                                        <p class="text-sm leading-6 text-slate-700">
-
-                                            {{ $question->pernyataan }}
-
-                                        </p>
-
-                                    </td>
-
-                                    {{-- YA --}}
-
-                                    <td class="border-b border-l border-slate-100 px-5 py-5 text-center align-middle">
-
-                                        <label class="inline-flex cursor-pointer items-center justify-center" title="Ya">
-
-                                            <input type="radio" name="jawaban[{{ $question->id }}]" value="1"
-                                                class="h-5 w-5 cursor-pointer accent-emerald-600" {{ (string) $currentAnswer === '1' ? 'checked' : '' }}>
-
-                                        </label>
-
-                                    </td>
-
-                                    {{-- TIDAK --}}
-
-                                    <td class="border-b border-l border-slate-100 px-5 py-5 text-center align-middle">
-
-                                        <label class="inline-flex cursor-pointer items-center justify-center" title="Tidak">
-
-                                            <input type="radio" name="jawaban[{{ $question->id }}]" value="0"
-                                                class="h-5 w-5 cursor-pointer accent-red-600" {{ (string) $currentAnswer === '0' ? 'checked' : '' }}>
-
-                                        </label>
-
-                                    </td>
-
-                                </tr>
-
-                            @empty
-
-                                {{-- =========================================
-
-                                DATA KOSONG
-
-                                ========================================== --}}
-
-                                <tr>
-
-                                    <td colspan="4" class="px-6 py-12 text-center">
-
-                                        <div class="text-lg font-bold text-slate-700">
-
-                                            Data instrumen belum tersedia
-
-                                        </div>
-
-                                        <p class="mt-2 text-sm text-slate-500">
-
-                                            Pertanyaan BK belum tersedia.
-
-                                        </p>
-
-                                    </td>
-
-                                </tr>
-
-                            @endforelse
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </section>
+            @include('bk.partials.tabel-pertanyaan', ['answers' => $answers])
 
             {{-- =====================================================
-
             PERTANYAAN URAIAN
-
             ====================================================== --}}
 
             @if ($essayAnswers->count() > 0)
@@ -755,9 +509,7 @@
             @endif
 
             {{-- =====================================================
-
             TOMBOL
-
             ====================================================== --}}
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -776,9 +528,7 @@
     </div>
 
     {{-- =========================================================
-
     JAVASCRIPT
-
     ========================================================== --}}
 
     <script>
@@ -845,45 +595,30 @@
 
             function updateProgress() {
                 let answered = 0;
-                let yes = 0;
-                let no = 0;
+                let totalSkor = 0;
 
                 const visibleQuestions = questions.filter(function (question) {
                     return !question.hidden;
                 });
 
                 visibleQuestions.forEach(function (question) {
-                    const checked = question.querySelector(
-                        'input[type="radio"]:checked'
-                    );
+                    const checked = question.querySelector('input[type="radio"]:checked');
 
                     if (checked) {
                         answered++;
-
-                        if (checked.value === '1') {
-                            yes++;
-                        } else {
-                            no++;
-                        }
+                        totalSkor += Number(checked.value);
                     }
                 });
 
                 const total = visibleQuestions.length;
-                const percentage = total > 0
-                    ? Math.round((answered / total) * 100)
-                    : 0;
+                const percentage = total > 0 ? Math.round((answered / total) * 100) : 0;
 
                 answeredCount.textContent = answered;
 
-                // Perbarui jumlah butir pada tampilan progres yang sudah ada.
                 const totalLabel = answeredCount.parentElement;
                 if (totalLabel) {
-                    const textNodes = Array.from(totalLabel.childNodes);
-                    textNodes.forEach(function (node) {
-                        if (
-                            node.nodeType === Node.TEXT_NODE &&
-                            node.textContent.includes('/ ')
-                        ) {
+                    Array.from(totalLabel.childNodes).forEach(function (node) {
+                        if (node.nodeType === Node.TEXT_NODE && node.textContent.includes('/ ')) {
                             node.textContent = ' / ' + total + ' butir';
                         }
                     });
@@ -893,7 +628,7 @@
                 progressPercent.textContent = percentage + '%';
 
                 jawabanSummary.textContent = answered > 0
-                    ? yes + ' Ya · ' + no + ' Tidak'
+                    ? totalSkor + ' / ' + (total * 4) + ' poin'
                     : 'Belum ada jawaban';
             }
 

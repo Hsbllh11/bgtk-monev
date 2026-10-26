@@ -15,10 +15,12 @@ class BKAnswer extends Model
         'bk_submission_id',
         'bk_question_id',
         'jawaban',
+        'skor',
     ];
 
     protected $casts = [
         'jawaban' => 'boolean',
+        'skor' => 'integer',
     ];
 
     /**

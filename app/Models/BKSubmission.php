@@ -35,6 +35,8 @@ class BKSubmission extends Model
         'jumlah_soal',
         'jumlah_ya',
         'jumlah_tidak',
+        'total_skor',
+        'skor_maksimal',
         'skor_persentase',
         'kategori',
         'status',
