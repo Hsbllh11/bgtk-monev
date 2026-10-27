@@ -4,8 +4,7 @@
 <div class="space-y-6">
     <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-            <p class="text-sm font-medium text-blue-600">Administrasi Sistem</p>
-            <h1 class="mt-1 text-2xl font-bold text-slate-800">Manajemen Akun</h1>
+            <h1 class="text-2xl font-bold text-slate-800">Manajemen Akun</h1>
             <p class="mt-1 text-sm text-slate-500">
                 Kelola akun Petugas Monitoring dan Evaluasi.
             </p>

@@ -15,16 +15,16 @@
 <div class="space-y-6">
 
     {{-- ================= HERO ================= --}}
-    <section class="relative overflow-hidden rounded-3xl p-8 text-white shadow-lg" 
+    <section class="relative overflow-hidden rounded-3xl p-5 text-white shadow-lg sm:p-8"
              style="background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #4f46e5 100%);">
-        
+
         <div class="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/10"></div>
         <div class="pointer-events-none absolute -bottom-24 right-40 h-56 w-56 rounded-full bg-white/5"></div>
 
         <div class="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
                 <p class="text-sm font-medium text-blue-100">{{ $tanggalHariIni }}</p>
-                <h1 class="mt-1 text-3xl font-bold tracking-tight text-white">
+                <h1 class="mt-1 text-2xl font-bold tracking-tight text-white sm:text-3xl">
                     {{ $salam }}, {{ \Illuminate\Support\Str::of(auth()->user()->name)->before(' ') }} 👋
                 </h1>
                 <p class="mt-2 max-w-xl text-sm leading-6 text-blue-100">

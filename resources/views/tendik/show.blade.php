@@ -825,11 +825,8 @@
 
 
                 aside,
-
                 nav,
-
                 header,
-
                 .no-print {
 
                     display: none !important;
@@ -855,7 +852,6 @@
 
 
                 section,
-
                 .rounded-2xl {
 
                     break-inside: avoid;
@@ -879,7 +875,6 @@
 
 
                 th,
-
                 td {
 
                     padding: 6px !important;

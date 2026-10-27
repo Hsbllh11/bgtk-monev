@@ -98,8 +98,9 @@ class PkgsdMbiController extends Controller
     {
         $pkgsdMbi->delete();
 
+        // PERBAIKAN: Ubah redirect ke 'instrumen.index' agar kembali ke daftar riwayat
         return redirect()
-            ->route('pkgsd-mbi.index')
+            ->route('instrumen.index')
             ->with('success', 'Pengisian PKGSD MBI berhasil dihapus.');
     }
 

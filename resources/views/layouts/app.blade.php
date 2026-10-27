@@ -56,21 +56,40 @@
         <div class="flex w-full" style="height: 100vh; height: 100dvh;">
 
             {{-- =========================================================
-            SIDEBAR (tetap)
+            BACKDROP (hanya mobile) — klik untuk menutup sidebar
             ========================================================== --}}
-            <aside class="flex w-64 flex-shrink-0 flex-col bg-slate-900 text-white">
+            <div id="sidebar-backdrop"
+                 class="fixed inset-0 z-30 hidden bg-slate-900/50 lg:hidden"></div>
+
+            {{-- =========================================================
+            SIDEBAR — off-canvas di mobile, tetap di desktop
+            ========================================================== --}}
+            <aside id="sidebar"
+                class="fixed inset-y-0 left-0 z-40 flex w-64 flex-shrink-0 -translate-x-full flex-col bg-slate-900 text-white transition-transform duration-200 ease-in-out lg:static lg:translate-x-0">
 
                 {{-- Brand --}}
-                <div class="flex h-20 flex-shrink-0 items-center border-b border-slate-800 px-6">
-                    {{-- LOGO DIGANTI DI SINI --}}
-                    <img src="{{ asset('images/Logotutwurihandayani.png') }}" 
-                         alt="Logo Tut Wuri Handayani" 
-                         class="h-12 w-auto object-contain">
-                    
-                    <div class="ml-3">
-                        <h1 class="text-lg font-bold leading-tight">MANDALIKA</h1>
-                        <p class="text-xs text-slate-400">Monitoring-Analisis-Evaluasi BGTK Akurat</p>
+                <div class="flex h-20 flex-shrink-0 items-center justify-between border-b border-slate-800 px-6">
+                    <div class="flex items-center">
+                        {{-- LOGO --}}
+                        <img src="{{ asset('images/Logotutwurihandayani.png') }}"
+                             alt="Logo Tut Wuri Handayani"
+                             class="h-12 w-auto object-contain">
+
+                        <div class="ml-3">
+                            <h1 class="text-lg font-bold leading-tight">MANDALIKA</h1>
+                            <p class="text-xs text-slate-400">Monitoring-Analisis-Evaluasi BGTK Akurat</p>
+                        </div>
                     </div>
+
+                    {{-- Tombol tutup (mobile) --}}
+                    <button type="button" id="sidebar-close"
+                            class="ml-2 rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden"
+                            aria-label="Tutup menu">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
 
                 {{-- Navigasi (scroll sendiri bila layar pendek) --}}
@@ -176,17 +195,29 @@
             ========================================================== --}}
             <div class="flex min-w-0 flex-1 flex-col">
 
-                {{-- HEADER (tetap) --}}
+                {{-- HEADER — padding responsif, ada hamburger di mobile --}}
                 <header
-                    class="relative z-10 flex h-20 flex-shrink-0 items-center justify-between border-b border-slate-200 bg-white px-8 shadow-sm">
+                    class="relative z-10 flex h-16 flex-shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 shadow-sm sm:px-6 lg:h-20 lg:px-8">
 
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-800">@yield('page-title', 'Dashboard')</h2>
-                        <p class="mt-0.5 text-sm text-slate-500">Sistem Monitoring dan Evaluasi BGTK Provinsi NTB</p>
+                    <div class="flex min-w-0 items-center gap-3">
+                        {{-- Hamburger (mobile) --}}
+                        <button type="button" id="sidebar-open"
+                                class="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
+                                aria-label="Buka menu">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+
+                        <div class="min-w-0">
+                            <h2 class="truncate text-lg font-bold text-slate-800 lg:text-xl">@yield('page-title', 'Dashboard')</h2>
+                            <p class="mt-0.5 hidden text-sm text-slate-500 sm:block">Sistem Monitoring dan Evaluasi BGTK Provinsi NTB</p>
+                        </div>
                     </div>
 
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
+                    <div class="flex flex-shrink-0 items-center gap-3">
+                        <div class="hidden text-right sm:block">
                             <p class="text-sm font-semibold text-slate-700">
                                 {{ auth()->user()->name }}
                             </p>
@@ -206,7 +237,7 @@
 
                 {{-- KONTEN (satu-satunya area yang scroll) --}}
                 <main class="flex-1 overflow-y-auto" style="min-height: 0;">
-                    <section class="mx-auto w-full max-w-7xl p-8">
+                    <section class="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-8">
                         @yield('content')
                     </section>
                 </main>
@@ -214,6 +245,36 @@
             </div>
 
         </div>
+
+        <script>
+            (function () {
+                const sidebar  = document.getElementById('sidebar');
+                const backdrop = document.getElementById('sidebar-backdrop');
+
+                function buka() {
+                    sidebar.classList.remove('-translate-x-full');
+                    backdrop.classList.remove('hidden');
+                }
+                function tutup() {
+                    sidebar.classList.add('-translate-x-full');
+                    backdrop.classList.add('hidden');
+                }
+
+                document.getElementById('sidebar-open').addEventListener('click', buka);
+                document.getElementById('sidebar-close').addEventListener('click', tutup);
+                backdrop.addEventListener('click', tutup);
+
+                // Tutup otomatis setelah menu diklik (mobile)
+                sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', tutup));
+
+                // Reset bila layar diperbesar ke desktop
+                window.addEventListener('resize', function () {
+                    if (window.innerWidth >= 1024) {
+                        backdrop.classList.add('hidden');
+                    }
+                });
+            })();
+        </script>
 
     </body>
 

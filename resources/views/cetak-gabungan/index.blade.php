@@ -100,12 +100,12 @@
     @endforeach
 
     {{-- Bar aksi --}}
-    <div class="sticky bottom-0 -mx-2 flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-lg">
+    <div class="sticky bottom-0 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-lg sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <p class="text-sm text-slate-600">
             <span id="jumlah" class="font-bold text-blue-600">0</span> dokumen dipilih
         </p>
         <button type="submit" id="btn-gabung"
-            class="inline-flex h-12 items-center justify-center rounded-xl bg-blue-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
+            class="inline-flex h-12 w-full items-center justify-center rounded-xl bg-blue-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto">
             Gabung &amp; Pratinjau
         </button>
     </div>

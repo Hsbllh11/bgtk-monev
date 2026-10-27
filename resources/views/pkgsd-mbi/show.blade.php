@@ -154,7 +154,7 @@
                 </p>
             </div>
 
-            {{-- TOMBOL AKSI (MENYESUAIKAN REFERENSI TENDIK) --}}
+            {{-- TOMBOL AKSI --}}
             <div class="no-print flex flex-wrap items-center gap-3">
                 {{-- Kembali (dengan ikon panah) --}}
                 <a href="{{ route('instrumen.index') }}"

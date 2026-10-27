@@ -24,7 +24,7 @@
                 </p>
             </div>
 
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
 
                 {{-- Kembali --}}
                 <a href="{{ route('instrumen.index') }}"
@@ -32,7 +32,6 @@
                     Kembali
                 </a>
 
-                {{-- Edit --}}
                 {{-- Edit --}}
                 <a href="{{ route('instrumen.edit', ['instrumen' => $instrumen->id]) }}"
                     class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
