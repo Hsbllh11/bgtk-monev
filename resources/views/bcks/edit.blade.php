@@ -1,18 +1,21 @@
 @extends('layouts.app')
 
-@section('title', 'Pengisian Instrumen BCKS')
-
-@section('page-title', 'Pengisian Instrumen BCKS')
+@section('title', 'Edit Pengisian BCKS')
+@section('page-title', 'Edit Pengisian BCKS')
 
 @section('content')
 
     @php
         $levels = config('bcks.instrumen.levels', []);
-        $pertanyaanTerbuka = config('bcks.instrumen.pertanyaan_terbuka', []);
+
+        // Memastikan status awal terpanggil dengan benar (mengutamakan old() jika ada error validasi)
+        $statusAwal = old('status_responden', $bcksPengisian->status_responden);
+
+        // Memetakan jawaban berdasarkan nomor indikator untuk mempermudah pemanggilan
+        $jawabanByNomor = $bcksPengisian->jawaban->keyBy('nomor_indikator');
 
         /*
-         * Rubrik penilaian per level (sumber: Instrumen Monev BCKS - Rev update).
-         * Kunci array = urutan level pada $levels (1 sampai 4).
+         * Rubrik penilaian per level.
          */
         $rubrik = [
             1 => [
@@ -66,18 +69,19 @@
                 <nav class="flex items-center gap-2 text-sm text-slate-500">
                     <a href="{{ route('instrumen.index') }}" class="transition hover:text-blue-600">Instrumen</a>
                     <span class="text-slate-300">/</span>
-                    <span class="font-medium text-slate-700">BCKS Instrumen</span>
+                    <span class="font-medium text-slate-700">Edit BCKS Instrumen</span>
                 </nav>
+
                 <h1 class="text-2xl font-bold text-slate-800">
-                    Instrumen Monev BCKS
+                    Edit Instrumen Monev BCKS
                 </h1>
 
                 <p class="mt-1 text-sm text-slate-500">
-                    Formulir Monitoring dan Evaluasi BCKS.
+                    Perbarui identitas responden dan jawaban instrumen sesuai status responden.
                 </p>
             </div>
 
-            <a href="{{ route('instrumen.index') }}"
+            <a href="{{ route('bcks.show', $bcksPengisian) }}"
                 class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor" stroke-width="2">
@@ -199,8 +203,9 @@
         @endif
 
         {{-- FORM UTAMA --}}
-        <form action="{{ route('bcks.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route('bcks.update', $bcksPengisian) }}" method="POST" class="space-y-6">
             @csrf
+            @method('PUT')
 
             {{-- A. IDENTITAS PESERTA BCKS --}}
             <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -216,7 +221,8 @@
                         <label for="nama_bcks" class="mb-2 block text-sm font-semibold text-slate-700">
                             Nama Peserta BCKS <span class="text-red-500">*</span>
                         </label>
-                        <input id="nama_bcks" name="nama_bcks" type="text" value="{{ old('nama_bcks') }}" required
+                        <input id="nama_bcks" name="nama_bcks" type="text"
+                            value="{{ old('nama_bcks', $bcksPengisian->nama_bcks) }}" required
                             placeholder="Masukkan nama peserta BCKS"
                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                         @error('nama_bcks')
@@ -228,7 +234,8 @@
                         <label for="unit_kerja" class="mb-2 block text-sm font-semibold text-slate-700">
                             Unit Kerja
                         </label>
-                        <input id="unit_kerja" name="unit_kerja" type="text" value="{{ old('unit_kerja') }}"
+                        <input id="unit_kerja" name="unit_kerja" type="text"
+                            value="{{ old('unit_kerja', $bcksPengisian->unit_kerja) }}"
                             placeholder="Masukkan unit kerja BCKS"
                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                         @error('unit_kerja')
@@ -241,7 +248,8 @@
                             Angkatan Pelatihan BCKS
                         </label>
                         <input id="angkatan_pelatihan" name="angkatan_pelatihan" type="text"
-                            value="{{ old('angkatan_pelatihan') }}" placeholder="Contoh: Angkatan 1 Tahun 2025"
+                            value="{{ old('angkatan_pelatihan', $bcksPengisian->angkatan_pelatihan) }}"
+                            placeholder="Contoh: Angkatan 1 Tahun 2025"
                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                         @error('angkatan_pelatihan')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -264,8 +272,9 @@
                         <label for="nama_responden" class="mb-2 block text-sm font-semibold text-slate-700">
                             Nama Responden <span class="text-red-500">*</span>
                         </label>
-                        <input id="nama_responden" name="nama_responden" type="text" value="{{ old('nama_responden') }}"
-                            required placeholder="Masukkan nama responden"
+                        <input id="nama_responden" name="nama_responden" type="text"
+                            value="{{ old('nama_responden', $bcksPengisian->nama_responden) }}" required
+                            placeholder="Masukkan nama responden"
                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                         @error('nama_responden')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -277,7 +286,8 @@
                             Unit Kerja Responden
                         </label>
                         <input id="unit_kerja_responden" name="unit_kerja_responden" type="text"
-                            value="{{ old('unit_kerja_responden') }}" placeholder="Masukkan unit kerja responden"
+                            value="{{ old('unit_kerja_responden', $bcksPengisian->unit_kerja_responden) }}"
+                            placeholder="Masukkan unit kerja responden"
                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                         @error('unit_kerja_responden')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -294,16 +304,15 @@
 
                             <option value="">Pilih status responden</option>
 
-                            <option value="BCKS" @selected(old('status_responden') === 'BCKS')>
+                            <option value="BCKS" @selected($statusAwal === 'BCKS')>
                                 BCKS
                             </option>
 
-                            <option value="Atasan Langsung / Pengawas Sekolah" @selected(old('status_responden') === 'Atasan Langsung / Pengawas Sekolah')>
+                            <option value="Atasan Langsung / Pengawas Sekolah" @selected($statusAwal === 'Atasan Langsung / Pengawas Sekolah')>
                                 Atasan Langsung / Kepala Sekolah
                             </option>
 
-                            <option value="Perwakilan Guru / Tenaga Kependidikan"
-                                @selected(old('status_responden') === 'Perwakilan Guru / Tenaga Kependidikan')>
+                            <option value="Perwakilan Guru / Tenaga Kependidikan" @selected($statusAwal === 'Perwakilan Guru / Tenaga Kependidikan')>
                                 Guru / Tenaga Kependidikan
                             </option>
                         </select>
@@ -330,7 +339,8 @@
                             Nama Petugas Monev <span class="text-red-500">*</span>
                         </label>
                         <input id="nama_petugas_monev" name="nama_petugas_monev" type="text"
-                            value="{{ old('nama_petugas_monev') }}" required placeholder="Masukkan nama petugas"
+                            value="{{ old('nama_petugas_monev', $bcksPengisian->nama_petugas_monev) }}" required
+                            placeholder="Masukkan nama petugas"
                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                         @error('nama_petugas_monev')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -342,7 +352,8 @@
                             Unit Kerja Petugas
                         </label>
                         <input id="unit_kerja_petugas" name="unit_kerja_petugas" type="text"
-                            value="{{ old('unit_kerja_petugas') }}" placeholder="Masukkan unit kerja petugas"
+                            value="{{ old('unit_kerja_petugas', $bcksPengisian->unit_kerja_petugas) }}"
+                            placeholder="Masukkan unit kerja petugas"
                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                         @error('unit_kerja_petugas')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -351,10 +362,11 @@
 
                     <div>
                         <label for="tanggal_evaluasi" class="mb-2 block text-sm font-semibold text-slate-700">
-                            Tanggal Pelaksanaan Monev <span class="text-red-500">*</span>
+                            Tanggal Evaluasi <span class="text-red-500">*</span>
                         </label>
                         <input id="tanggal_evaluasi" name="tanggal_evaluasi" type="date"
-                            value="{{ old('tanggal_evaluasi', date('Y-m-d')) }}" required
+                            value="{{ old('tanggal_evaluasi', $bcksPengisian->tanggal_evaluasi?->format('Y-m-d')) }}"
+                            required
                             class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
                         @error('tanggal_evaluasi')
                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -407,10 +419,26 @@
                                 </thead>
 
                                 <tbody class="divide-y divide-slate-100">
-                                    @foreach ($level['indikator'] as $indikator)
+                                    @foreach (($level['indikator'] ?? []) as $indikator)
 
                                         @php
                                             $kodeForm = str_replace('.', '_', $indikator['kode']);
+
+                                            [$levelNumber, $nomor] = explode('.', $indikator['kode']);
+
+                                            // Menggunakan BcksInstrumen untuk memetakan nomor global
+                                            $nomorIndikator = \App\Support\BcksInstrumen::nomorGlobal(
+                                                (int) $levelNumber,
+                                                (int) $nomor
+                                            );
+
+                                            // Mengambil skor lama dari database
+                                            $skorLama = $nomorIndikator !== null
+                                                ? ($jawabanByNomor[$nomorIndikator]->skor ?? null)
+                                                : null;
+
+                                            // Prioritaskan old() jika ada error validasi sebelumnya
+                                            $skorSekarang = old('skor.' . $kodeForm, $skorLama);
                                         @endphp
 
                                         {{-- HEADER KELOMPOK (A, B, C, ...) --}}
@@ -435,7 +463,7 @@
                                                 <td class="px-3 py-4 text-center">
                                                     <label class="inline-flex cursor-pointer items-center justify-center">
                                                         <input type="radio" name="skor[{{ $kodeForm }}]" value="{{ $nilai }}"
-                                                            @checked(old('skor.' . $kodeForm) == $nilai)
+                                                            @checked((string) $skorSekarang === (string) $nilai)
                                                             class="h-5 w-5 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-200">
                                                     </label>
                                                 </td>
@@ -534,7 +562,7 @@
 
                 <button type="submit"
                     class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
-                    Simpan Pengisian
+                    Simpan Perubahan
                 </button>
             </div>
 
@@ -575,10 +603,9 @@
 
                     radios.forEach(function (radio) {
                         radio.disabled = !aktif;
-
-                        if (!aktif) {
-                            radio.checked = false;
-                        }
+                        
+                        // JANGAN hapus centang jika hanya di-hide
+                        // if (!aktif) { radio.checked = false; } 
                     });
 
                     if (aktif) {
@@ -636,6 +663,7 @@
                 radio.addEventListener('change', updateBcksForm);
             });
 
+            // Panggil saat halaman pertama kali dimuat
             updateBcksForm();
         });
     </script>
