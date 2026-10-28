@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BcksPengisian;
+use App\Support\BcksInstrumen;
 use App\Support\SekolahResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -191,14 +192,7 @@ class BcksPengisianController extends Controller
             'skor' => ['required', 'array'],
         ];
 
-        $jumlahIndikator = [
-            1 => 4,
-            2 => 4,
-            3 => 12,
-            4 => 7,
-        ];
-
-        foreach ($jumlahIndikator as $level => $jumlah) {
+        foreach (BcksInstrumen::jumlahPerLevelAngka() as $level => $jumlah) {
             for ($nomor = 1; $nomor <= $jumlah; $nomor++) {
                 $key = "skor.{$level}_{$nomor}";
 
@@ -254,27 +248,20 @@ class BcksPengisianController extends Controller
                 continue;
             }
 
-            $level = $match[1];
+            $level = (int) $match[1];
             $nomor = (int) $match[2];
 
-            $nomorIndikator = match ($level) {
-                '1' => $nomor,
-                '2' => 4 + $nomor,
-                '3' => 8 + $nomor,
-                '4' => 20 + $nomor,
-            };
+            $nomorIndikator = BcksInstrumen::nomorGlobal($level, $nomor);
+            $levelNama      = BcksInstrumen::namaLevel($level);
 
-            $levelNama = match ($level) {
-                '1' => 'Reaction',
-                '2' => 'Learning',
-                '3' => 'Behavior',
-                '4' => 'Results',
-            };
+            if ($nomorIndikator === null || $levelNama === null) {
+                continue;
+            }
 
             $indikator[] = [
                 'nomor_indikator' => $nomorIndikator,
-                'level' => $levelNama,
-                'skor' => (int) $nilai,
+                'level'           => $levelNama,
+                'skor'            => (int) $nilai,
             ];
         }
 

@@ -198,7 +198,7 @@
             ?? $tendik->jabatan
             ?? '';
 
-        $isTendik = $jabatanResponden === 'Tendik';
+        $isTendik = in_array($jabatanResponden, ['Tendik', 'Operator'], true);
 
         // Tendik menggunakan Level 1-4.
         // Jabatan lainnya hanya menggunakan Level 3-4.

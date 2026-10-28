@@ -11,7 +11,7 @@
         <div class="flex items-center gap-2 text-sm text-slate-500">
             <a href="{{ route('sekolah.index') }}"
                class="transition hover:text-blue-600">
-                Data Sekolah
+                Daftar data Sekolah
             </a>
 
             <span>/</span>

@@ -108,7 +108,7 @@ class InstrumenController extends Controller
 
                 'skor' => $item->total_skor,
 
-                'skor_maksimal' => 108,
+                'skor_maksimal' => \App\Support\BcksInstrumen::skorMaksimum($item->status_responden === 'BCKS'),
 
                 'predikat' => $item->predikat,
 

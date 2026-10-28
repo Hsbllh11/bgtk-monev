@@ -5,13 +5,13 @@
 
     {{-- Header --}}
     <div>
-        <!-- <a href="{{ route('manajemen-akun.index') }}"
-           class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 transition hover:text-blue-800">
-            &larr; Kembali ke Manajemen Akun
-        </a> -->
-
+      
         <div class="mt-4">
-            <p class="text-sm font-medium text-blue-600">Administrasi Sistem</p>
+             <nav class="flex items-center gap-2 text-sm text-slate-500">
+                <a href="{{ route('manajemen-akun.index') }}" class="transition hover:text-blue-600">Daftar akun petugas</a>
+                <span class="text-slate-300">/</span>
+                <span class="font-medium text-slate-700">Detail petugas</span>
+            </nav>
             <h1 class="mt-1 text-2xl font-bold text-slate-800">
                 Detail Anggota Monev
             </h1>

@@ -2204,7 +2204,7 @@
             function updateLevelJabatan() {
                 if (!jabatan) return;
 
-                const isTendik = jabatan.value === 'Tendik';
+                const isTendik = ['Tendik', 'Operator'].includes(jabatan.value);
 
                 levelSections.forEach(function (section) {
                     const level = Number(section.dataset.levelSection);

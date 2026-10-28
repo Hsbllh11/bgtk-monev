@@ -10,6 +10,11 @@
     {{-- Header --}}
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
+            <nav class="flex items-center gap-2 text-sm text-slate-500">
+                <a href="{{ route('manajemen-akun.index') }}" class="transition hover:text-blue-600">Daftar data sekolah</a>
+                <span class="text-slate-300">/</span>
+                <span class="font-medium text-slate-700">Buat akun sekolah</span>
+            </nav>
             <h1 class="text-2xl font-bold text-slate-800">
                 Tambah Sekolah
             </h1>

@@ -18,6 +18,11 @@ class TendikController extends Controller
     ];
 
     /**
+     * Jabatan yang memperoleh seluruh level (1–4).
+     */
+    private const JABATAN_SEMUA_LEVEL = ['Tendik', 'Operator'];
+
+    /**
      * Pembagian nomor indikator berdasarkan level.
      */
     private function kelompokLevel(): array
@@ -31,12 +36,12 @@ class TendikController extends Controller
     }
 
     /**
-     * Tendik memperoleh semua level.
+     * Tendik dan Operator memperoleh semua level.
      * Jabatan lainnya hanya memperoleh Level 3 dan 4.
      */
     private function levelBerlaku(string $jabatan): array
     {
-        return $jabatan === 'Tendik'
+        return in_array($jabatan, self::JABATAN_SEMUA_LEVEL, true)
             ? [1, 2, 3, 4]
             : [3, 4];
     }

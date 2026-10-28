@@ -70,8 +70,8 @@
         |--------------------------------------------------------------------------
         |
         | Nomor global tetap mengikuti urutan konfigurasi asli:
-        | Level 1 = 1-4, Level 2 = 5-8,
-        | Level 3 = 9-20, Level 4 = 21-27.
+        | Level 1 = 1-12, Level 2 = 13-20,
+        | Level 3 = 21-32, Level 4 = 33-40.
         |
         */
 
@@ -101,8 +101,8 @@
         |--------------------------------------------------------------------------
         */
 
-        $jumlahIndikatorBerlaku = $isBcks ? 27 : 19;
-        $skorMaksimum = $jumlahIndikatorBerlaku * 4;
+        $jumlahIndikatorBerlaku = \App\Support\BcksInstrumen::jumlahIndikator($isBcks);
+        $skorMaksimum = \App\Support\BcksInstrumen::skorMaksimum($isBcks);
 
         $totalSkorAktual = (int) $jawaban->sum('skor');
 
@@ -391,13 +391,8 @@
                             $jumlahIndikatorLevel = $levelCounts[$level] ?? 0;
                             $skorLevel = $levelScores[$level] ?? 0;
 
-                            $maksimalLevel = match ($level) {
-                                'Reaction' => 16,
-                                'Learning' => 16,
-                                'Behavior' => 48,
-                                'Results' => 28,
-                                default => $jumlahIndikatorLevel * 4,
-                            };
+                            $maksimalLevel = \App\Support\BcksInstrumen::levelMaksimum()[$level]
+                                ?? ($jumlahIndikatorLevel * 4);
 
                             $persentaseLevel = $maksimalLevel > 0
                                 ? ($skorLevel / $maksimalLevel) * 100

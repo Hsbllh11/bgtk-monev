@@ -244,7 +244,7 @@
                                     </span>
 
                                     <span class="text-xs text-slate-400">
-                                        / 108
+                                        / {{ \App\Support\BcksInstrumen::skorMaksimum($pengisian->status_responden === 'BCKS') }}
                                     </span>
 
                                 </td>
@@ -362,6 +362,6 @@
 
     </div>
 
-</div> -->
+</div>
 
 @endsection

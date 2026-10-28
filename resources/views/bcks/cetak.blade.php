@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -29,8 +28,8 @@
             ->filter(fn ($item) => in_array($item->level, $levelAktif, true))
             ->values();
 
-        $jumlahIndikatorBerlaku = $isBcks ? 27 : 19;
-        $skorMaksimum = $jumlahIndikatorBerlaku * 4;
+        $jumlahIndikatorBerlaku = \App\Support\BcksInstrumen::jumlahIndikator($isBcks);
+        $skorMaksimum = \App\Support\BcksInstrumen::skorMaksimum($isBcks);
         $totalSkorAktual = (int) $jawabanBerlaku->sum('skor');
 
         $nilaiAkhirAktual = $skorMaksimum > 0
@@ -53,12 +52,7 @@
             'Results' => 'Dampak penerapan hasil pelatihan terhadap sekolah.',
         ];
 
-        $levelMaksimum = [
-            'Reaction' => 16,
-            'Learning' => 16,
-            'Behavior' => 48,
-            'Results' => 28,
-        ];
+        $levelMaksimum = \App\Support\BcksInstrumen::levelMaksimum();
 
         $levelScores = array_fill_keys(array_keys($levelLabel), 0);
         $levelCounts = array_fill_keys(array_keys($levelLabel), 0);

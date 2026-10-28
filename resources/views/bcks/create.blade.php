@@ -212,7 +212,7 @@
                     <div class="mt-2 flex items-center justify-between">
 
                         <span id="bcks-progress-text" class="text-sm font-bold text-slate-900">
-                            0 / 27 butir
+                            0 / 40 butir
                         </span>
 
                         <span class="text-xs text-slate-400">
@@ -509,6 +509,14 @@
                                         @php
                                             $kodeForm = str_replace('.', '_', $indikator['kode']);
                                         @endphp
+
+                                        @if (isset($level['kelompok'][$indikator['kode']]))
+                                            <tr class="bg-blue-50">
+                                                <td colspan="6" class="px-5 py-3 text-sm font-bold text-blue-900">
+                                                    {{ $level['kelompok'][$indikator['kode']] }}
+                                                </td>
+                                            </tr>
+                                        @endif
 
                                         <tr class="transition hover:bg-slate-50">
 
