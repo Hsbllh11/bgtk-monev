@@ -164,7 +164,7 @@
                 </h3>
 
                 <p class="mt-1 text-sm leading-6 text-slate-500">
-                    Instrumen monitoring dan evaluasi program Matematika GEMBIRA.
+                    Instrumen monitoring dan evaluasi program   GEMBIRA.
                 </p>
 
                 <div class="mt-6 grid grid-cols-2 gap-2">

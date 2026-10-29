@@ -10,6 +10,10 @@
 
     $pctSekolah = $persen($sekolahTerjangkau, $totalSekolah);
     $pctTl      = $persen($tlSelesai, $tlTotal);
+    
+    // Variabel fallback jika controller belum mengirim data
+    $sudahDimonitor = $sekolahSudahDimonitor ?? $sekolahTerjangkau;
+    $belumDimonitor = $sekolahBelumDimonitor ?? ($totalSekolah - $sekolahTerjangkau);
 @endphp
 
 <div class="space-y-6">
@@ -53,10 +57,11 @@
     </section>
 
     {{-- ================= KPI ================= --}}
-    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+    {{-- Baris 1: 3 Kolom --}}
+    <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
 
         {{-- Instrumen --}}
-        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
+        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md flex flex-col justify-between">
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-sm font-medium text-slate-500">Pengisian Instrumen</p>
@@ -73,7 +78,7 @@
         </div>
 
         {{-- Wawancara --}}
-        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
+        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md flex flex-col justify-between">
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-sm font-medium text-slate-500">Lembar Wawancara</p>
@@ -89,27 +94,8 @@
             </p>
         </div>
 
-        {{-- Sekolah --}}
-        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm font-medium text-slate-500">Sekolah Terjangkau</p>
-                    <p class="mt-2 text-3xl font-bold text-slate-900">
-                        {{ $sekolahTerjangkau }}<span class="text-lg font-medium text-slate-400"> / {{ $totalSekolah }}</span>
-                    </p>
-                </div>
-                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
-                </span>
-            </div>
-            <div class="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
-                <div class="h-full rounded-full bg-violet-500" style="width: {{ $pctSekolah }}%"></div>
-            </div>
-            <p class="mt-2 text-xs text-slate-500">{{ $pctSekolah }}% sekolah sudah memiliki data monev</p>
-        </div>
-
-        {{-- Tindak lanjut --}}
-        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
+        {{-- Tindak Lanjut --}}
+        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md flex flex-col justify-between">
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-sm font-medium text-slate-500">Tindak Lanjut Selesai</p>
@@ -121,13 +107,67 @@
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </span>
             </div>
-            <div class="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
-                <div class="h-full rounded-full bg-amber-500" style="width: {{ $pctTl }}%"></div>
+            <div class="mt-4">
+                <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div class="h-full rounded-full bg-amber-500" style="width: {{ $pctTl }}%"></div>
+                </div>
+                <p class="mt-2 text-xs {{ $tlTerlambat > 0 ? 'font-semibold text-rose-600' : 'text-slate-500' }}">
+                    {{ $tlTerlambat > 0 ? $tlTerlambat . ' melewati target waktu' : 'Tidak ada yang terlambat' }}
+                </p>
             </div>
-            <p class="mt-2 text-xs {{ $tlTerlambat > 0 ? 'font-semibold text-rose-600' : 'text-slate-500' }}">
-                {{ $tlTerlambat > 0 ? $tlTerlambat . ' melewati target waktu' : 'Tidak ada yang terlambat' }}
-            </p>
         </div>
+
+    </div>
+
+    {{-- Baris 2: 2 Kolom Khusus Status Sekolah --}}
+    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+        {{-- Sekolah Sudah Dimonitor --}}
+        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md flex flex-col justify-between">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-sm font-medium text-slate-500">Sekolah Sudah Dimonitor</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-900">
+                        {{ $sudahDimonitor }}<span class="text-lg font-medium text-slate-400"> / {{ $totalSekolah }}</span>
+                    </p>
+                </div>
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </span>
+            </div>
+            <div class="mt-4">
+                <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div class="h-full rounded-full bg-emerald-500" style="width: {{ $persen($sudahDimonitor, $totalSekolah) }}%"></div>
+                </div>
+                <p class="mt-2 text-xs text-slate-500">
+                    {{ $persen($sudahDimonitor, $totalSekolah) }}% dari total sekolah telah disurvei/dimonitor.
+                </p>
+            </div>
+        </div>
+
+        {{-- Sekolah Belum Dimonitor --}}
+        <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md flex flex-col justify-between">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-sm font-medium text-slate-500">Sekolah Belum Dimonitor</p>
+                    <p class="mt-2 text-3xl font-bold text-slate-900">
+                        {{ $belumDimonitor }}<span class="text-lg font-medium text-slate-400"> / {{ $totalSekolah }}</span>
+                    </p>
+                </div>
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </span>
+            </div>
+            <div class="mt-4">
+                <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div class="h-full rounded-full bg-rose-500" style="width: {{ $persen($belumDimonitor, $totalSekolah) }}%"></div>
+                </div>
+                <p class="mt-2 text-xs text-slate-500">
+                    {{ $persen($belumDimonitor, $totalSekolah) }}% sekolah masih membutuhkan kunjungan/monev.
+                </p>
+            </div>
+        </div>
+
     </div>
 
     {{-- ================= PERHATIAN ================= --}}
