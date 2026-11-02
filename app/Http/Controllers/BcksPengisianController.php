@@ -75,7 +75,7 @@ class BcksPengisianController extends Controller
             ]);
 
             foreach ($indikator as $item) {
-                $pengisian->jawaban()->create($item);
+                $pengisian->jawabanBaru()->create($item);
             }
 
             return $pengisian;
@@ -89,6 +89,23 @@ class BcksPengisianController extends Controller
     public function show(BcksPengisian $bcksPengisian)
     {
         $bcksPengisian->load('jawaban');
+        
+        // Hitung ulang skor dari data yang berhasil dimuat (bisa dari arsip lama)
+        $indikator = [];
+        foreach ($bcksPengisian->jawaban as $j) {
+            $indikator[] = [
+                'nomor_indikator' => $j->nomor_indikator,
+                'level' => $j->level,
+                'skor' => $j->skor
+            ];
+        }
+        
+        if (count($indikator) > 0) {
+            [$totalSkor, $nilaiAkhir, $predikat] = $this->hitungHasil($indikator);
+            $bcksPengisian->total_skor = $totalSkor;
+            $bcksPengisian->nilai_akhir = $nilaiAkhir;
+            $bcksPengisian->predikat = $predikat;
+        }
 
         return view('bcks.show', compact('bcksPengisian'));
     }
@@ -96,6 +113,23 @@ class BcksPengisianController extends Controller
     public function cetak(BcksPengisian $bcksPengisian)
     {
         $bcksPengisian->load('jawaban');
+        
+        // Hitung ulang skor dari data yang berhasil dimuat (bisa dari arsip lama)
+        $indikator = [];
+        foreach ($bcksPengisian->jawaban as $j) {
+            $indikator[] = [
+                'nomor_indikator' => $j->nomor_indikator,
+                'level' => $j->level,
+                'skor' => $j->skor
+            ];
+        }
+        
+        if (count($indikator) > 0) {
+            [$totalSkor, $nilaiAkhir, $predikat] = $this->hitungHasil($indikator);
+            $bcksPengisian->total_skor = $totalSkor;
+            $bcksPengisian->nilai_akhir = $nilaiAkhir;
+            $bcksPengisian->predikat = $predikat;
+        }
 
         return view('bcks.cetak', compact('bcksPengisian'));
     }
@@ -148,10 +182,12 @@ class BcksPengisianController extends Controller
             ]);
 
             // Hapus jawaban lama, termasuk Level 1–2 jika tidak lagi berlaku.
+            $bcksPengisian->jawabanBaru()->delete();
+            // Hapus juga jawaban arsip jika ada, karena ini akan diperbarui ke format baru
             $bcksPengisian->jawaban()->delete();
 
             foreach ($indikator as $item) {
-                $bcksPengisian->jawaban()->create($item);
+                $bcksPengisian->jawabanBaru()->create($item);
             }
         });
 

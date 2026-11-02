@@ -39,11 +39,27 @@ class BcksPengisian extends Model
 
     /**
      * Relasi ke jawaban setiap indikator BCKS.
+     * Otomatis mengambil dari tabel arsip jika tabel baru kosong.
      */
     public function jawaban(): HasMany
     {
+        // Cek apakah ada jawaban di tabel baru (format 40 soal)
+        if ($this->jawabanBaru()->exists()) {
+            return $this->jawabanBaru();
+        }
+
+        // Jika kosong, ambil dari tabel arsip lama (format 27 soal)
+        return $this->hasMany(BcksJawabanLama::class, 'bcks_pengisian_id');
+    }
+
+    /**
+     * Relasi asli ke tabel jawaban baru.
+     */
+    public function jawabanBaru(): HasMany
+    {
         return $this->hasMany(BcksJawaban::class, 'bcks_pengisian_id');
     }
+
     public function sekolah()
     {
         return $this->belongsTo(Sekolah::class);
