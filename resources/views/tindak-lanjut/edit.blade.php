@@ -6,39 +6,316 @@
 
 @section('content')
 
-    <div class="space-y-6">
+    <style>
+        /* ===================== TOKEN WARNA (sama dengan Tambah Tindak Lanjut) ===================== */
+        :root {
+            --p-50: #eff4ff;
+            --p-100: #dbe7fe;
+            --p-200: #bfd4fb;
+            --p-500: #3b82f6;
+            --p-600: #2563eb;
+            --p-700: #1d4ed8;
+            --p-800: #1e40af;
+            --accent: #f5b82e;
+            --ink: #0f1b3d;
+            --muted: #64748b;
+            --line: #e6ebf5;
+        }
 
-        {{-- Header --}}
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <nav class="flex items-center gap-2 text-sm text-slate-500">
-                    <a href="{{ route('manajemen-akun.index') }}" class="transition hover:text-blue-600">Daftar tidank lanjut</a>
-                    <span class="text-slate-300">/</span>
-                    <span class="font-medium text-slate-700">Edit tindak lanjut</span>
-                </nav>
-                <h1 class="text-2xl font-bold text-slate-800">
-                    Edit Tindak Lanjut
-                </h1>
+        .d-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
 
-                <p class="mt-1 text-sm text-slate-500">
-                    Perbarui informasi tindak lanjut hasil monitoring dan evaluasi.
-                </p>
+        .d-form {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .d-card {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .d-card-h {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: -.01em;
+        }
+
+        .d-card-s {
+            margin-top: 2px;
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
+        .d-card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 20px 20px 14px;
+        }
+
+        /* --- judul halaman --- */
+        .d-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        @media (max-width: 640px) {
+            .d-title-row {
+                flex-direction: column;
+            }
+        }
+
+        .d-h1 {
+            font-size: 28px;
+            font-weight: 400;
+            letter-spacing: -.02em;
+            color: var(--ink);
+            line-height: 1.2;
+        }
+
+        .d-h1 b {
+            font-weight: 700;
+        }
+
+        .d-crumb {
+            margin-top: 4px;
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
+        .d-crumb a {
+            color: inherit;
+            transition: color .2s;
+        }
+
+        .d-crumb a:hover {
+            color: var(--p-600);
+        }
+
+        .d-desc {
+            margin-top: 10px;
+            max-width: 640px;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #475569;
+        }
+
+        /* --- tombol pastel --- */
+        .d-pbtn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-shrink: 0;
+            height: 46px;
+            padding: 0 18px;
+            border-radius: 14px;
+            background: var(--b-bg);
+            border: 1px solid var(--b-line);
+            color: var(--b-ink);
+            font-family: inherit;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            text-decoration: none;
+            transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+        }
+
+        .d-pbtn:hover {
+            transform: translateY(-1px);
+            filter: brightness(.97);
+            box-shadow: 0 12px 22px -14px var(--b-glow);
+        }
+
+        .d-pbtn svg {
+            flex-shrink: 0;
+            transition: transform .3s ease;
+        }
+
+        .d-pbtn.back:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .b-blue {
+            --b-bg: linear-gradient(160deg, #eaf0ff 0%, #d3e1ff 100%);
+            --b-line: #c6d8fb;
+            --b-ink: #1d4ed8;
+            --b-glow: rgba(37, 99, 235, .7);
+        }
+
+        .b-mint {
+            --b-bg: linear-gradient(160deg, #e9faf2 0%, #cdf0e0 100%);
+            --b-line: #bfe8d4;
+            --b-ink: #047857;
+            --b-glow: rgba(5, 150, 105, .7);
+        }
+
+        /* tombol sekunder (Batal) */
+        .d-btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 46px;
+            padding: 0 18px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: #fff;
+            color: #475569;
+            font-size: 13.5px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background .2s, color .2s;
+        }
+
+        .d-btn-ghost:hover {
+            background: var(--p-50);
+            color: var(--p-700);
+        }
+
+        .d-foot {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        @media (max-width: 640px) {
+            .d-foot {
+                flex-direction: column-reverse;
+            }
+        }
+
+        /* --- notifikasi error --- */
+        .d-error {
+            padding: 16px 20px;
+            border-radius: 16px;
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: #be123c;
+        }
+
+        .d-error b {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .d-error ul {
+            margin: 8px 0 0 18px;
+            list-style: disc;
+            font-size: 12.5px;
+            line-height: 1.8;
+        }
+
+        /* --- form --- */
+        .d-form-grid {
+            display: grid;
+            gap: 18px;
+            padding: 6px 20px 22px;
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        @media (min-width: 768px) {
+            .d-form-grid.c2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .d-form-grid.c3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .d-form-grid .span2 {
+                grid-column: 1 / -1;
+            }
+        }
+
+        .d-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .d-label i {
+            color: #e11d48;
+            font-style: normal;
+        }
+
+        .d-field {
+            width: 100%;
+            height: 44px;
+            padding: 0 14px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: #fff;
+            color: #334155;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        textarea.d-field {
+            height: auto;
+            padding: 12px 14px;
+            line-height: 1.7;
+            resize: vertical;
+        }
+
+        .d-field::placeholder {
+            color: #94a3b8;
+        }
+
+        .d-field:focus {
+            border-color: var(--p-500);
+            box-shadow: 0 0 0 4px var(--p-100);
+        }
+    </style>
+
+    <div class="d-wrap">
+
+        {{-- ================= JUDUL HALAMAN ================= --}}
+        <section>
+            <div class="d-title-row">
+                <div>
+                    <h1 class="d-h1">Edit <b>Tindak Lanjut</b></h1>
+                    <p class="d-crumb">
+                        Dashboard &nbsp;›&nbsp;
+                        <a href="{{ route('tindak-lanjut.index') }}">Daftar tindak lanjut</a>
+                        &nbsp;›&nbsp; Edit tindak lanjut
+                    </p>
+                    <p class="d-desc">Perbarui informasi tindak lanjut hasil monitoring dan evaluasi.</p>
+                </div>
+
+                {{-- Kembali --}}
+                <a href="{{ route('tindak-lanjut.show', ['tindakLanjut' => $tindakLanjut->id]) }}"
+                    class="d-pbtn b-blue back">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                    Kembali
+                </a>
             </div>
+        </section>
 
-            <a href="{{ route('tindak-lanjut.show', ['tindakLanjut' => $tindakLanjut->id]) }}"
-                class="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                ← Kembali
-            </a>
-        </div>
-
-        {{-- Error Validasi --}}
+        {{-- ================= VALIDATION ERROR ================= --}}
         @if ($errors->any())
-            <div class="rounded-xl border border-red-200 bg-red-50 p-4">
-                <h3 class="text-sm font-semibold text-red-800">
-                    Terdapat kesalahan pada data.
-                </h3>
+            <div class="d-error">
+                <b>Terdapat kesalahan pada data.</b>
 
-                <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-red-700">
+                <ul>
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -46,36 +323,29 @@
             </div>
         @endif
 
-        {{-- Form --}}
+        {{-- ================= FORM UTAMA ================= --}}
         <form action="{{ route('tindak-lanjut.update', ['tindakLanjut' => $tindakLanjut->id]) }}" method="POST"
-            class="space-y-6">
+            class="d-form">
 
             @csrf
             @method('PUT')
 
-            {{-- Sumber --}}
-            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                <div class="border-b border-slate-200 px-6 py-5">
-                    <h2 class="text-lg font-bold text-slate-800">
-                        Sumber Tindak Lanjut
-                    </h2>
-
-                    <p class="mt-1 text-sm text-slate-500">
-                        Tentukan sekolah dan wawancara yang berkaitan.
-                    </p>
+            {{-- SUMBER TINDAK LANJUT --}}
+            <section class="d-card">
+                <div class="d-card-top">
+                    <div>
+                        <h2 class="d-card-h">Sumber Tindak Lanjut</h2>
+                        <p class="d-card-s">Tentukan sekolah dan wawancara yang berkaitan.</p>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+                <div class="d-form-grid c2">
 
                     {{-- Sekolah --}}
                     <div>
-                        <label for="sekolah_id" class="mb-2 block text-sm font-semibold text-slate-700">
-                            Sekolah <span class="text-red-500">*</span>
-                        </label>
+                        <label for="sekolah_id" class="d-label">Sekolah <i>*</i></label>
 
-                        <select id="sekolah_id" name="sekolah_id" required
-                            class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                        <select id="sekolah_id" name="sekolah_id" required class="d-field">
                             <option value="">
                                 -- Pilih Sekolah --
                             </option>
@@ -96,12 +366,9 @@
 
                     {{-- Wawancara --}}
                     <div>
-                        <label for="wawancara_id" class="mb-2 block text-sm font-semibold text-slate-700">
-                            Sumber Wawancara
-                        </label>
+                        <label for="wawancara_id" class="d-label">Sumber Wawancara</label>
 
-                        <select id="wawancara_id" name="wawancara_id"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                        <select id="wawancara_id" name="wawancara_id" class="d-field">
                             <option value="">
                                 -- Tidak terkait wawancara tertentu --
                             </option>
@@ -126,98 +393,74 @@
                     </div>
 
                 </div>
-            </div>
+            </section>
 
-            {{-- Detail --}}
-            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                <div class="border-b border-slate-200 px-6 py-5">
-                    <h2 class="text-lg font-bold text-slate-800">
-                        Detail Tindak Lanjut
-                    </h2>
+            {{-- DETAIL TINDAK LANJUT --}}
+            <section class="d-card">
+                <div class="d-card-top">
+                    <div>
+                        <h2 class="d-card-h">Detail Tindak Lanjut</h2>
+                    </div>
                 </div>
 
-                <div class="space-y-5 p-6">
+                <div class="d-form-grid">
 
                     {{-- Judul --}}
                     <div>
-                        <label for="judul_tindak_lanjut" class="mb-2 block text-sm font-semibold text-slate-700">
-                            Judul Tindak Lanjut
-                            <span class="text-red-500">*</span>
-                        </label>
-
+                        <label for="judul_tindak_lanjut" class="d-label">Judul Tindak Lanjut <i>*</i></label>
                         <input type="text" id="judul_tindak_lanjut" name="judul_tindak_lanjut"
                             value="{{ old('judul_tindak_lanjut', $tindakLanjut->judul_tindak_lanjut) }}" required
-                            class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                            class="d-field">
                     </div>
 
                     {{-- Uraian --}}
                     <div>
-                        <label for="uraian_tindak_lanjut" class="mb-2 block text-sm font-semibold text-slate-700">
-                            Uraian Tindak Lanjut
-                            <span class="text-red-500">*</span>
-                        </label>
-
+                        <label for="uraian_tindak_lanjut" class="d-label">Uraian Tindak Lanjut <i>*</i></label>
                         <textarea id="uraian_tindak_lanjut" name="uraian_tindak_lanjut" rows="5" required
-                            class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">{{ old('uraian_tindak_lanjut', $tindakLanjut->uraian_tindak_lanjut) }}</textarea>
+                            class="d-field">{{ old('uraian_tindak_lanjut', $tindakLanjut->uraian_tindak_lanjut) }}</textarea>
                     </div>
 
                     {{-- Penanggung Jawab --}}
                     <div>
-                        <label for="penanggung_jawab" class="mb-2 block text-sm font-semibold text-slate-700">
-                            Penanggung Jawab
-                            <span class="text-red-500">*</span>
-                        </label>
-
+                        <label for="penanggung_jawab" class="d-label">Penanggung Jawab <i>*</i></label>
                         <input type="text" id="penanggung_jawab" name="penanggung_jawab"
-                            value="{{ old('penanggung_jawab', $tindakLanjut->penanggung_jawab) }}" required
-                            class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                            value="{{ old('penanggung_jawab', $tindakLanjut->penanggung_jawab) }}" required class="d-field">
                     </div>
 
                 </div>
-            </div>
+            </section>
 
-            {{-- Jadwal dan Status --}}
-            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                <div class="border-b border-slate-200 px-6 py-5">
-                    <h2 class="text-lg font-bold text-slate-800">
-                        Jadwal dan Status
-                    </h2>
+            {{-- JADWAL DAN STATUS --}}
+            <section class="d-card">
+                <div class="d-card-top">
+                    <div>
+                        <h2 class="d-card-h">Jadwal dan Status</h2>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-3">
+                <div class="d-form-grid c3">
 
                     {{-- Tanggal Mulai --}}
                     <div>
-                        <label for="tanggal_mulai" class="mb-2 block text-sm font-semibold text-slate-700">
-                            Tanggal Mulai
-                        </label>
-
+                        <label for="tanggal_mulai" class="d-label">Tanggal Mulai</label>
                         <input type="date" id="tanggal_mulai" name="tanggal_mulai"
                             value="{{ old('tanggal_mulai', $tindakLanjut->tanggal_mulai?->format('Y-m-d')) }}"
-                            class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                            class="d-field">
                     </div>
 
                     {{-- Target Selesai --}}
                     <div>
-                        <label for="target_selesai" class="mb-2 block text-sm font-semibold text-slate-700">
-                            Target Selesai
-                        </label>
-
+                        <label for="target_selesai" class="d-label">Target Selesai</label>
                         <input type="date" id="target_selesai" name="target_selesai"
                             value="{{ old('target_selesai', $tindakLanjut->target_selesai?->format('Y-m-d')) }}"
-                            class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                            class="d-field">
                     </div>
 
                     {{-- Status --}}
                     <div>
-                        <label for="status" class="mb-2 block text-sm font-semibold text-slate-700">
-                            Status <span class="text-red-500">*</span>
-                        </label>
+                        <label for="status" class="d-label">Status <i>*</i></label>
 
-                        <select id="status" name="status" required
-                            class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                        <select id="status" name="status" required class="d-field">
                             <option value="Belum Dimulai" @selected(
                                 old('status', $tindakLanjut->status) === 'Belum Dimulai'
                             )>
@@ -239,38 +482,36 @@
                     </div>
 
                 </div>
-            </div>
+            </section>
 
-            {{-- Keterangan --}}
-            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                <div class="border-b border-slate-200 px-6 py-5">
-                    <h2 class="text-lg font-bold text-slate-800">
-                        Keterangan
-                    </h2>
+            {{-- KETERANGAN --}}
+            <section class="d-card">
+                <div class="d-card-top">
+                    <div>
+                        <h2 class="d-card-h">Keterangan</h2>
+                    </div>
                 </div>
 
-                <div class="p-6">
-                    <textarea id="keterangan" name="keterangan" rows="4"
-                        placeholder="Tambahkan keterangan jika diperlukan..."
-                        class="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">{{ old('keterangan', $tindakLanjut->keterangan) }}</textarea>
+                <div class="d-form-grid">
+                    <div>
+                        <textarea id="keterangan" name="keterangan" rows="4" aria-label="Keterangan"
+                            placeholder="Tambahkan keterangan jika diperlukan..."
+                            class="d-field">{{ old('keterangan', $tindakLanjut->keterangan) }}</textarea>
+                    </div>
                 </div>
+            </section>
 
-            </div>
+            {{-- ================= TOMBOL ================= --}}
+            <div class="d-foot">
 
-            {{-- Tombol --}}
-            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-
-                <a href="{{ route('tindak-lanjut.show', ['tindakLanjut' => $tindakLanjut->id]) }}"
-                    class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                    Batal
-                </a>
-
-                <button type="submit"
-                    class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
+                <button type="submit" class="d-pbtn b-mint">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+                        <path d="M17 21v-8H7v8M7 3v5h8" />
+                    </svg>
                     Simpan Perubahan
                 </button>
-
             </div>
 
         </form>

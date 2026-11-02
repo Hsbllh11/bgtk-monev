@@ -1,365 +1,461 @@
 @extends('layouts.app')
 
 @section('title', 'Tambah Sekolah')
+
 @section('page-title', 'Tambah Sekolah')
 
 @section('content')
 
-<div class="space-y-6">
+    <style>
+        /* ===================== TOKEN WARNA (sama dengan Tindak Lanjut) ===================== */
+        :root {
+            --p-50: #eff4ff;
+            --p-100: #dbe7fe;
+            --p-200: #bfd4fb;
+            --p-500: #3b82f6;
+            --p-600: #2563eb;
+            --p-700: #1d4ed8;
+            --p-800: #1e40af;
+            --accent: #f5b82e;
+            --ink: #0f1b3d;
+            --muted: #64748b;
+            --line: #e6ebf5;
+        }
 
-    {{-- Header --}}
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <nav class="flex items-center gap-2 text-sm text-slate-500">
-                <a href="{{ route('manajemen-akun.index') }}" class="transition hover:text-blue-600">Daftar data sekolah</a>
-                <span class="text-slate-300">/</span>
-                <span class="font-medium text-slate-700">Buat akun sekolah</span>
-            </nav>
-            <h1 class="text-2xl font-bold text-slate-800">
-                Tambah Sekolah
-            </h1>
-            <p class="mt-1 text-sm text-slate-500">
-                Tambahkan data sekolah baru ke dalam sistem monitoring dan evaluasi.
-            </p>
-        </div>
+        .d-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
 
-        <a
-            href="{{ route('sekolah.index') }}"
-            class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2"
-            >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
+        .d-form {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
 
-            Kembali
-        </a>
-    </div>
+        .d-card {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            overflow: hidden;
+        }
 
+        .d-card-h {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: -.01em;
+        }
 
-    {{-- Error Validation --}}
-    @if ($errors->any())
-        <div class="rounded-xl border border-red-200 bg-red-50 p-4">
-            <div class="flex gap-3">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="mt-0.5 h-5 w-5 shrink-0 text-red-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M12 9v3.75m0 3.75h.008v.008H12V16.5zM10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
-                    />
-                </svg>
+        .d-card-s {
+            margin-top: 2px;
+            font-size: 12.5px;
+            color: var(--muted);
+        }
 
+        .d-card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 20px 20px 14px;
+        }
+
+        /* --- judul halaman --- */
+        .d-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        @media (max-width: 640px) {
+            .d-title-row {
+                flex-direction: column;
+            }
+        }
+
+        .d-h1 {
+            font-size: 28px;
+            font-weight: 400;
+            letter-spacing: -.02em;
+            color: var(--ink);
+            line-height: 1.2;
+        }
+
+        .d-h1 b {
+            font-weight: 700;
+        }
+
+        .d-crumb {
+            margin-top: 4px;
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
+        .d-crumb a {
+            color: inherit;
+            transition: color .2s;
+        }
+
+        .d-crumb a:hover {
+            color: var(--p-600);
+        }
+
+        .d-desc {
+            margin-top: 10px;
+            max-width: 640px;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #475569;
+        }
+
+        /* --- tombol pastel --- */
+        .d-pbtn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-shrink: 0;
+            height: 46px;
+            padding: 0 18px;
+            border-radius: 14px;
+            background: var(--b-bg);
+            border: 1px solid var(--b-line);
+            color: var(--b-ink);
+            font-family: inherit;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            text-decoration: none;
+            transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+        }
+
+        .d-pbtn:hover {
+            transform: translateY(-1px);
+            filter: brightness(.97);
+            box-shadow: 0 12px 22px -14px var(--b-glow);
+        }
+
+        .d-pbtn svg {
+            flex-shrink: 0;
+            transition: transform .3s ease;
+        }
+
+        .d-pbtn.back:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .b-blue {
+            --b-bg: linear-gradient(160deg, #eaf0ff 0%, #d3e1ff 100%);
+            --b-line: #c6d8fb;
+            --b-ink: #1d4ed8;
+            --b-glow: rgba(37, 99, 235, .7);
+        }
+
+        .b-mint {
+            --b-bg: linear-gradient(160deg, #e9faf2 0%, #cdf0e0 100%);
+            --b-line: #bfe8d4;
+            --b-ink: #047857;
+            --b-glow: rgba(5, 150, 105, .7);
+        }
+
+        /* tombol sekunder (Batal) */
+        .d-btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 46px;
+            padding: 0 18px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: #fff;
+            color: #475569;
+            font-size: 13.5px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background .2s, color .2s;
+        }
+
+        .d-btn-ghost:hover {
+            background: var(--p-50);
+            color: var(--p-700);
+        }
+
+        .d-foot {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        @media (max-width: 640px) {
+            .d-foot {
+                flex-direction: column-reverse;
+            }
+        }
+
+        /* --- notifikasi error --- */
+        .d-error {
+            padding: 16px 20px;
+            border-radius: 16px;
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: #be123c;
+        }
+
+        .d-error b {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .d-error ul {
+            margin: 8px 0 0 18px;
+            list-style: disc;
+            font-size: 12.5px;
+            line-height: 1.8;
+        }
+
+        /* --- form --- */
+        .d-form-grid {
+            display: grid;
+            gap: 18px;
+            padding: 6px 20px 22px;
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        @media (min-width: 768px) {
+            .d-form-grid.c2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .d-form-grid.c3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .d-form-grid .span2 {
+                grid-column: 1 / -1;
+            }
+        }
+
+        .d-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .d-label i {
+            color: #e11d48;
+            font-style: normal;
+        }
+
+        .d-field {
+            width: 100%;
+            height: 44px;
+            padding: 0 14px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: #fff;
+            color: #334155;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        textarea.d-field {
+            height: auto;
+            padding: 12px 14px;
+            line-height: 1.7;
+            resize: vertical;
+        }
+
+        .d-field::placeholder {
+            color: #94a3b8;
+        }
+
+        .d-field:focus {
+            border-color: var(--p-500);
+            box-shadow: 0 0 0 4px var(--p-100);
+        }
+
+        .d-hint {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+    </style>
+
+    <div class="d-wrap">
+
+        {{-- ================= JUDUL HALAMAN ================= --}}
+        <section>
+            <div class="d-title-row">
                 <div>
-                    <p class="font-semibold text-red-800">
-                        Terdapat kesalahan pada data.
+                    <h1 class="d-h1">Tambah <b>Sekolah</b></h1>
+                    <p class="d-crumb">
+                        Dashboard &nbsp;›&nbsp;
+                        <a href="{{ route('sekolah.index') }}">Daftar data sekolah</a>
+                        &nbsp;›&nbsp; Tambah sekolah
                     </p>
-
-                    <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-red-700">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+                    <p class="d-desc">Tambahkan data sekolah baru ke dalam sistem monitoring dan evaluasi.</p>
                 </div>
+
+                {{-- Kembali --}}
+                <a href="{{ route('sekolah.index') }}" class="d-pbtn b-blue back">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                    Kembali
+                </a>
             </div>
-        </div>
-    @endif
+        </section>
 
+        {{-- ================= VALIDATION ERROR ================= --}}
+        @if ($errors->any())
+            <div class="d-error">
+                <b>Terdapat kesalahan pada data.</b>
 
-    {{-- Form --}}
-    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-        {{-- Form Header --}}
-        <div class="border-b border-slate-200 px-6 py-5">
-            <h2 class="text-lg font-bold text-slate-800">
-                Informasi Sekolah
-            </h2>
+        {{-- ================= FORM UTAMA ================= --}}
+        <form action="{{ route('sekolah.store') }}" method="POST" class="d-form">
 
-            <p class="mt-1 text-sm text-slate-500">
-                Lengkapi informasi sekolah pada kolom yang tersedia.
-            </p>
-        </div>
-
-
-        <form
-            action="{{ route('sekolah.store') }}"
-            method="POST"
-            class="space-y-6 p-6"
-        >
             @csrf
 
-            {{-- Identitas Sekolah --}}
-            <div>
-                <h3 class="mb-4 text-sm font-bold uppercase tracking-wide text-slate-700">
-                    Identitas Sekolah
-                </h3>
+            {{-- IDENTITAS SEKOLAH --}}
+            <section class="d-card">
+                <div class="d-card-top">
+                    <div>
+                        <h2 class="d-card-h">Identitas Sekolah</h2>
+                        <p class="d-card-s">Lengkapi informasi dasar sekolah pada kolom yang tersedia.</p>
+                    </div>
+                </div>
 
-                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div class="d-form-grid c2">
 
                     {{-- NPSN --}}
                     <div>
-                        <label
-                            for="npsn"
-                            class="mb-2 block text-sm font-semibold text-slate-700"
-                        >
-                            NPSN <span class="text-red-500">*</span>
-                        </label>
-
-                        <input
-                            type="text"
-                            id="npsn"
-                            name="npsn"
-                            value="{{ old('npsn') }}"
-                            placeholder="Contoh: 50201001"
-                            maxlength="20"
-                            required
-                            class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                        >
-
-                        <p class="mt-1.5 text-xs text-slate-500">
-                            Nomor Pokok Sekolah Nasional.
-                        </p>
+                        <label for="npsn" class="d-label">NPSN <i>*</i></label>
+                        <input type="text" id="npsn" name="npsn" value="{{ old('npsn') }}" placeholder="Contoh: 50201001"
+                            maxlength="20" required class="d-field">
+                        <p class="d-hint">Nomor Pokok Sekolah Nasional.</p>
                     </div>
-
 
                     {{-- Nama Sekolah --}}
                     <div>
-                        <label
-                            for="nama_sekolah"
-                            class="mb-2 block text-sm font-semibold text-slate-700"
-                        >
-                            Nama Sekolah <span class="text-red-500">*</span>
-                        </label>
-
-                        <input
-                            type="text"
-                            id="nama_sekolah"
-                            name="nama_sekolah"
-                            value="{{ old('nama_sekolah') }}"
-                            placeholder="Contoh: SMP Negeri 1 Mataram"
-                            required
-                            class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                        >
+                        <label for="nama_sekolah" class="d-label">Nama Sekolah <i>*</i></label>
+                        <input type="text" id="nama_sekolah" name="nama_sekolah" value="{{ old('nama_sekolah') }}"
+                            placeholder="Contoh: SMP Negeri 1 Mataram" required class="d-field">
                     </div>
-
 
                     {{-- Jenjang --}}
                     <div>
-                        <label
-                            for="jenjang"
-                            class="mb-2 block text-sm font-semibold text-slate-700"
-                        >
-                            Jenjang <span class="text-red-500">*</span>
-                        </label>
+                        <label for="jenjang" class="d-label">Jenjang <i>*</i></label>
 
-                        <select
-                            id="jenjang"
-                            name="jenjang"
-                            required
-                            class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                        >
-                            <option value="">Pilih Jenjang</option>
-                            <option value="SD" {{ old('jenjang') == 'SD' ? 'selected' : '' }}>
-                                SD
-                            </option>
-                            <option value="SMP" {{ old('jenjang') == 'SMP' ? 'selected' : '' }}>
-                                SMP
-                            </option>
-                            <option value="SMA" {{ old('jenjang') == 'SMA' ? 'selected' : '' }}>
-                                SMA
-                            </option>
-                            <option value="SMK" {{ old('jenjang') == 'SMK' ? 'selected' : '' }}>
-                                SMK
-                            </option>
+                        <select id="jenjang" name="jenjang" required class="d-field">
+                            <option value="">-- Pilih Jenjang --</option>
+                            <option value="SD" {{ old('jenjang') == 'SD' ? 'selected' : '' }}>SD</option>
+                            <option value="SMP" {{ old('jenjang') == 'SMP' ? 'selected' : '' }}>SMP</option>
+                            <option value="SMA" {{ old('jenjang') == 'SMA' ? 'selected' : '' }}>SMA</option>
+                            <option value="SMK" {{ old('jenjang') == 'SMK' ? 'selected' : '' }}>SMK</option>
                         </select>
                     </div>
 
-
                     {{-- Kabupaten/Kota --}}
                     <div>
-                        <label
-                            for="kabupaten_kota"
-                            class="mb-2 block text-sm font-semibold text-slate-700"
-                        >
-                            Kabupaten/Kota <span class="text-red-500">*</span>
-                        </label>
-
-                        <input
-                            type="text"
-                            id="kabupaten_kota"
-                            name="kabupaten_kota"
-                            value="{{ old('kabupaten_kota') }}"
-                            placeholder="Contoh: Kota Mataram"
-                            required
-                            class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                        >
+                        <label for="kabupaten_kota" class="d-label">Kabupaten/Kota <i>*</i></label>
+                        <input type="text" id="kabupaten_kota" name="kabupaten_kota" value="{{ old('kabupaten_kota') }}"
+                            placeholder="Contoh: Kota Mataram" required class="d-field">
                     </div>
-
 
                     {{-- Kecamatan --}}
                     <div>
-                        <label
-                            for="kecamatan"
-                            class="mb-2 block text-sm font-semibold text-slate-700"
-                        >
-                            Kecamatan
-                        </label>
-
-                        <input
-                            type="text"
-                            id="kecamatan"
-                            name="kecamatan"
-                            value="{{ old('kecamatan') }}"
-                            placeholder="Contoh: Selaparang"
-                            class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                        >
+                        <label for="kecamatan" class="d-label">Kecamatan</label>
+                        <input type="text" id="kecamatan" name="kecamatan" value="{{ old('kecamatan') }}"
+                            placeholder="Contoh: Selaparang" class="d-field">
                     </div>
-
 
                     {{-- Tahun Monitoring --}}
                     <div>
-                        <label
-                            for="tahun_monitoring"
-                            class="mb-2 block text-sm font-semibold text-slate-700"
-                        >
-                            Tahun Monitoring
-                        </label>
-
-                        <input
-                            type="number"
-                            id="tahun_monitoring"
-                            name="tahun_monitoring"
-                            value="{{ old('tahun_monitoring') }}"
-                            placeholder="Contoh: 2026"
-                            min="2000"
-                            max="2100"
-                            class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                        >
+                        <label for="tahun_monitoring" class="d-label">Tahun Monitoring</label>
+                        <input type="number" id="tahun_monitoring" name="tahun_monitoring"
+                            value="{{ old('tahun_monitoring') }}" placeholder="Contoh: 2026" min="2000" max="2100"
+                            class="d-field">
                     </div>
 
                 </div>
-            </div>
+            </section>
 
-
-            {{-- Alamat --}}
-            <div class="border-t border-slate-200 pt-6">
-                <h3 class="mb-4 text-sm font-bold uppercase tracking-wide text-slate-700">
-                    Alamat Sekolah
-                </h3>
-
-                <div>
-                    <label
-                        for="alamat"
-                        class="mb-2 block text-sm font-semibold text-slate-700"
-                    >
-                        Alamat
-                    </label>
-
-                    <textarea
-                        id="alamat"
-                        name="alamat"
-                        rows="4"
-                        placeholder="Masukkan alamat lengkap sekolah..."
-                        class="w-full resize-none rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    >{{ old('alamat') }}</textarea>
-                </div>
-            </div>
-
-
-            {{-- Monitoring --}}
-            <div class="border-t border-slate-200 pt-6">
-                <h3 class="mb-4 text-sm font-bold uppercase tracking-wide text-slate-700">
-                    Status Monitoring
-                </h3>
-
-                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-
-                    {{-- Status --}}
+            {{-- ALAMAT SEKOLAH --}}
+            <section class="d-card">
+                <div class="d-card-top">
                     <div>
-                        <label
-                            for="status_monitoring"
-                            class="mb-2 block text-sm font-semibold text-slate-700"
-                        >
-                            Status Monitoring <span class="text-red-500">*</span>
-                        </label>
+                        <h2 class="d-card-h">Alamat Sekolah</h2>
+                        <p class="d-card-s">Masukkan alamat lengkap lokasi sekolah.</p>
+                    </div>
+                </div>
 
-                        <select
-                            id="status_monitoring"
-                            name="status_monitoring"
-                            required
-                            class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                        >
-                            <option value="">Pilih Status</option>
+                <div class="d-form-grid">
+                    <div>
+                        <textarea id="alamat" name="alamat" rows="4" aria-label="Alamat"
+                            placeholder="Masukkan alamat lengkap sekolah..." class="d-field">{{ old('alamat') }}</textarea>
+                    </div>
+                </div>
+            </section>
 
-                            <option
-                                value="Belum Dimonitor"
-                                {{ old('status_monitoring', 'Belum Dimonitor') == 'Belum Dimonitor' ? 'selected' : '' }}
-                            >
+            {{-- STATUS MONITORING --}}
+            <section class="d-card">
+                <div class="d-card-top">
+                    <div>
+                        <h2 class="d-card-h">Status Monitoring</h2>
+                        <p class="d-card-s">Tentukan status monitoring sekolah saat ini.</p>
+                    </div>
+                </div>
+
+                <div class="d-form-grid c2">
+                    <div>
+                        <label for="status_monitoring" class="d-label">Status Monitoring <i>*</i></label>
+
+                        <select id="status_monitoring" name="status_monitoring" required class="d-field">
+                            <option value="">-- Pilih Status --</option>
+
+                            <option value="Belum Dimonitor" {{ old('status_monitoring', 'Belum Dimonitor') == 'Belum Dimonitor' ? 'selected' : '' }}>
                                 Belum Dimonitor
                             </option>
 
-                            <option
-                                value="Sudah Dimonitor"
-                                {{ old('status_monitoring') == 'Sudah Dimonitor' ? 'selected' : '' }}
-                            >
+                            <option value="Sudah Dimonitor" {{ old('status_monitoring') == 'Sudah Dimonitor' ? 'selected' : '' }}>
                                 Sudah Dimonitor
                             </option>
                         </select>
                     </div>
-
                 </div>
-            </div>
+            </section>
 
-
-            {{-- Tombol --}}
-            <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:justify-end">
-
-                <a
-                    href="{{ route('sekolah.index') }}"
-                    class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                    Batal
-                </a>
-
-                <button
-                    type="submit"
-                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M12 4v16m8-8H4"
-                        />
+            {{-- ================= TOMBOL ================= --}}
+            <div class="d-foot">
+                <button type="submit" class="d-pbtn b-mint">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+                        <path d="M17 21v-8H7v8M7 3v5h8" />
                     </svg>
-
                     Simpan Data Sekolah
                 </button>
-
             </div>
 
         </form>
-    </div>
 
-</div>
+    </div>
 
 @endsection
