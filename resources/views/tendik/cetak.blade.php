@@ -176,7 +176,11 @@
         ?? $tendik->jabatan
         ?? '-';
 
-    $isTendik = $jabatanResponden === 'Tendik';
+    $isTendik = in_array(
+        $jabatanResponden,
+        ['Tendik', 'Operator', 'Bendahara'],
+        true
+    );
 
     // Jabatan selain Tendik hanya menggunakan Level III dan IV.
     if (!$isTendik) {

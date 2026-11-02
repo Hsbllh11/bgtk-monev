@@ -4,138 +4,682 @@
 @section('page-title', 'Data Sekolah')
 
 @section('content')
+    @php
+        $persen = fn($a, $b) => $b > 0 ? min(round(($a / $b) * 100), 100) : 0;
 
-    <div class="space-y-6">
+        $pctSudah = $persen($sudahDimonitor, $totalSekolah);
+        $pctBelum = $persen($belumDimonitor, $totalSekolah);
 
-        {{-- Header --}}
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-slate-800">Data Sekolah</h1>
-                <p class="mt-1 text-sm text-slate-500">
-                    Kelola data sekolah yang menjadi objek monitoring dan evaluasi.
-                </p>
-            </div>
+        $adaFilter = request()->hasAny(['jenjang', 'kabupaten_kota', 'status_monitoring', 'cari']);
 
-            <a href="{{ route('sekolah.create') }}"
-                class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Tambah Sekolah
-            </a>
-        </div>
+        // Warna badge keterangan per kategori monev (sama dengan halaman Instrumen).
+        $paletKategori = [
+            'BCKS' => 'background:#dbeafe;color:#1d4ed8',
+            'BK' => 'background:#ede9fe;color:#6d28d9',
+            'TENDIK' => 'background:#d1fae5;color:#047857',
+            'GEMBIRA' => 'background:#fef3c7;color:#b45309',
+            'PKGSD MBI' => 'background:#cffafe;color:#0e7490',
+        ];
+    @endphp
 
-        {{-- Notifikasi --}}
-        @if(session('success'))
-            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4">
-                <div class="flex items-center gap-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <p class="text-sm font-medium text-emerald-800">{{ session('success') }}</p>
+    <style>
+        /* ===================== TOKEN WARNA (sama dengan dashboard) ===================== */
+        :root {
+            --p-50: #eff4ff;
+            --p-100: #dbe7fe;
+            --p-200: #bfd4fb;
+            --p-500: #3b82f6;
+            --p-600: #2563eb;
+            --p-700: #1d4ed8;
+            --p-800: #1e40af;
+            --accent: #f5b82e;
+            --ink: #0f1b3d;
+            --muted: #64748b;
+            --line: #e6ebf5;
+        }
+
+        .d-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .d-card {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .d-card-h {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: -.01em;
+        }
+
+        .d-card-s {
+            margin-top: 2px;
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
+        .d-card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 20px 20px 14px;
+        }
+
+        .d-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 9px;
+            background: var(--p-50);
+            color: var(--p-700);
+            font-size: 11.5px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* --- judul halaman --- */
+        .d-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        @media (max-width: 640px) {
+            .d-title-row {
+                flex-direction: column;
+            }
+        }
+
+        .d-h1 {
+            font-size: 28px;
+            font-weight: 400;
+            letter-spacing: -.02em;
+            color: var(--ink);
+            line-height: 1.2;
+        }
+
+        .d-h1 b {
+            font-weight: 700;
+        }
+
+        .d-crumb {
+            margin-top: 4px;
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
+        .d-desc {
+            margin-top: 10px;
+            max-width: 640px;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #475569;
+        }
+
+        /* --- tombol utama --- */
+        .d-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-shrink: 0;
+            height: 46px;
+            padding: 0 18px;
+            border: 0;
+            border-radius: 14px;
+            background: var(--p-600);
+            color: #fff;
+            font-family: inherit;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 20px -8px rgba(37, 99, 235, .7);
+            transition: transform .25s ease, background .25s ease;
+        }
+
+        .d-btn:hover {
+            background: var(--p-700);
+            transform: translateY(-1px);
+        }
+
+        .d-btn svg {
+            transition: transform .3s ease;
+        }
+
+        .d-btn.plus:hover svg {
+            transform: rotate(90deg);
+        }
+
+        .d-btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 46px;
+            padding: 0 18px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: #fff;
+            color: #475569;
+            font-size: 13.5px;
+            font-weight: 600;
+            transition: background .2s, color .2s;
+        }
+
+        .d-btn-ghost:hover {
+            background: var(--p-50);
+            color: var(--p-700);
+        }
+
+        /* --- tile KPI --- */
+        .d-tiles {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        @media (min-width: 1100px) {
+            .d-tiles {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 520px) {
+            .d-tiles {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .d-tile {
+            position: relative;
+            text-align: center;
+            padding: 22px 16px 18px;
+            overflow: hidden;
+            background: var(--t-bg, var(--p-50));
+            border: 1px solid var(--t-line, #dfe8fb);
+            border-radius: 18px;
+            transition: transform .3s cubic-bezier(.22, 1, .36, 1), box-shadow .3s cubic-bezier(.22, 1, .36, 1);
+        }
+
+        .d-tile:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 30px -20px var(--t-glow, rgba(37, 99, 235, .6));
+        }
+
+        .d-tile-clip {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            color: var(--t-clip, #a9bde6);
+        }
+
+        .d-tile-dot {
+            position: absolute;
+            right: 14px;
+            top: 14px;
+            width: 7px;
+            height: 7px;
+            border-radius: 9999px;
+            background: var(--p-600);
+        }
+
+        .d-tile-ico {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 10px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 18px -10px var(--t-glow, rgba(37, 99, 235, .55));
+        }
+
+        .d-tile-label {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .d-tile-val {
+            margin-top: 4px;
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -.02em;
+            color: var(--ink);
+        }
+
+        .d-tile-val small {
+            font-size: 15px;
+            font-weight: 600;
+            color: #7f8cab;
+        }
+
+        .d-tile-note {
+            margin-top: 6px;
+            font-size: 11.5px;
+            color: #55637f;
+        }
+
+        .t-blue {
+            --t-bg: linear-gradient(160deg, #eaf0ff 0%, #d3e1ff 100%);
+            --t-line: #c6d8fb;
+            --t-glow: rgba(37, 99, 235, .55);
+            --t-clip: #8fa9e6;
+        }
+
+        .t-mint {
+            --t-bg: linear-gradient(160deg, #e9faf2 0%, #cdf0e0 100%);
+            --t-line: #bfe8d4;
+            --t-glow: rgba(5, 150, 105, .5);
+            --t-clip: #86c9ae;
+        }
+
+        .t-violet {
+            --t-bg: linear-gradient(160deg, #f2edff 0%, #e0d6ff 100%);
+            --t-line: #d6caf9;
+            --t-glow: rgba(124, 58, 237, .5);
+            --t-clip: #a999dc;
+        }
+
+        .t-amber {
+            --t-bg: linear-gradient(160deg, #fff7de 0%, #fde8ac 100%);
+            --t-line: #f6dd9b;
+            --t-glow: rgba(217, 154, 11, .5);
+            --t-clip: #d3b568;
+        }
+
+        .d-tile::before,
+        .d-tile::after {
+            content: '';
+            position: absolute;
+            z-index: 0;
+            border-radius: 9999px;
+            pointer-events: none;
+        }
+
+        .d-tile::before {
+            right: -30px;
+            bottom: -42px;
+            width: 124px;
+            height: 124px;
+            background: rgba(255, 255, 255, .38);
+        }
+
+        .d-tile::after {
+            left: -26px;
+            bottom: -46px;
+            width: 92px;
+            height: 92px;
+            background: rgba(255, 255, 255, .24);
+        }
+
+        .d-tile>p,
+        .d-tile>.d-tile-ico {
+            position: relative;
+            z-index: 1;
+        }
+
+        .d-tile-dot {
+            z-index: 1;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, .65);
+        }
+
+        /* --- notifikasi sukses --- */
+        .d-alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 18px;
+            border-radius: 16px;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #047857;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.7;
+        }
+
+        /* --- filter --- */
+        .d-filter {
+            padding: 20px;
+        }
+
+        .d-filter-grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        @media (min-width: 768px) {
+            .d-filter-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .d-filter-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
+
+        .d-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .d-field {
+            width: 100%;
+            height: 44px;
+            padding: 0 14px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: #fff;
+            color: #334155;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .d-field::placeholder {
+            color: #94a3b8;
+        }
+
+        .d-field:focus {
+            border-color: var(--p-500);
+            box-shadow: 0 0 0 4px var(--p-100);
+        }
+
+        .d-search {
+            position: relative;
+        }
+
+        .d-search svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            pointer-events: none;
+        }
+
+        .d-search .d-field {
+            padding-left: 40px;
+        }
+
+        .d-filter-foot {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        /* --- badge --- */
+        .d-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .d-badge.sm {
+            padding: 3px 8px;
+            font-size: 11px;
+        }
+
+        /* --- tabel --- */
+        .d-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .d-table th {
+            padding: 12px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            text-align: left;
+            white-space: nowrap;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .d-table th.right {
+            text-align: right;
+        }
+
+        .d-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--line);
+            vertical-align: middle;
+        }
+
+        .d-table tbody tr {
+            transition: background .2s;
+        }
+
+        .d-table tbody tr:hover {
+            background: #f7f9ff;
+        }
+
+        .d-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .d-table .nm {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .d-table .sub {
+            margin-top: 2px;
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .d-table .txt {
+            font-size: 12.5px;
+            color: #475569;
+            white-space: nowrap;
+        }
+
+        .d-table .faint {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        /* --- tombol aksi ikon --- */
+        .d-act {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border: 0;
+            border-radius: 11px;
+            background: transparent;
+            color: var(--ink);
+            cursor: pointer;
+            transition: background .2s, color .2s;
+        }
+
+        .d-act:hover {
+            background: var(--p-50);
+            color: var(--p-700);
+        }
+
+        .d-act.danger {
+            color: #e11d48;
+        }
+
+        .d-act.danger:hover {
+            background: #fff1f2;
+            color: #be123c;
+        }
+
+        /* --- empty state --- */
+        .d-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 56px 24px;
+            text-align: center;
+        }
+
+        .d-empty-ico {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: var(--p-50);
+            color: var(--p-600);
+        }
+    </style>
+
+    <div class="d-wrap">
+
+        {{-- ================= JUDUL HALAMAN ================= --}}
+        <section>
+            <div class="d-title-row">
+                <div>
+                    <h1 class="d-h1">Data <b>Sekolah</b></h1>
+                    <p class="d-crumb">Dashboard &nbsp;›&nbsp; Data Sekolah</p>
+                    <p class="d-desc">Kelola data sekolah yang menjadi objek monitoring dan evaluasi.</p>
                 </div>
+
+                <a href="{{ route('sekolah.create') }}" class="d-btn plus">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round">
+                        <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    Tambah Sekolah
+                </a>
+            </div>
+        </section>
+
+        {{-- ================= NOTIFIKASI ================= --}}
+        @if(session('success'))
+            <div class="d-alert">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:3px">
+                    <path d="M5 13l4 4L19 7" />
+                </svg>
+                <p>{{ session('success') }}</p>
             </div>
         @endif
 
-        {{-- Statistik --}}
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {{-- ================= STATISTIK ================= --}}
+        <div class="d-tiles">
 
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">Total Sekolah</p>
-                        <p class="mt-2 text-3xl font-bold text-slate-800">{{ $totalSekolah }}</p>
-                    </div>
-                    <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3 21h18M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16M9 7h2m-2 4h2m2-4h2m-2 4h2" />
-                        </svg>
-                    </div>
-                </div>
+            {{-- Total Sekolah --}}
+            <div class="d-tile t-blue">
+                <svg class="d-tile-clip" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                </svg>
+                <span class="d-tile-dot"></span>
+                <span class="d-tile-ico" style="color: var(--p-600)">
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 21h18M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16M9 7h2m-2 4h2m2-4h2m-2 4h2" />
+                    </svg>
+                </span>
+                <p class="d-tile-label">Total Sekolah</p>
+                <p class="d-tile-val">{{ $totalSekolah }}</p>
+                <p class="d-tile-note">Seluruh sekolah terdaftar</p>
             </div>
 
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">Sudah Dimonitor</p>
-                        <p class="mt-2 text-3xl font-bold text-emerald-600">{{ $sudahDimonitor }}</p>
-                    </div>
-                    <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                    </div>
-                </div>
+            {{-- Sudah Dimonitor --}}
+            <div class="d-tile t-mint">
+                <svg class="d-tile-clip" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                </svg>
+                <span class="d-tile-dot" style="background:#10b981"></span>
+                <span class="d-tile-ico" style="color:#059669">
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </span>
+                <p class="d-tile-label">Sudah Dimonitor</p>
+                <p class="d-tile-val">{{ $sudahDimonitor }}<small> / {{ $totalSekolah }}</small></p>
+                <p class="d-tile-note">{{ $pctSudah }}% dari total sekolah</p>
             </div>
 
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">Belum Dimonitor</p>
-                        <p class="mt-2 text-3xl font-bold text-amber-600">{{ $belumDimonitor }}</p>
-                    </div>
-                    <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 9v3m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" />
-                        </svg>
-                    </div>
-                </div>
+            {{-- Belum Dimonitor --}}
+            <div class="d-tile t-amber">
+                <svg class="d-tile-clip" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                </svg>
+                <span class="d-tile-dot" style="background: var(--accent)"></span>
+                <span class="d-tile-ico" style="color:#d99a0b">
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v3m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" />
+                    </svg>
+                </span>
+                <p class="d-tile-label">Belum Dimonitor</p>
+                <p class="d-tile-val">{{ $belumDimonitor }}<small> / {{ $totalSekolah }}</small></p>
+                <p class="d-tile-note">{{ $pctBelum }}% dari total sekolah</p>
             </div>
 
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">Kabupaten/Kota</p>
-                        <p class="mt-2 text-3xl font-bold text-purple-600">{{ $wilayah }}</p>
-                    </div>
-                    <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-purple-50 text-purple-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 21s8-4.5 8-11a8 8 0 10-16 0c0 6.5 8 11 8 11z" />
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 10a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
-                        </svg>
-                    </div>
-                </div>
+            {{-- Kabupaten/Kota --}}
+            <div class="d-tile t-violet">
+                <svg class="d-tile-clip" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                </svg>
+                <span class="d-tile-dot" style="background:#8b5cf6"></span>
+                <span class="d-tile-ico" style="color:#7c3aed">
+                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 21s8-4.5 8-11a8 8 0 10-16 0c0 6.5 8 11 8 11z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
+                    </svg>
+                </span>
+                <p class="d-tile-label">Kabupaten/Kota</p>
+                <p class="d-tile-val">{{ $wilayah }}</p>
+                <p class="d-tile-note">Wilayah yang tercakup</p>
             </div>
 
         </div>
 
-        {{-- Filter --}}
-        <form action="{{ route('sekolah.index') }}" method="GET"
-            class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        {{-- ================= FILTER ================= --}}
+        <form action="{{ route('sekolah.index') }}" method="GET" class="d-card d-filter">
 
-            <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h2 class="text-base font-bold text-slate-800">Filter Data Sekolah</h2>
-                    <p class="mt-1 text-sm text-slate-500">
-                        Cari sekolah berdasarkan jenjang, wilayah, atau status monitoring.
-                    </p>
-                </div>
-
-                @if(request()->hasAny(['jenjang', 'kabupaten_kota', 'status_monitoring', 'cari']))
-                    <a href="{{ route('sekolah.index') }}" class="text-sm font-semibold text-blue-600 hover:text-blue-800">
-                        Reset filter
-                    </a>
-                @endif
+            <div style="margin-bottom:16px">
+                <h2 class="d-card-h">Filter Data Sekolah</h2>
+                <p class="d-card-s">Cari sekolah berdasarkan jenjang, wilayah, atau status monitoring.</p>
             </div>
 
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div class="d-filter-grid">
 
                 <div>
-                    <label for="jenjang" class="mb-2 block text-sm font-medium text-slate-700">
-                        Jenjang
-                    </label>
-                    <select id="jenjang" name="jenjang"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                    <label for="jenjang" class="d-label">Jenjang</label>
+                    <select id="jenjang" name="jenjang" class="d-field">
                         <option value="">Semua Jenjang</option>
                         @foreach(['SD', 'SMP', 'SMA', 'SMK'] as $jenjang)
                             <option value="{{ $jenjang }}" @selected(request('jenjang') === $jenjang)>
@@ -146,11 +690,8 @@
                 </div>
 
                 <div>
-                    <label for="kabupaten_kota" class="mb-2 block text-sm font-medium text-slate-700">
-                        Kabupaten/Kota
-                    </label>
-                    <select id="kabupaten_kota" name="kabupaten_kota"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                    <label for="kabupaten_kota" class="d-label">Kabupaten/Kota</label>
+                    <select id="kabupaten_kota" name="kabupaten_kota" class="d-field">
                         <option value="">Semua Wilayah</option>
                         @foreach($daftarWilayah ?? [] as $namaWilayah)
                             <option value="{{ $namaWilayah }}" @selected(request('kabupaten_kota') === $namaWilayah)>
@@ -161,11 +702,8 @@
                 </div>
 
                 <div>
-                    <label for="status_monitoring" class="mb-2 block text-sm font-medium text-slate-700">
-                        Status Monitoring
-                    </label>
-                    <select id="status_monitoring" name="status_monitoring"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                    <label for="status_monitoring" class="d-label">Status Monitoring</label>
+                    <select id="status_monitoring" name="status_monitoring" class="d-field">
                         <option value="">Semua Status</option>
                         <option value="Sudah Dimonitor" @selected(request('status_monitoring') === 'Sudah Dimonitor')>
                             Sudah Dimonitor
@@ -177,29 +715,26 @@
                 </div>
 
                 <div>
-                    <label for="cari" class="mb-2 block text-sm font-medium text-slate-700">
-                        Pencarian
-                    </label>
-                    <div class="relative">
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                            class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <label for="cari" class="d-label">Pencarian</label>
+                    <div class="d-search">
+                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M21 21l-4.35-4.35m2.35-5.65a8 8 0 11-16 0 8 8 0 0116 0z" />
                         </svg>
                         <input id="cari" type="text" name="cari" value="{{ request('cari') }}"
-                            placeholder="Cari nama atau NPSN..."
-                            class="w-full rounded-lg border border-slate-300 py-2.5 pl-10 pr-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                            placeholder="Cari nama atau NPSN..." class="d-field">
                     </div>
                 </div>
 
             </div>
 
-            <div class="mt-4 flex justify-end">
-                <button type="submit"
-                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2">
+            <div class="d-filter-foot">
+                @if($adaFilter)
+                    <a href="{{ route('sekolah.index') }}" class="d-btn-ghost">Reset Filter</a>
+                @endif
+
+                <button type="submit" class="d-btn">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M21 21l-4.35-4.35m2.35-5.65a8 8 0 11-16 0 8 8 0 0116 0z" />
                     </svg>
@@ -209,56 +744,38 @@
 
         </form>
 
-        {{-- Tabel Sekolah --}}
-        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        {{-- ================= TABEL SEKOLAH ================= --}}
+        <div class="d-card">
 
-            <div
-                class="flex flex-col gap-2 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="d-card-top">
                 <div>
-                    <h2 class="text-base font-bold text-slate-800">Daftar Sekolah</h2>
-                    <p class="mt-1 text-sm text-slate-500">
-                        Data sekolah beserta rekap aktivitas monitoring dan evaluasi.
-                    </p>
+                    <h2 class="d-card-h">Daftar Sekolah</h2>
+                    <p class="d-card-s">Data sekolah beserta rekap aktivitas monitoring dan evaluasi.</p>
                 </div>
-                <span class="text-sm text-slate-500">
-                    Menampilkan {{ $sekolahs->count() }} dari {{ $sekolahs->total() }} sekolah
+
+                <span class="d-pill">
+                    {{ $sekolahs->count() }} dari {{ $sekolahs->total() }} sekolah
                 </span>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200">
+            <div style="overflow-x:auto">
+                <table class="d-table">
 
-                    <thead class="bg-slate-50">
+                    <thead>
                         <tr>
-                            <th
-                                class="whitespace-nowrap px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                                No</th>
-                            <th
-                                class="whitespace-nowrap px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                                NPSN</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">Nama
-                                Sekolah</th>
-                            <th
-                                class="whitespace-nowrap px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                                Jenjang</th>
-                            <th
-                                class="whitespace-nowrap px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                                Kabupaten/Kota</th>
-                            <th
-                                class="whitespace-nowrap px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                                Status</th>
-                            <th
-                                class="whitespace-nowrap px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                                Data Monev</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                                Keterangan</th>
-                            <th
-                                class="whitespace-nowrap px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
-                                Aksi</th>
+                            <th>No</th>
+                            <th>NPSN</th>
+                            <th>Nama Sekolah</th>
+                            <th>Jenjang</th>
+                            <th>Kabupaten/Kota</th>
+                            <th>Status</th>
+                            <th>Data Monev</th>
+                            <th>Keterangan</th>
+                            <th class="right">Aksi</th>
                         </tr>
                     </thead>
 
-                    <tbody class="divide-y divide-slate-100 bg-white">
+                    <tbody>
 
                         @forelse($sekolahs as $index => $sekolah)
 
@@ -309,115 +826,101 @@
                                     ->all();
 
                                 $kategoriMonev = array_values(array_unique(
-                                    array_merge($kategoriMonev  , $kategoriWawancara)
+                                    array_merge($kategoriMonev, $kategoriWawancara)
                                 ));
 
                             @endphp
 
-                            <tr class="transition hover:bg-slate-50">
+                            <tr>
 
-                                <td class="whitespace-nowrap px-4 py-4 text-sm text-slate-600">
-                                    {{ $sekolahs->firstItem() + $index }}
-                                </td>
+                                <td class="txt">{{ $sekolahs->firstItem() + $index }}</td>
 
-                                <td class="whitespace-nowrap px-4 py-4 text-sm text-slate-700">
-                                    {{ $sekolah->npsn ?: '—' }}
-                                </td>
+                                <td class="txt">{{ $sekolah->npsn ?: '—' }}</td>
 
-                                <td class="min-w-48 px-4 py-4">
-                                    <div class="font-semibold text-slate-800">
-                                        {{ $sekolah->nama_sekolah }}
-                                    </div>
+                                <td style="min-width:190px">
+                                    <p class="nm">{{ $sekolah->nama_sekolah }}</p>
                                     @if($sekolah->kecamatan)
-                                        <div class="mt-1 text-xs text-slate-500">
-                                            Kec. {{ $sekolah->kecamatan }}
-                                        </div>
+                                        <p class="sub">Kec. {{ $sekolah->kecamatan }}</p>
                                     @endif
                                 </td>
 
-                                <td class="whitespace-nowrap px-4 py-4">
+                                <td style="white-space:nowrap">
                                     @if($sekolah->jenjang)
-                                        <span class="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                                        <span class="d-badge" style="background:#dbeafe;color:#1d4ed8">
                                             {{ $sekolah->jenjang }}
                                         </span>
                                     @else
-                                        <span class="text-sm text-slate-400">—</span>
+                                        <span class="faint">—</span>
                                     @endif
                                 </td>
 
-                                <td class="whitespace-nowrap px-4 py-4 text-sm text-slate-600">
-                                    {{ $sekolah->kabupaten_kota ?: '—' }}
-                                </td>
+                                <td class="txt">{{ $sekolah->kabupaten_kota ?: '—' }}</td>
 
-                                <td class="whitespace-nowrap px-4 py-4">
+                                <td style="white-space:nowrap">
                                     @if($sekolah->status_monitoring === 'Sudah Dimonitor')
-                                        <span
-                                            class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                                            Sudah Dimonitor
-                                        </span>
+                                        <span class="d-badge" style="background:#d1fae5;color:#047857">Sudah Dimonitor</span>
                                     @else
-                                        <span
-                                            class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
-                                            <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
-                                            Belum Dimonitor
-                                        </span>
+                                        <span class="d-badge" style="background:#fef3c7;color:#b45309">Belum Dimonitor</span>
                                     @endif
                                 </td>
 
-                                <td class="whitespace-nowrap px-4 py-4 text-sm text-slate-700">
-                                    <div class="font-semibold">{{ $jumlahInstrumen }} instrumen</div>
-                                    <div class="mt-1 text-xs text-slate-500">{{ $jumlahWawancara }} wawancara</div>
+                                <td style="white-space:nowrap">
+                                    <p class="nm">{{ $jumlahInstrumen }} instrumen</p>
+                                    <p class="sub">{{ $jumlahWawancara }} wawancara</p>
                                 </td>
 
-                                <td class="min-w-36 px-4 py-4">
+                                <td style="min-width:150px">
                                     @if(count($kategoriMonev))
-                                        <div class="flex flex-wrap gap-1.5">
+                                        <div style="display:flex;flex-wrap:wrap;gap:6px">
                                             @foreach($kategoriMonev as $kategori)
-                                                <span class="rounded-md bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700">
+                                                <span class="d-badge sm"
+                                                    style="{{ $paletKategori[$kategori] ?? 'background:#f1f5f9;color:#475569' }}">
                                                     {{ $kategori }}
                                                 </span>
                                             @endforeach
                                         </div>
                                     @else
-                                        <span class="text-xs text-slate-400">Belum ada aktivitas</span>
+                                        <span class="faint">Belum ada aktivitas</span>
                                     @endif
                                 </td>
 
-                                {{-- AKSI (DISAMAKAN DENGAN MANAJEMEN AKUN) --}}
-                                <td class="whitespace-nowrap px-4 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-2">
-                                        
-                                        <!-- Tombol Detail (Ikon Mata) -->
-                                        <a href="{{ route('sekolah.show', $sekolah) }}" 
-                                           title="Lihat Detail"
-                                           class="inline-flex items-center justify-center rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-100">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                {{-- Aksi --}}
+                                <td style="white-space:nowrap;text-align:right">
+                                    <div style="display:flex;align-items:center;justify-content:flex-end;gap:2px">
+
+                                        {{-- Detail --}}
+                                        <a href="{{ route('sekolah.show', $sekolah) }}" title="Lihat Detail"
+                                            aria-label="Lihat Detail" class="d-act">
+                                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
                                         </a>
 
-                                        <!-- Tombol Edit (Ikon Pensil) -->
-                                        <a href="{{ route('sekolah.edit', $sekolah) }}" 
-                                           title="Edit Data"
-                                           class="inline-flex items-center justify-center rounded-lg border border-blue-200 p-2 text-blue-700 transition hover:bg-blue-50">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                        {{-- Edit --}}
+                                        <a href="{{ route('sekolah.edit', $sekolah) }}" title="Edit" aria-label="Edit"
+                                            class="d-act">
+                                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
                                         </a>
 
-                                        <!-- Tombol Hapus (Ikon Tempat Sampah) -->
+                                        {{-- Hapus --}}
                                         <form action="{{ route('sekolah.destroy', $sekolah) }}" method="POST"
-                                              onsubmit="return confirm('Apakah Anda yakin ingin menghapus data sekolah ini?')"
-                                              class="inline-flex m-0">
+                                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus data sekolah ini?')"
+                                            style="display:inline-flex;margin:0">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" 
-                                                    title="Hapus Data"
-                                                    class="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 p-2 text-red-600 transition hover:bg-red-100">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                            <button type="submit" title="Hapus" aria-label="Hapus" class="d-act danger">
+                                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
                                             </button>
                                         </form>
@@ -430,29 +933,27 @@
                         @empty
 
                             <tr>
-                                <td colspan="9" class="p-0">
-                                    <div
-                                        class="flex min-h-[320px] w-full flex-col items-center justify-center px-6 py-12 text-center">
+                                <td colspan="9" style="padding:0">
+                                    <div class="d-empty">
 
-                                        <div
-                                            class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <div class="d-empty-ico">
+                                            <svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                stroke-width="1.8">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="M3 21h18M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16" />
                                             </svg>
                                         </div>
 
-                                        <h3 class="mt-5 text-base font-bold text-slate-800">
-                                            @if(request()->hasAny(['jenjang', 'kabupaten_kota', 'status_monitoring', 'cari']))
+                                        <h3 class="d-card-h" style="margin-top:6px">
+                                            @if($adaFilter)
                                                 Data sekolah tidak ditemukan
                                             @else
                                                 Belum ada data sekolah
                                             @endif
                                         </h3>
 
-                                        <p class="mt-2 max-w-md text-sm leading-relaxed text-slate-500">
-                                            @if(request()->hasAny(['jenjang', 'kabupaten_kota', 'status_monitoring', 'cari']))
+                                        <p class="d-card-s" style="max-width:420px;line-height:1.7">
+                                            @if($adaFilter)
                                                 Tidak ada sekolah yang sesuai dengan filter pencarian. Coba ubah atau reset filter.
                                             @else
                                                 Belum terdapat data sekolah di dalam database. Tambahkan data sekolah untuk mulai
@@ -460,17 +961,15 @@
                                             @endif
                                         </p>
 
-                                        @if(request()->hasAny(['jenjang', 'kabupaten_kota', 'status_monitoring', 'cari']))
-                                            <a href="{{ route('sekolah.index') }}"
-                                                class="mt-6 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                                        @if($adaFilter)
+                                            <a href="{{ route('sekolah.index') }}" class="d-btn-ghost" style="margin-top:8px">
                                                 Reset Filter
                                             </a>
                                         @else
-                                            <a href="{{ route('sekolah.create') }}"
-                                                class="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                            <a href="{{ route('sekolah.create') }}" class="d-btn plus" style="margin-top:8px">
+                                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                    stroke-width="2.2" stroke-linecap="round">
+                                                    <path d="M12 5v14M5 12h14" />
                                                 </svg>
                                                 Tambah Sekolah
                                             </a>
@@ -488,7 +987,7 @@
 
             {{-- Pagination --}}
             @if($sekolahs->hasPages())
-                <div class="border-t border-slate-200 px-5 py-4">
+                <div style="border-top:1px solid var(--line);padding:16px 20px">
                     {{ $sekolahs->appends(request()->query())->links() }}
                 </div>
             @endif

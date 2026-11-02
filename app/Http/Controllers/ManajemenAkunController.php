@@ -36,6 +36,8 @@ class ManajemenAkunController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        // Statistik selalu dihitung ulang dari database (tidak terpengaruh filter),
+        // sehingga langsung berubah setelah akun diaktifkan / dinonaktifkan.
         $totalAkun = User::where('role', 'petugas_monev')->count();
         $akunAktif = User::where('role', 'petugas_monev')
             ->where('is_active', true)
@@ -68,15 +70,22 @@ class ManajemenAkunController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => [
-                'required', 'string', 'max:100', 'alpha_dash',
+                'required',
+                'string',
+                'max:100',
+                'alpha_dash',
                 'unique:users,username',
             ],
             'nip' => [
-                'required', 'string', 'max:30',
+                'required',
+                'string',
+                'max:30',
                 'unique:users,nip',
             ],
             'password' => [
-                'required', 'confirmed', Password::min(8),
+                'required',
+                'confirmed',
+                Password::min(8),
             ],
         ], [
             'name.required' => 'Nama wajib diisi.',
@@ -149,15 +158,22 @@ class ManajemenAkunController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'username' => [
-                'required', 'string', 'max:100', 'alpha_dash',
+                'required',
+                'string',
+                'max:100',
+                'alpha_dash',
                 Rule::unique('users', 'username')->ignore($manajemen_akun->id),
             ],
             'nip' => [
-                'required', 'string', 'max:30',
+                'required',
+                'string',
+                'max:30',
                 Rule::unique('users', 'nip')->ignore($manajemen_akun->id),
             ],
             'password' => [
-                'nullable', 'confirmed', Password::min(8),
+                'nullable',
+                'confirmed',
+                Password::min(8),
             ],
         ], [
             'name.required' => 'Nama wajib diisi.',
@@ -177,7 +193,7 @@ class ManajemenAkunController extends Controller
             . '@bgtk-monev.local';
 
         // Password hanya diubah jika kolom diisi.
-        if (! empty($validated['password'])) {
+        if (!empty($validated['password'])) {
             $manajemen_akun->password = $validated['password'];
         }
 
@@ -189,7 +205,7 @@ class ManajemenAkunController extends Controller
     }
 
     /**
-     * Mengaktifkan atau menonaktifkan akun.
+     * Mengaktifkan atau menonaktifkan akun (toggle status).
      */
     public function destroy(User $manajemen_akun)
     {
@@ -198,16 +214,23 @@ class ManajemenAkunController extends Controller
             404
         );
 
-        $manajemen_akun->is_active = ! $manajemen_akun->is_active;
+        // Cegah pengguna menonaktifkan akunnya sendiri.
+        if ($manajemen_akun->id === auth()->id()) {
+            return redirect()
+                ->route('manajemen-akun.index')
+                ->with('error', 'Anda tidak dapat menonaktifkan akun yang sedang digunakan.');
+        }
+
+        $manajemen_akun->is_active = !$manajemen_akun->is_active;
         $manajemen_akun->save();
 
         $status = $manajemen_akun->is_active
-            ? 'diaktifkan'
+            ? 'diaktifkan kembali'
             : 'dinonaktifkan';
 
         return redirect()
             ->route('manajemen-akun.index')
-            ->with('success', "Akun berhasil {$status}.");
+            ->with('success', "Akun {$manajemen_akun->name} berhasil {$status}.");
     }
 
     /**

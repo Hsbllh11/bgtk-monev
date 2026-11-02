@@ -20,7 +20,11 @@ class TendikController extends Controller
     /**
      * Jabatan yang memperoleh seluruh level (1–4).
      */
-    private const JABATAN_SEMUA_LEVEL = ['Tendik', 'Operator'];
+    private const JABATAN_SEMUA_LEVEL = [
+        'Tendik',
+        'Operator',
+        'Bendahara',
+    ];
 
     /**
      * Pembagian nomor indikator berdasarkan level.

@@ -6,246 +6,510 @@
 
 @section('content')
 
-    <div class="mx-auto max-w-7xl space-y-6">
+    <style>
+        /* ===================== TOKEN WARNA (sama dengan Edit BCKS / Data Sekolah) ===================== */
+        :root {
+            --p-50: #eff4ff;
+            --p-100: #dbe7fe;
+            --p-200: #bfd4fb;
+            --p-500: #3b82f6;
+            --p-600: #2563eb;
+            --p-700: #1d4ed8;
+            --p-800: #1e40af;
+            --accent: #f5b82e;
+            --ink: #0f1b3d;
+            --muted: #64748b;
+            --line: #e6ebf5;
+        }
+
+        .d-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .d-form {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .d-card {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .d-card-h {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: -.01em;
+        }
+
+        .d-card-s {
+            margin-top: 2px;
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
+        .d-card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 20px 20px 14px;
+        }
+
+        /* --- judul halaman --- */
+        .d-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        @media (max-width: 640px) {
+            .d-title-row {
+                flex-direction: column;
+            }
+        }
+
+        .d-h1 {
+            font-size: 28px;
+            font-weight: 400;
+            letter-spacing: -.02em;
+            color: var(--ink);
+            line-height: 1.2;
+        }
+
+        .d-h1 b {
+            font-weight: 700;
+        }
+
+        .d-crumb {
+            margin-top: 4px;
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
+        .d-crumb a {
+            color: inherit;
+            transition: color .2s;
+        }
+
+        .d-crumb a:hover {
+            color: var(--p-600);
+        }
+
+        .d-desc {
+            margin-top: 10px;
+            max-width: 640px;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #475569;
+        }
+
+        /* --- tombol pastel (warna mengikuti tile) --- */
+        .d-pbtn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-shrink: 0;
+            height: 46px;
+            padding: 0 18px;
+            border-radius: 14px;
+            background: var(--b-bg);
+            border: 1px solid var(--b-line);
+            color: var(--b-ink);
+            font-family: inherit;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+        }
+
+        .d-pbtn:hover {
+            transform: translateY(-1px);
+            filter: brightness(.97);
+            box-shadow: 0 12px 22px -14px var(--b-glow);
+        }
+
+        .d-pbtn:disabled {
+            opacity: .7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .d-pbtn svg {
+            flex-shrink: 0;
+            transition: transform .3s ease;
+        }
+
+        .d-pbtn.back:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .b-blue {
+            --b-bg: linear-gradient(160deg, #eaf0ff 0%, #d3e1ff 100%);
+            --b-line: #c6d8fb;
+            --b-ink: #1d4ed8;
+            --b-glow: rgba(37, 99, 235, .7);
+        }
+
+        .b-mint {
+            --b-bg: linear-gradient(160deg, #e9faf2 0%, #cdf0e0 100%);
+            --b-line: #bfe8d4;
+            --b-ink: #047857;
+            --b-glow: rgba(5, 150, 105, .7);
+        }
+
+        .d-foot {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* --- info instrumen + progres --- */
+        .d-info-card {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        @media (min-width: 1024px) {
+            .d-info-card {
+                grid-template-columns: minmax(0, 1fr) 280px;
+            }
+        }
+
+        .d-info-main {
+            padding: 22px;
+            border-left: 4px solid var(--p-600);
+        }
+
+        .d-info-head {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .d-info-ico {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: var(--p-50);
+            color: var(--p-600);
+        }
+
+        .d-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 18px;
+            padding: 12px 14px;
+            border: 1px dashed var(--p-200);
+            border-radius: 14px;
+            background: #f5f8ff;
+            font-size: 12.5px;
+            line-height: 1.7;
+            color: #475569;
+        }
+
+        .d-note b.t {
+            display: block;
+            font-weight: 700;
+            color: var(--p-700);
+        }
+
+        .d-note ol {
+            margin: 4px 0 0;
+            padding-left: 20px;
+            list-style: decimal;
+        }
+
+        .d-note li+li {
+            margin-top: 2px;
+        }
+
+        .d-prog {
+            padding: 22px;
+            border-top: 1px solid var(--line);
+            background: #f9fbff;
+        }
+
+        @media (min-width: 1024px) {
+            .d-prog {
+                border-top: 0;
+                border-left: 1px solid var(--line);
+            }
+        }
+
+        .d-prog-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .d-prog-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .d-prog-pct {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--p-600);
+        }
+
+        .d-bar {
+            height: 8px;
+            margin-top: 10px;
+            overflow: hidden;
+            border-radius: 9999px;
+            background: #e6ebf5;
+        }
+
+        .d-bar>div {
+            height: 100%;
+            border-radius: 9999px;
+            background: var(--p-600);
+            transition: width .3s ease;
+        }
+
+        .d-prog-val {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--ink);
+        }
+
+        .d-prog-sep {
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid var(--line);
+        }
+
+        /* --- notifikasi error --- */
+        .d-error {
+            padding: 16px 20px;
+            border-radius: 16px;
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: #be123c;
+        }
+
+        .d-error b {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .d-error ul {
+            margin: 8px 0 0 18px;
+            list-style: disc;
+            font-size: 12.5px;
+            line-height: 1.8;
+        }
+
+        /* --- form --- */
+        .d-form-grid {
+            display: grid;
+            gap: 18px;
+            padding: 6px 20px 22px;
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        @media (min-width: 768px) {
+            .d-form-grid.c2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .d-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--ink);
+            line-height: 1.6;
+        }
+
+        .d-label i {
+            color: #e11d48;
+            font-style: normal;
+        }
+
+        .d-field {
+            width: 100%;
+            height: 44px;
+            padding: 0 14px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: #fff;
+            color: #334155;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .d-field::placeholder {
+            color: #94a3b8;
+        }
+
+        .d-field:focus {
+            border-color: var(--p-500);
+            box-shadow: 0 0 0 4px var(--p-100);
+        }
+
+        textarea.d-field {
+            height: auto;
+            min-height: 120px;
+            padding: 12px 14px;
+            line-height: 1.7;
+            resize: vertical;
+        }
+
+        .d-essay {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            padding: 6px 20px 22px;
+        }
+    </style>
+
+    <div class="d-wrap">
 
         {{-- =========================================================
         HEADER
         ========================================================== --}}
-
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
-            <div class="flex items-center gap-3">
-
+        <section>
+            <div class="d-title-row">
                 <div>
-
-                    <nav class="flex items-center gap-2 text-sm text-slate-500">
-
-                        <a href="{{ route('instrumen.index') }}" class="transition hover:text-blue-600">Instrumen</a>
-
-                        <span class="text-slate-300">/</span>
-
-                        <span class="font-medium text-slate-700">Edit BK Instrumen</span>
-
-                    </nav>
-
-                    <h1 class="text-2xl font-bold text-slate-800">
-
-                        Edit Instrumen Monev BK
-
-                    </h1>
-
-                    <p class="mt-1 text-sm text-slate-500">
-
-                        Perbarui data identitas, lokasi, dan jawaban BK.
-
+                    <h1 class="d-h1">Edit Instrumen Monev <b>BK</b></h1>
+                    <p class="d-crumb">
+                        Dashboard &nbsp;›&nbsp;
+                        <a href="{{ route('instrumen.index') }}">Instrumen</a>
+                        &nbsp;›&nbsp; Edit BK Instrumen
                     </p>
-
+                    <p class="d-desc">
+                        Perbarui data identitas, lokasi, dan jawaban BK.
+                    </p>
                 </div>
 
+                {{-- Kembali --}}
+                <a href="{{ route('bk.show', $submission) }}" class="d-pbtn b-blue back">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                    Kembali
+                </a>
             </div>
-
-            <a href="{{ route('bk.show', $submission) }}"
-                class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
-
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2">
-
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-
-                </svg>
-
-                Kembali
-
-            </a>
-
-        </div>
+        </section>
 
         {{-- =========================================================
         PETUNJUK + PROGRESS (satu kartu)
         ========================================================== --}}
+        <div class="d-card">
+            <div class="d-info-card">
 
-        <style>
-            .instr-card {
-                display: flex;
-                flex-direction: column;
-            }
+                {{-- ===================== KIRI: PETUNJUK ===================== --}}
+                <div class="d-info-main">
+                    <div class="d-info-head">
+                        <div class="d-info-ico">
+                            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
 
-            .instr-side {
-                width: 100%;
-                border-top: 1px solid #e2e8f0;
-            }
-
-            @media (min-width: 1024px) {
-
-                .instr-card {
-                    flex-direction: row;
-                }
-
-                .instr-side {
-                    width: 20rem;
-                    flex: 0 0 20rem;
-                    border-top: 0;
-                    border-left: 1px solid #e2e8f0;
-                }
-
-            }
-        </style>
-
-        <div class="instr-card overflow-hidden rounded-2xl bg-white shadow-sm"
-            style="border: 1px solid #e2e8f0; border-left: 4px solid #2563eb;">
-
-            {{-- ===================== KIRI: PETUNJUK ===================== --}}
-
-            <div style="flex: 1 1 0%; min-width: 0; padding: 24px;">
-
-                <div style="display: flex; align-items: flex-start; gap: 16px;">
-
-                    <div
-                        style="display: flex; align-items: center; justify-content: center; flex: 0 0 44px; width: 44px; height: 44px; border-radius: 12px; background: #eff6ff; color: #2563eb;">
-
-                        <svg xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px;" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-
-                        </svg>
-
+                        <div style="min-width:0">
+                            <h2 class="d-card-h">Instrumen Monitoring dan Evaluasi BK</h2>
+                            <p class="d-card-s" style="line-height:1.7">
+                                Monitoring dan Evaluasi Diseminasi Implementasi 7 Jurus BK Hebat.
+                            </p>
+                        </div>
                     </div>
 
-                    <div>
+                    <div class="d-note">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="flex-shrink:0;margin-top:3px;color:var(--p-600)">
+                            <path d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+                        </svg>
 
-                        <h2 class="text-lg font-bold text-slate-800">
+                        <div>
+                            <b class="t">Petunjuk pengisian</b>
 
-                            Instrumen Monitoring dan Evaluasi BK
+                            <ol>
+                                <li>
+                                    Isilah instrumen sesuai dengan fakta yang diketahui,
+                                    dialami, dilakukan, dan dirasakan.
+                                </li>
 
-                        </h2>
+                                <li>
+                                    Bacalah setiap pernyataan pada Bagian A dengan cermat,
+                                    kemudian pilih skor <strong>1, 2, 3, atau 4</strong> sesuai tingkat ketercapaian kondisi riil di lapangan.
+                                </li>
 
-                        <p class="mt-1 text-sm leading-6 text-slate-500">
+                                <li>
+                                    Bacalah setiap pertanyaan pada Bagian B dan tuliskan
+                                    jawaban secara singkat, padat, dan jelas.
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
 
-                            Monitoring dan Evaluasi Diseminasi Implementasi 7 Jurus BK Hebat.
+                {{-- ===================== KANAN: PROGRES ===================== --}}
+                <div class="d-prog">
+                    <div class="d-prog-row">
+                        <span class="d-prog-label">Progres pengisian</span>
+                        <span id="progressPercent" class="d-prog-pct">0%</span>
+                    </div>
 
+                    <div class="d-bar">
+                        <div id="progressBar" style="width: 0%"></div>
+                    </div>
+
+                    <div class="d-prog-row" style="margin-top:10px">
+                        <span class="d-prog-val">
+                            <span id="answeredCount">0</span> / {{ $questions->count() }} butir
+                        </span>
+
+                        <span class="d-prog-label" style="font-weight:500">Terjawab</span>
+                    </div>
+
+                    <div class="d-prog-sep">
+                        <p class="d-prog-label">Skor sementara</p>
+                        <p id="jawabanSummary" class="d-prog-val" style="margin-top:4px">
+                            Belum ada jawaban
                         </p>
-
                     </div>
-
-                </div>
-
-                <div
-                    style="margin-top: 20px; padding: 16px 20px; border: 1px dashed #bfdbfe; border-radius: 12px; background: #f5f9ff;">
-
-                    <div
-                        style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #1d4ed8;">
-
-                        <svg xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-
-                        </svg>
-
-                        Petunjuk pengisian
-
-                    </div>
-
-                    <ol
-                        style="margin: 8px 0 0; padding-left: 22px; list-style: decimal; font-size: 13px; line-height: 1.7; color: #1e3a8a;">
-
-                        <li>
-
-                            Isilah instrumen sesuai dengan fakta yang diketahui,
-
-                            dialami, dilakukan, dan dirasakan.
-
-                        </li>
-
-                        <li>
-
-                            Bacalah setiap pernyataan pada Bagian A dengan cermat,
-
-                            kemudian pilih skor <strong>1, 2, 3, atau 4</strong> sesuai tingkat ketercapaian kondisi riil di lapangan.
-
-                        </li>
-
-                        <li>
-
-                            Bacalah setiap pertanyaan pada Bagian B dan tuliskan
-
-                            jawaban secara singkat, padat, dan jelas.
-
-                        </li>
-
-                    </ol>
-
                 </div>
 
             </div>
-
-            {{-- ===================== KANAN: PROGRES ===================== --}}
-
-            <div class="instr-side" style="padding: 24px; background: #f8fafc;">
-
-                <div
-                    style="display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 500; color: #64748b;">
-
-                    <span>Progres pengisian</span>
-
-                    <span id="progressPercent" style="font-weight: 700; color: #2563eb;">0%</span>
-
-                </div>
-
-                <div style="margin-top: 8px; height: 8px; overflow: hidden; border-radius: 9999px; background: #e2e8f0;">
-
-                    <div id="progressBar"
-                        style="width: 0%; height: 100%; border-radius: 9999px; background: #2563eb; transition: width 0.3s;">
-                    </div>
-
-                </div>
-
-                <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 12px;">
-
-                    <span style="font-size: 14px; font-weight: 700; color: #0f172a;">
-
-                        <span id="answeredCount">0</span> / {{ $questions->count() }} butir
-
-                    </span>
-
-                    <span style="font-size: 12px; color: #94a3b8;">Terjawab</span>
-
-                </div>
-
-                <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
-
-                    <p style="font-size: 12px; color: #64748b;">Skor sementara</p>
-
-                    <p id="jawabanSummary" style="margin-top: 4px; font-size: 14px; font-weight: 700; color: #0f172a;">
-
-                        Belum ada jawaban
-
-                    </p>
-
-                </div>
-
-            </div>
-
         </div>
 
         {{-- =========================================================
         ERROR VALIDATION
         ========================================================== --}}
-
         @if ($errors->any())
 
-            <div class="rounded-2xl border border-red-200 bg-red-50 p-5">
+            <div class="d-error">
 
-                <div class="font-semibold text-red-800">
+                <b>Pengisian belum dapat disimpan.</b>
 
-                    Pengisian belum dapat disimpan.
-
-                </div>
-
-                <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-red-700">
+                <ul>
 
                     @foreach ($errors->all() as $error)
 
@@ -266,8 +530,7 @@
         {{-- =========================================================
         FORM
         ========================================================== --}}
-
-        <form id="bkEditForm" action="{{ route('bk.update', $submission) }}" method="POST" class="space-y-6">
+        <form id="bkEditForm" action="{{ route('bk.update', $submission) }}" method="POST" class="d-form">
 
             @csrf
             @method('PUT')
@@ -275,101 +538,59 @@
             {{-- =====================================================
             1. IDENTITAS PETUGAS MONEV
             ====================================================== --}}
+            <section class="d-card">
 
-            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                <div class="border-b border-slate-200 bg-slate-50 px-6 py-5">
-
-                    <div class="flex items-center gap-3">
-
-                        <div>
-
-                            <h2 class="text-lg font-bold text-slate-800">
-
-                                A. Identitas Petugas Monev
-
-                            </h2>
-
-                            <p class="mt-1 text-sm text-slate-500">
-
-                                Informasi petugas pelaksana monitoring dan evaluasi.
-
-                            </p>
-
-                        </div>
-
+                <div class="d-card-top">
+                    <div>
+                        <h2 class="d-card-h">A. Identitas Petugas Monev</h2>
+                        <p class="d-card-s">Informasi petugas pelaksana monitoring dan evaluasi.</p>
                     </div>
-
                 </div>
 
-                <div class="grid gap-5 p-6 md:grid-cols-2">
+                <div class="d-form-grid c2">
 
                     {{-- Nama Petugas --}}
-
                     <div>
-
-                        <label for="nama_petugas_monev" class="mb-2 block text-sm font-semibold text-slate-700">
-
-                            Nama Petugas Monev
-
-                            <span class="text-red-500">*</span>
-
+                        <label for="nama_petugas_monev" class="d-label">
+                            Nama Petugas Monev <i>*</i>
                         </label>
 
                         <input type="text" id="nama_petugas_monev" name="nama_petugas_monev"
                             value="{{ old('nama_petugas_monev', $submission->nama_petugas_monev) }}" required
-                            placeholder="Masukkan nama petugas"
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-
+                            placeholder="Masukkan nama petugas" class="d-field">
                     </div>
 
                     {{-- Instansi --}}
-
                     <div>
-
-                        <label for="instansi_petugas" class="mb-2 block text-sm font-semibold text-slate-700">
-
+                        <label for="instansi_petugas" class="d-label">
                             Instansi
-
                         </label>
 
                         <input type="text" id="instansi_petugas" name="instansi_petugas"
                             value="{{ old('instansi_petugas', $submission->instansi_petugas) }}"
-                            placeholder="Masukkan instansi"
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-
+                            placeholder="Masukkan instansi" class="d-field">
                     </div>
 
                     {{-- Lokasi --}}
-
                     <div>
-
-                        <label for="lokasi_monev" class="mb-2 block text-sm font-semibold text-slate-700">
-
+                        <label for="lokasi_monev" class="d-label">
                             Lokasi Monev
-
                         </label>
 
                         <input type="text" id="lokasi_monev" name="lokasi_monev"
                             value="{{ old('lokasi_monev', $submission->lokasi_monev) }}" placeholder="Masukkan lokasi Monev"
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-
+                            class="d-field">
                     </div>
 
                     {{-- Tanggal --}}
-
                     <div>
-
-                        <label for="tanggal_pelaksanaan" class="mb-2 block text-sm font-semibold text-slate-700">
-
+                        <label for="tanggal_pelaksanaan" class="d-label">
                             Tanggal Pelaksanaan
-
                         </label>
 
                         <input type="date" id="tanggal_pelaksanaan" name="tanggal_pelaksanaan"
                             value="{{ old('tanggal_pelaksanaan', optional($submission->tanggal_pelaksanaan)->format('Y-m-d')) }}"
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-
+                            class="d-field">
                     </div>
 
                 </div>
@@ -379,27 +600,26 @@
             {{-- =====================================================
             2. IDENTITAS RESPONDEN
             ====================================================== --}}
-            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div class="border-b border-slate-200 bg-slate-50 px-6 py-5">
-                    <h2 class="text-lg font-bold text-slate-800">B. Identitas Responden</h2>
-                    <p class="mt-1 text-sm text-slate-500">Identitas responden yang mengisi instrumen BK.</p>
+            <section class="d-card">
+
+                <div class="d-card-top">
+                    <div>
+                        <h2 class="d-card-h">B. Identitas Responden</h2>
+                        <p class="d-card-s">Identitas responden yang mengisi instrumen BK.</p>
+                    </div>
                 </div>
 
-                <div class="grid gap-5 p-6 md:grid-cols-2">
+                <div class="d-form-grid c2">
                     <div>
-                        <label for="nama_responden" class="mb-2 block text-sm font-semibold text-slate-700">Nama Responden
-                            <span class="text-red-500">*</span></label>
+                        <label for="nama_responden" class="d-label">Nama Responden <i>*</i></label>
                         <input type="text" id="nama_responden" name="nama_responden"
                             value="{{ old('nama_responden', $submission->nama_responden) }}" required maxlength="255"
-                            placeholder="Masukkan nama responden"
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            placeholder="Masukkan nama responden" class="d-field">
                     </div>
 
                     <div>
-                        <label for="jabatan_responden" class="mb-2 block text-sm font-semibold text-slate-700">Jabatan
-                            Responden <span class="text-red-500">*</span></label>
-                        <select id="jabatan_responden" name="jabatan_responden" required
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                        <label for="jabatan_responden" class="d-label">Jabatan Responden <i>*</i></label>
+                        <select id="jabatan_responden" name="jabatan_responden" required class="d-field">
                             <option value="">Pilih jabatan</option>
                             <option value="BK" @selected(old('jabatan_responden', $submission->jabatan_responden) === 'BK')>BK
                             </option>
@@ -411,48 +631,38 @@
 
                     <div id="jabatanLainnyaWrapper"
                         class="{{ old('jabatan_responden', $submission->jabatan_responden) === 'Lainnya' ? '' : 'hidden' }}">
-                        <label for="jabatan_lainnya" class="mb-2 block text-sm font-semibold text-slate-700">Jabatan Lainnya
-                            <span class="text-red-500">*</span></label>
+                        <label for="jabatan_lainnya" class="d-label">Jabatan Lainnya <i>*</i></label>
                         <input type="text" id="jabatan_lainnya" name="jabatan_lainnya"
                             value="{{ old('jabatan_lainnya', $submission->jabatan_lainnya) }}" maxlength="255"
-                            placeholder="Tuliskan jabatan responden"
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            placeholder="Tuliskan jabatan responden" class="d-field">
                     </div>
 
                     <div>
-                        <label for="satuan_pendidikan" class="mb-2 block text-sm font-semibold text-slate-700">Satuan
-                            Pendidikan <span class="text-red-500">*</span></label>
+                        <label for="satuan_pendidikan" class="d-label">Satuan Pendidikan <i>*</i></label>
                         <input type="text" id="satuan_pendidikan" name="satuan_pendidikan"
-                            value="{{ old('satuan_pendidikan', $submission->satuan_pendidikan) }}" required maxlength="255"
-                            placeholder="Masukkan nama satuan pendidikan"
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            value="{{ old('satuan_pendidikan', $submission->satuan_pendidikan) }}" required
+                            maxlength="255" placeholder="Masukkan nama satuan pendidikan" class="d-field">
                     </div>
 
                     <div>
-                        <label for="masa_kerja" class="mb-2 block text-sm font-semibold text-slate-700">Masa Kerja (tahun)
-                            <span class="text-red-500">*</span></label>
+                        <label for="masa_kerja" class="d-label">Masa Kerja (tahun) <i>*</i></label>
                         <input type="number" id="masa_kerja" name="masa_kerja"
                             value="{{ old('masa_kerja', $submission->masa_kerja) }}" required min="0" max="100" step="1"
-                            placeholder="Contoh: 5"
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            placeholder="Contoh: 5" class="d-field">
                     </div>
 
                     <div>
-                        <label for="nama_pelatihan" class="mb-2 block text-sm font-semibold text-slate-700">Nama Pelatihan
-                            <span class="text-red-500">*</span></label>
+                        <label for="nama_pelatihan" class="d-label">Nama Pelatihan <i>*</i></label>
                         <input type="text" id="nama_pelatihan" name="nama_pelatihan"
                             value="{{ old('nama_pelatihan', $submission->nama_pelatihan) }}" required maxlength="255"
-                            placeholder="Masukkan nama pelatihan"
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            placeholder="Masukkan nama pelatihan" class="d-field">
                     </div>
 
                     <div>
-                        <label for="tanggal_pengisian" class="mb-2 block text-sm font-semibold text-slate-700">Tanggal
-                            Pengisian <span class="text-red-500">*</span></label>
+                        <label for="tanggal_pengisian" class="d-label">Tanggal Pengisian <i>*</i></label>
                         <input type="date" id="tanggal_pengisian" name="tanggal_pengisian"
                             value="{{ old('tanggal_pengisian', optional($submission->tanggal_pengisian)->format('Y-m-d')) }}"
-                            required
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            required class="d-field">
                     </div>
                 </div>
             </section>
@@ -465,40 +675,35 @@
             {{-- =====================================================
             PERTANYAAN URAIAN
             ====================================================== --}}
-
             @if ($essayAnswers->count() > 0)
 
-                <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <section class="d-card">
 
-                    <div class="border-b border-slate-200 bg-slate-50 px-6 py-5">
-
-                        <h2 class="text-lg font-bold text-slate-800">Pertanyaan Uraian</h2>
-
-                        <p class="mt-1 text-sm text-slate-500">Perbarui jawaban uraian jika diperlukan.</p>
-
+                    <div class="d-card-top">
+                        <div>
+                            <h2 class="d-card-h">Pertanyaan Uraian</h2>
+                            <p class="d-card-s">Perbarui jawaban uraian jika diperlukan.</p>
+                        </div>
                     </div>
 
-                    <div class="space-y-5 p-6">
+                    <div class="d-essay">
 
                         @foreach ($essayAnswers as $essay)
 
-                                    <div>
+                            <div>
 
-                                        <label class="mb-2 block text-sm font-semibold text-slate-700">
-                                            {{ $essay->nomor }}.
-                                            {{ $essay->pertanyaan }}
-                                        </label>
+                                <label class="d-label">
+                                    {{ $essay->nomor }}.
+                                    {{ $essay->pertanyaan }}
+                                </label>
 
-                                        <textarea name="essay[{{ $essay->nomor }}][pertanyaan]"
-                                            class="hidden">{{ $essay->pertanyaan }}</textarea>
+                                <textarea name="essay[{{ $essay->nomor }}][pertanyaan]"
+                                    class="hidden">{{ $essay->pertanyaan }}</textarea>
 
-                                        <textarea name="essay[{{ $essay->nomor }}][jawaban]" rows="5"
-                                            class="w-full resize-y rounded-xl border border-slate-300 px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">{{ old(
-                                "essay.{$essay->nomor}.jawaban",
-                                $essay->jawaban
-                            ) }}</textarea>
+                                <textarea name="essay[{{ $essay->nomor }}][jawaban]" rows="5"
+                                    class="d-field">{{ old("essay.{$essay->nomor}.jawaban", $essay->jawaban) }}</textarea>
 
-                                    </div>
+                            </div>
 
                         @endforeach
 
@@ -511,14 +716,15 @@
             {{-- =====================================================
             TOMBOL
             ====================================================== --}}
+            <div class="d-foot">
 
-            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-
-                <button id="submitButton" type="submit"
-                    class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
-
+                <button id="submitButton" type="submit" class="d-pbtn b-mint">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+                        <path d="M17 21v-8H7v8M7 3v5h8" />
+                    </svg>
                     Simpan Perubahan
-
                 </button>
 
             </div>
