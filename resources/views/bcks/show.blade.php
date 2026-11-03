@@ -56,15 +56,13 @@
 
         /*
         |--------------------------------------------------------------------------
-        | Ambil jawaban yang berlaku
+        | Ambil jawaban yang berlaku (Deteksi Data Lama vs Baru)
         |--------------------------------------------------------------------------
-        |
-        | Jawaban Level 1 dan Level 2 dari data lama tidak digunakan
-        | untuk menghitung hasil responden selain BCKS.
-        |
         */
 
         $jawabanSemua = $bcksPengisian->jawaban ?? collect();
+        // Jika data lama, nomor indikator maksimalnya 27. Jika baru, maksimalnya 40.
+        $isDataLama = $jawabanSemua->isNotEmpty() && $jawabanSemua->max('nomor_indikator') <= 27;
 
         $jawaban = $jawabanSemua
             ->filter(function ($item) use ($levelAktif) {
@@ -76,11 +74,6 @@
         |--------------------------------------------------------------------------
         | Bangun daftar indikator yang ditampilkan
         |--------------------------------------------------------------------------
-        |
-        | Nomor global tetap mengikuti urutan konfigurasi asli:
-        | Level 1 = 1-12, Level 2 = 13-20,
-        | Level 3 = 21-32, Level 4 = 33-40.
-        |
         */
 
         $indikatorConfig = [];
@@ -105,18 +98,20 @@
 
         /*
         |--------------------------------------------------------------------------
-        | Perhitungan skor
+        | PERBAIKAN: Perhitungan skor mengambil dari Controller (Data Arsip)
         |--------------------------------------------------------------------------
         */
+        
+        $totalSkorAktual = $bcksPengisian->total_skor;
+        $nilaiAkhirAktual = $bcksPengisian->nilai_akhir;
 
-        $jumlahIndikatorBerlaku = \App\Support\BcksInstrumen::jumlahIndikator($isBcks);
-        $skorMaksimum = \App\Support\BcksInstrumen::skorMaksimum($isBcks);
+        $jumlahIndikatorBerlaku = $bcksPengisian->jawaban->count();
+        $skorMaksimum = $jumlahIndikatorBerlaku * 4;
 
-        $totalSkorAktual = (int) $jawaban->sum('skor');
-
-        $nilaiAkhirAktual = $skorMaksimum > 0
-            ? round(($totalSkorAktual / $skorMaksimum) * 100, 2)
-            : 0;
+        if ($skorMaksimum == 0) {
+            $jumlahIndikatorBerlaku = \App\Support\BcksInstrumen::jumlahIndikator($isBcks);
+            $skorMaksimum = \App\Support\BcksInstrumen::skorMaksimum($isBcks);
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -154,11 +149,6 @@
         |--------------------------------------------------------------------------
         | Predikat
         |--------------------------------------------------------------------------
-        |
-        | Predikat tetap mengambil nilai yang tersimpan pada database.
-        | Pastikan nilai tersebut dihitung menggunakan rumus dan
-        | rentang predikat resmi yang digunakan aplikasi.
-        |
         */
 
         $predikat = $bcksPengisian->predikat ?: '-';
@@ -352,6 +342,13 @@
             --b-line: #f6dd9b;
             --b-ink: #b45309;
             --b-glow: rgba(217, 154, 11, .7);
+        }
+
+        .b-red {
+            --b-bg: linear-gradient(160deg, #fef2f2 0%, #fecaca 100%);
+            --b-line: #fca5a5;
+            --b-ink: #b91c1c;
+            --b-glow: rgba(220, 38, 38, .7);
         }
 
         /* --- tile ringkasan --- */
@@ -730,6 +727,20 @@
 
     <div class="d-wrap">
 
+        {{-- BANNER PERINGATAN DATA LAMA --}}
+        @if ($isDataLama)
+            <div style="background-color: #fffbeb; border: 1px solid #fcd34d; padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                <div>
+                    <h3 style="color: #b45309; font-weight: 700; font-size: 16px; margin: 0;">Perhatian: Ini Adalah Data Lama (27 Indikator)</h3>
+                    <p style="color: #92400e; font-size: 13px; margin: 4px 0 0 0;">Data ini tersimpan dalam format lama. Anda dapat melihat riwayatnya di bawah, namun untuk mengeditnya, Anda harus memperbarui formatnya ke 40 soal baru.</p>
+                </div>
+                <a href="{{ route('bcks.edit', $bcksPengisian) }}" class="d-pbtn b-red" style="box-shadow: 0 4px 6px -1px rgba(220,38,38,0.2);">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    Perbarui Data Sekarang
+                </a>
+            </div>
+        @endif
+
         {{-- ================= JUDUL HALAMAN ================= --}}
         <section>
             <div class="d-title-row">
@@ -744,48 +755,22 @@
                 </div>
 
                 <div class="no-print d-actions">
-
-                    {{-- Kembali --}}
                     <a href="{{ route('instrumen.index') }}" class="d-pbtn b-blue back">
-                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                        </svg>
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
                         Kembali
                     </a>
-
-                    {{-- Cetak Hasil --}}
                     <a href="{{ route('bcks.cetak', $bcksPengisian) }}" target="_blank" class="d-pbtn b-mint">
-                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
-                            <path d="M6 14h12v7H6z" />
-                        </svg>
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" /><path d="M6 14h12v7H6z" /></svg>
                         Cetak Hasil
                     </a>
-
-                    {{-- Gabung PDF --}}
-                    <a href="{{ route('cetak-gabungan.index', ['pilih' => ['bcks-' . $bcksPengisian->id]]) }}"
-                        class="d-pbtn b-violet">
-                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 3h7l5 5v9a2 2 0 01-2 2H9a2 2 0 01-2-2V5a2 2 0 012-2z" />
-                            <path d="M16 3v5h5" />
-                            <path d="M17 21H6a2 2 0 01-2-2V9" />
-                        </svg>
+                    <a href="{{ route('cetak-gabungan.index', ['pilih' => ['bcks-' . $bcksPengisian->id]]) }}" class="d-pbtn b-violet">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h7l5 5v9a2 2 0 01-2 2H9a2 2 0 01-2-2V5a2 2 0 012-2z" /><path d="M16 3v5h5" /><path d="M17 21H6a2 2 0 01-2-2V9" /></svg>
                         Gabung PDF
                     </a>
-
-                    {{-- Edit Data --}}
                     <a href="{{ route('bcks.edit', $bcksPengisian) }}" class="d-pbtn b-amber">
-                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                         Edit Data
                     </a>
-
                 </div>
             </div>
         </section>
@@ -793,215 +778,60 @@
         {{-- ================= NOTIFIKASI ================= --}}
         @if (session('success'))
             <div class="d-alert">
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"
-                    stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:3px">
-                    <path d="M5 13l4 4L19 7" />
-                </svg>
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:3px"><path d="M5 13l4 4L19 7" /></svg>
                 <p>{{ session('success') }}</p>
             </div>
         @endif
 
         {{-- ================= RINGKASAN HASIL ================= --}}
         <div class="d-tiles">
-
-            {{-- Total Skor --}}
             <div class="d-tile t-blue">
-                <svg class="d-tile-clip" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path
-                        d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
-                </svg>
-                <span class="d-tile-dot"></span>
-                <span class="d-tile-ico" style="color:var(--p-600)">
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 11l3 3L22 4" />
-                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
-                    </svg>
-                </span>
+                <span class="d-tile-ico" style="color:var(--p-600)"><svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" /></svg></span>
                 <p class="d-tile-label">Total Skor</p>
                 <p class="d-tile-val">{{ $totalSkorAktual }}<small> / {{ $skorMaksimum }}</small></p>
-                <p class="d-tile-note">Akumulasi {{ $jumlahIndikatorBerlaku }} indikator sesuai status responden</p>
             </div>
-
-            {{-- Nilai Akhir --}}
             <div class="d-tile t-mint">
-                <svg class="d-tile-clip" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path
-                        d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
-                </svg>
-                <span class="d-tile-dot" style="background:#10b981"></span>
-                <span class="d-tile-ico" style="color:#059669">
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M19 5L5 19" />
-                        <circle cx="6.5" cy="6.5" r="2.5" />
-                        <circle cx="17.5" cy="17.5" r="2.5" />
-                    </svg>
-                </span>
+                <span class="d-tile-ico" style="color:#059669"><svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5L5 19" /><circle cx="6.5" cy="6.5" r="2.5" /><circle cx="17.5" cy="17.5" r="2.5" /></svg></span>
                 <p class="d-tile-label">Nilai Akhir</p>
                 <p class="d-tile-val">{{ number_format($nilaiAkhirAktual, 2, ',', '.') }}<small> %</small></p>
-                <p class="d-tile-note">Persentase dari skor maksimum indikator yang berlaku</p>
             </div>
-
-            {{-- Predikat --}}
             <div class="d-tile t-amber">
-                <svg class="d-tile-clip" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path
-                        d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
-                </svg>
-                <span class="d-tile-dot" style="background:var(--accent)"></span>
-                <span class="d-tile-ico" style="color:#d99a0b">
-                    <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="8" r="6" />
-                        <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" />
-                    </svg>
-                </span>
+                <span class="d-tile-ico" style="color:#d99a0b"><svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6" /><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" /></svg></span>
                 <p class="d-tile-label">Predikat</p>
-                <div style="margin-top:8px">
-                    <span class="d-badge lg" style="{{ $predikatStyle }}">{{ $predikat }}</span>
-                </div>
-                <p class="d-tile-note">Kategori hasil penilaian yang tersimpan</p>
+                <div style="margin-top:8px"><span class="d-badge lg" style="{{ $predikatStyle }}">{{ $predikat }}</span></div>
             </div>
-
         </div>
 
-        {{-- ================= A. IDENTITAS PESERTA BCKS ================= --}}
+        {{-- ================= IDENTITAS ================= --}}
         <section class="d-card">
-            <div class="d-card-top">
-                <div>
-                    <h2 class="d-card-h">A. Identitas Peserta BCKS</h2>
-                    <p class="d-card-s">Informasi mengenai peserta BCKS yang dievaluasi.</p>
-                </div>
-            </div>
-
+            <div class="d-card-top"><div><h2 class="d-card-h">Identitas Peserta & Responden</h2></div></div>
             <div class="d-info c2">
-                <div>
-                    <p class="d-info-label">Nama Peserta BCKS</p>
-                    <p class="d-info-val">{{ $bcksPengisian->nama_bcks ?: '-' }}</p>
-                </div>
-
-                <div>
-                    <p class="d-info-label">Unit Kerja</p>
-                    <p class="d-info-val">{{ $bcksPengisian->unit_kerja ?: '-' }}</p>
-                </div>
-
-                <div class="d-info-wide">
-                    <p class="d-info-label">Angkatan Pelatihan BCKS</p>
-                    <p class="d-info-val">{{ $bcksPengisian->angkatan_pelatihan ?: '-' }}</p>
-                </div>
-            </div>
-        </section>
-
-        {{-- ================= B. IDENTITAS RESPONDEN ================= --}}
-        <section class="d-card">
-            <div class="d-card-top">
-                <div>
-                    <h2 class="d-card-h">B. Identitas Responden</h2>
-                    <p class="d-card-s">Informasi pihak yang memberikan jawaban.</p>
-                </div>
-            </div>
-
-            <div class="d-info c2">
-                <div>
-                    <p class="d-info-label">Nama Responden</p>
-                    <p class="d-info-val">{{ $bcksPengisian->nama_responden ?: '-' }}</p>
-                </div>
-
-                <div>
-                    <p class="d-info-label">Unit Kerja Responden</p>
-                    <p class="d-info-val">{{ $bcksPengisian->unit_kerja_responden ?: '-' }}</p>
-                </div>
-
-                <div class="d-info-wide">
-                    <p class="d-info-label">Status Responden</p>
-                    <p class="d-info-val">{{ $statusResponden ?: '-' }}</p>
-                </div>
-            </div>
-        </section>
-
-        {{-- ================= C. PETUGAS MONEV ================= --}}
-        <section class="d-card">
-            <div class="d-card-top">
-                <div>
-                    <h2 class="d-card-h">C. Petugas Monev</h2>
-                    <p class="d-card-s">Identitas petugas dan tanggal evaluasi.</p>
-                </div>
-            </div>
-
-            <div class="d-info c3">
-                <div>
-                    <p class="d-info-label">Nama Petugas Monev</p>
-                    <p class="d-info-val">{{ $bcksPengisian->nama_petugas_monev ?: '-' }}</p>
-                </div>
-
-                <div>
-                    <p class="d-info-label">Unit Kerja Petugas</p>
-                    <p class="d-info-val">{{ $bcksPengisian->unit_kerja_petugas ?: '-' }}</p>
-                </div>
-
-                <div>
-                    <p class="d-info-label">Tanggal Evaluasi</p>
-                    <p class="d-info-val">{{ $bcksPengisian->tanggal_evaluasi?->format('d/m/Y') ?? '-' }}</p>
-                </div>
-
-                <div>
-                    <p class="d-info-label">Status Pengisian</p>
-                    <div style="margin-top:6px">
-                        <span class="d-badge" style="background:#d1fae5;color:#047857">
-                            {{ $bcksPengisian->status_pengisian ?: '-' }}
-                        </span>
-                    </div>
-                </div>
+                <div><p class="d-info-label">Nama Peserta BCKS</p><p class="d-info-val">{{ $bcksPengisian->nama_bcks ?: '-' }}</p></div>
+                <div><p class="d-info-label">Unit Kerja</p><p class="d-info-val">{{ $bcksPengisian->unit_kerja ?: '-' }}</p></div>
+                <div><p class="d-info-label">Nama Responden</p><p class="d-info-val">{{ $bcksPengisian->nama_responden ?: '-' }}</p></div>
+                <div><p class="d-info-label">Status Responden</p><p class="d-info-val">{{ $statusResponden ?: '-' }}</p></div>
             </div>
         </section>
 
         {{-- ================= REKAP PER LEVEL ================= --}}
         <section class="d-card">
-            <div class="d-card-top">
-                <div>
-                    <h2 class="d-card-h">Rekapitulasi Berdasarkan Level</h2>
-                    <p class="d-card-s">Ringkasan skor untuk level evaluasi yang berlaku bagi responden.</p>
-                </div>
-
-                <span class="d-pill">{{ count($levelAktif) }} level</span>
-            </div>
-
+            <div class="d-card-top"><div><h2 class="d-card-h">Rekapitulasi Berdasarkan Level</h2></div><span class="d-pill">{{ count($levelAktif) }} level</span></div>
             <div class="d-levels">
                 @foreach ($levelConfig as $level => $config)
                     @if (in_array($level, $levelAktif, true))
                         @php
                             $jumlahIndikatorLevel = $levelCounts[$level] ?? 0;
                             $skorLevel = $levelScores[$level] ?? 0;
-
-                            $maksimalLevel = \App\Support\BcksInstrumen::levelMaksimum()[$level]
-                                ?? ($jumlahIndikatorLevel * 4);
-
-                            $persentaseLevel = $maksimalLevel > 0
-                                ? ($skorLevel / $maksimalLevel) * 100
-                                : 0;
+                            $maksimalLevel = \App\Support\BcksInstrumen::levelMaksimum()[$level] ?? ($jumlahIndikatorLevel * 4);
+                            $persentaseLevel = $maksimalLevel > 0 ? ($skorLevel / $maksimalLevel) * 100 : 0;
                         @endphp
-
                         <div class="d-level">
                             <span class="d-badge" style="{{ $config['badge'] }}">{{ $config['label'] }}</span>
-                            <p class="d-level-desc">{{ $config['deskripsi'] }}</p>
-
                             <div class="d-level-row">
-                                <div class="d-level-score">
-                                    {{ $skorLevel }}<small> / {{ $maksimalLevel }}</small>
-                                </div>
-
-                                <span class="d-level-pct">
-                                    {{ number_format($persentaseLevel, 2, ',', '.') }}%
-                                </span>
+                                <div class="d-level-score">{{ $skorLevel }}<small> / {{ $maksimalLevel }}</small></div>
+                                <span class="d-level-pct">{{ number_format($persentaseLevel, 2, ',', '.') }}%</span>
                             </div>
-
-                            <div class="d-bar">
-                                <span style="width: {{ min($persentaseLevel, 100) }}%;background: {{ $config['bar'] }}"></span>
-                            </div>
+                            <div class="d-bar"><span style="width: {{ min($persentaseLevel, 100) }}%;background: {{ $config['bar'] }}"></span></div>
                         </div>
                     @endif
                 @endforeach
@@ -1012,61 +842,47 @@
         <section class="d-card">
             <div class="d-card-top">
                 <div>
-                    <h2 class="d-card-h">Detail Penilaian {{ $jumlahIndikatorBerlaku }} Indikator</h2>
-                    <p class="d-card-s">Nilai setiap indikator berdasarkan status dan hasil pengisian instrumen.</p>
+                    <h2 class="d-card-h">Detail Penilaian {{ $isDataLama ? 'Histori Lama' : $jumlahIndikatorBerlaku . ' Indikator' }}</h2>
+                    <p class="d-card-s">{{ $isDataLama ? 'Data jawaban lama (27 indikator).' : 'Nilai setiap indikator berdasarkan status dan hasil pengisian instrumen.' }}</p>
                 </div>
-
-                <span class="d-pill">{{ count($indikatorConfig) }} indikator</span>
+                <span class="d-pill">{{ count($jawabanSemua) }} indikator terisi</span>
             </div>
-
             <div style="overflow-x:auto">
                 <table class="d-table">
                     <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Level</th>
-                            <th>Indikator</th>
-                            <th class="center">Skor</th>
-                        </tr>
+                        <tr><th>No</th><th>Level</th><th>Indikator</th><th class="center">Skor</th></tr>
                     </thead>
-
                     <tbody>
-                        @forelse ($indikatorConfig as $indikator)
-                            @php
-                                $nomor = $indikator['nomor'];
-                                $kode = (string) $indikator['kode'];
-
-                                $jawabanItem = $jawabanByNomor->get((string) $nomor)
-                                    ?? $jawabanByKode->get($kode);
-                            @endphp
-
-                            <tr>
-                                <td class="txt">{{ $nomor }}</td>
-
-                                <td style="white-space:nowrap">
-                                    <span class="d-badge"
-                                        style="{{ $levelConfig[$indikator['level']]['badge'] ?? 'background:#f1f5f9;color:#475569' }}">
-                                        {{ $levelConfig[$indikator['level']]['label'] ?? $indikator['level'] }}
-                                    </span>
-                                </td>
-
-                                <td class="q">{{ $indikator['pertanyaan'] }}</td>
-
-                                <td style="text-align:center">
-                                    @if ($jawabanItem)
-                                        <span class="d-score">{{ $jawabanItem->skor }}</span>
-                                    @else
-                                        <span class="faint">-</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="d-empty-row">
-                                    Konfigurasi indikator belum tersedia.
-                                </td>
-                            </tr>
-                        @endforelse
+                        @if ($isDataLama)
+                            @forelse ($jawabanSemua->sortBy('nomor_indikator') as $jawabanLama)
+                                <tr>
+                                    <td class="txt">{{ $loop->iteration }}</td>
+                                    <td style="white-space:nowrap"><span class="d-badge" style="background:#f1f5f9;color:#475569">{{ $jawabanLama->level }}</span></td>
+                                    <td class="q">Indikator No. {{ $jawabanLama->nomor_indikator }}</td>
+                                    <td style="text-align:center"><span class="d-score">{{ $jawabanLama->skor }}</span></td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="4" class="d-empty-row">Tidak ada detail jawaban yang tersimpan.</td></tr>
+                            @endforelse
+                        @else
+                            @forelse ($indikatorConfig as $indikator)
+                                @php
+                                    $nomor = $indikator['nomor'];
+                                    $kode = (string) $indikator['kode'];
+                                    $jawabanItem = $jawabanByNomor->get((string) $nomor) ?? $jawabanByKode->get($kode);
+                                @endphp
+                                <tr>
+                                    <td class="txt">{{ $nomor }}</td>
+                                    <td style="white-space:nowrap"><span class="d-badge" style="{{ $levelConfig[$indikator['level']]['badge'] ?? 'background:#f1f5f9;color:#475569' }}">{{ $levelConfig[$indikator['level']]['label'] ?? $indikator['level'] }}</span></td>
+                                    <td class="q">{{ $indikator['pertanyaan'] }}</td>
+                                    <td style="text-align:center">
+                                        @if ($jawabanItem)<span class="d-score">{{ $jawabanItem->skor }}</span>@else<span class="faint">-</span>@endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="4" class="d-empty-row">Konfigurasi indikator belum tersedia.</td></tr>
+                            @endforelse
+                        @endif
                     </tbody>
                 </table>
             </div>

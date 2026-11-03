@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\BcksPengisian;
+use App\Models\BcksJawaban;
+use App\Models\BcksJawabanLama;
 use App\Support\BcksInstrumen;
 use App\Support\SekolahResolver;
 use Illuminate\Http\Request;
@@ -21,6 +23,7 @@ class BcksPengisianController extends Controller
 
     public function index()
     {
+        // Gunakan eager loading
         $pengisians = BcksPengisian::with('jawaban')
             ->latest('tanggal_evaluasi')
             ->latest('id')
@@ -88,11 +91,19 @@ class BcksPengisianController extends Controller
 
     public function show(BcksPengisian $bcksPengisian)
     {
-        $bcksPengisian->load('jawaban');
+        // 1. Ambil data mentah secara langsung tanpa melalui relasi
+        $jawabanBaru = BcksJawaban::where('bcks_pengisian_id', $bcksPengisian->id)->get();
+        $jawabanLama = BcksJawabanLama::where('bcks_pengisian_id', $bcksPengisian->id)->get();
+
+        // 2. Tentukan jawaban mana yang dipakai (prioritaskan data baru)
+        $jawabanAktif = $jawabanBaru->isNotEmpty() ? $jawabanBaru : $jawabanLama;
+
+        // 3. Set relasi manual agar View bisa membacanya
+        $bcksPengisian->setRelation('jawaban', $jawabanAktif);
         
-        // Hitung ulang skor dari data yang berhasil dimuat (bisa dari arsip lama)
+        // 4. Hitung ulang skor (jika data dari arsip lama)
         $indikator = [];
-        foreach ($bcksPengisian->jawaban as $j) {
+        foreach ($jawabanAktif as $j) {
             $indikator[] = [
                 'nomor_indikator' => $j->nomor_indikator,
                 'level' => $j->level,
@@ -112,11 +123,15 @@ class BcksPengisianController extends Controller
 
     public function cetak(BcksPengisian $bcksPengisian)
     {
-        $bcksPengisian->load('jawaban');
+        // Sama seperti show(), kita paksa ambil data mentah
+        $jawabanBaru = BcksJawaban::where('bcks_pengisian_id', $bcksPengisian->id)->get();
+        $jawabanLama = BcksJawabanLama::where('bcks_pengisian_id', $bcksPengisian->id)->get();
+        $jawabanAktif = $jawabanBaru->isNotEmpty() ? $jawabanBaru : $jawabanLama;
         
-        // Hitung ulang skor dari data yang berhasil dimuat (bisa dari arsip lama)
+        $bcksPengisian->setRelation('jawaban', $jawabanAktif);
+        
         $indikator = [];
-        foreach ($bcksPengisian->jawaban as $j) {
+        foreach ($jawabanAktif as $j) {
             $indikator[] = [
                 'nomor_indikator' => $j->nomor_indikator,
                 'level' => $j->level,
@@ -134,9 +149,23 @@ class BcksPengisianController extends Controller
         return view('bcks.cetak', compact('bcksPengisian'));
     }
 
+    public function historiLama(BcksPengisian $bcksPengisian)
+    {
+        $jawabanLama = BcksJawabanLama::where('bcks_pengisian_id', $bcksPengisian->id)
+            ->orderBy('nomor_indikator', 'asc')
+            ->get();
+
+        return view('bcks.histori_lama', compact('bcksPengisian', 'jawabanLama'));
+    }
+
     public function edit(BcksPengisian $bcksPengisian)
     {
-        $bcksPengisian->load('jawaban');
+        // Paksa ambil data agar form edit bisa membaca data lama
+        $jawabanBaru = BcksJawaban::where('bcks_pengisian_id', $bcksPengisian->id)->get();
+        $jawabanLama = BcksJawabanLama::where('bcks_pengisian_id', $bcksPengisian->id)->get();
+        $jawabanAktif = $jawabanBaru->isNotEmpty() ? $jawabanBaru : $jawabanLama;
+        
+        $bcksPengisian->setRelation('jawaban', $jawabanAktif);
 
         return view('bcks.edit', compact('bcksPengisian'));
     }
@@ -181,11 +210,11 @@ class BcksPengisianController extends Controller
                 'status_pengisian' => 'Selesai',
             ]);
 
-            // Hapus jawaban lama, termasuk Level 1–2 jika tidak lagi berlaku.
-            $bcksPengisian->jawabanBaru()->delete();
-            // Hapus juga jawaban arsip jika ada, karena ini akan diperbarui ke format baru
-            $bcksPengisian->jawaban()->delete();
+            // Hapus jawaban lama dari kedua tabel
+            BcksJawaban::where('bcks_pengisian_id', $bcksPengisian->id)->delete();
+            BcksJawabanLama::where('bcks_pengisian_id', $bcksPengisian->id)->delete();
 
+            // Simpan jawaban baru
             foreach ($indikator as $item) {
                 $bcksPengisian->jawabanBaru()->create($item);
             }
@@ -205,9 +234,6 @@ class BcksPengisianController extends Controller
             ->with('success', 'Data pengisian BCKS berhasil dihapus.');
     }
 
-    /**
-     * Validasi identitas dan skor berdasarkan status responden.
-     */
     private function validatePengisian(Request $request): array
     {
         $status = $request->input('status_responden');
@@ -232,7 +258,6 @@ class BcksPengisianController extends Controller
             for ($nomor = 1; $nomor <= $jumlah; $nomor++) {
                 $key = "skor.{$level}_{$nomor}";
 
-                // Level 1–2 wajib hanya untuk status BCKS.
                 $wajib = $status === self::STATUS_BCKS || $level >= 3;
 
                 $rules[$key] = [
@@ -245,7 +270,6 @@ class BcksPengisianController extends Controller
 
         $validated = $request->validate($rules);
 
-        // Normalisasi: skor level yang tidak berlaku tidak diproses.
         $validated['skor'] = $this->filterSkorBerdasarkanStatus(
             $validated['skor'],
             $validated['status_responden']
@@ -254,9 +278,6 @@ class BcksPengisianController extends Controller
         return $validated;
     }
 
-    /**
-     * Mengeluarkan skor Level 1–2 untuk status selain BCKS.
-     */
     private function filterSkorBerdasarkanStatus(
         array $skor,
         string $status
@@ -272,9 +293,6 @@ class BcksPengisianController extends Controller
         );
     }
 
-    /**
-     * Menyiapkan jawaban hanya dari indikator yang berlaku.
-     */
     private function prepareIndikator(array $skor): array
     {
         $indikator = [];
@@ -304,10 +322,6 @@ class BcksPengisianController extends Controller
         return $indikator;
     }
 
-    /**
-     * Nilai akhir berupa persentase dari skor maksimum indikator aktif.
-     * Predikat menggunakan skala persentase agar adil untuk setiap status.
-     */
     private function hitungHasil(array $indikator): array
     {
         $totalSkor = collect($indikator)->sum('skor');

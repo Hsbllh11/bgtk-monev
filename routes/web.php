@@ -86,6 +86,12 @@ Route::middleware('auth')->group(function () {
         [BcksPengisianController::class, 'cetak']
     )->name('bcks.cetak');
 
+    // ROUTE BARU UNTUK HISTORI LAMA
+    Route::get(
+        '/bcks/{bcksPengisian}/histori-lama',
+        [BcksPengisianController::class, 'historiLama']
+    )->name('bcks.histori');
+
 
     // ========================================================
     // INSTRUMEN BIMBINGAN DAN KONSELING (BK)
@@ -168,8 +174,6 @@ Route::middleware('auth')->group(function () {
     // Cetak hasil PKGSD MBI
     Route::get('/pkgsd-mbi/{pkgsdMbi}/cetak', [PkgsdMbiController::class, 'cetak'])
         ->name('pkgsd-mbi.cetak');
-
-    // Pengelolaan instrumen PKGSD MBI
 
 
     // ========================================================
@@ -278,8 +282,6 @@ Route::middleware('auth')->group(function () {
         'cetak',
     ])->name('wawancara.cetak');
 
-    // Riwayat, detail, tambah, edit, dan hapus wawancara.
-    // Route khusus wawancara diletakkan sebelum resource ini.
     Route::resource('wawancara', WawancaraController::class)
         ->parameters([
             'wawancara' => 'wawancara',
@@ -319,12 +321,6 @@ Route::middleware('auth')->group(function () {
     // ========================================================
 
     Route::middleware('admin')->group(function () {
-
-        // ----------------------------------------------------
-        // Route hapus custom — didaftarkan SEBELUM resource
-        // agar tidak tertimpa oleh route resource `destroy`
-        // dengan pola /manajemen-akun/{manajemen_akun}
-        // ----------------------------------------------------
         Route::delete('manajemen-akun/{manajemen_akun}/hapus', [
             ManajemenAkunController::class,
             'hapus',
