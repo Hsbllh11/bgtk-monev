@@ -11,10 +11,13 @@
             $informasiTambahan = [];
         }
 
+        // DIPERBARUI: Menjadi 5 pertanyaan sesuai PDF
         $pertanyaanBk = [
-            1 => 'Apa saja hambatan yang Anda hadapi selama mengikuti pelatihan ini?',
-            2 => 'Hal baik apa saja yang harus dipertahankan dalam pelaksanaan pelatihan ini?',
-            3 => 'Saran apa yang dapat Anda berikan untuk peningkatan dan keberlanjutan program ini?',
+            1 => 'Apa strategi bapak/ibu dalam menjalin kerjasama dengan guru Non BK untuk implementasi 7 Jurus BK hebat?',
+            2 => 'Bagaimana bentuk dukungan Kepala Sekolah dalam mengimplementasikan 7 Jurus BK Hebat?',
+            3 => 'Apa saja hambatan yang Anda hadapi selama mengikuti pelatihan ini?',
+            4 => 'Hal baik apa saja yang harus dipertahankan dalam pelaksanaan pelatihan ini?',
+            5 => 'Saran apa yang dapat Anda berikan untuk peningkatan dan keberlanjutan program ini?',
         ];
 
         /*

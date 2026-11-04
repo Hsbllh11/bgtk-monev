@@ -643,11 +643,13 @@ class WawancaraController extends Controller
             'nama_kegiatan' => ['required', 'string', 'max:255'],
             'tanggal_pengisian' => ['required', 'date'],
 
-            // Jawaban wawancara
+            // Jawaban wawancara (DIPERBARUI MENJADI 5)
             'jawaban_wawancara' => ['required', 'array'],
             'jawaban_wawancara.1' => ['required', 'string'],
             'jawaban_wawancara.2' => ['required', 'string'],
             'jawaban_wawancara.3' => ['required', 'string'],
+            'jawaban_wawancara.4' => ['required', 'string'],
+            'jawaban_wawancara.5' => ['required', 'string'],
         ]);
 
         $namaPetugas = $validated['nama_petugas_monev'];
@@ -694,10 +696,12 @@ class WawancaraController extends Controller
             'nama_narasumber' => $namaResponden,
             'jabatan_narasumber' => $validated['jabatan'],
 
-            // Tiga jawaban wawancara
+            // Lima jawaban wawancara (DIPERBARUI)
             'jawaban_1' => $validated['jawaban_wawancara'][1],
             'jawaban_2' => $validated['jawaban_wawancara'][2],
             'jawaban_3' => $validated['jawaban_wawancara'][3],
+            'jawaban_4' => $validated['jawaban_wawancara'][4],
+            'jawaban_5' => $validated['jawaban_wawancara'][5],
 
             'hasil_wawancara' => json_encode(
                 $metadata,
@@ -1099,10 +1103,13 @@ class WawancaraController extends Controller
                 'instansi_petugas' => ['nullable', 'string', 'max:255'],
                 'lokasi_monev' => ['nullable', 'string', 'max:255'],
 
+                // DIPERBARUI MENJADI 5
                 'jawaban_wawancara' => ['required', 'array'],
                 'jawaban_wawancara.1' => ['required', 'string'],
                 'jawaban_wawancara.2' => ['required', 'string'],
                 'jawaban_wawancara.3' => ['required', 'string'],
+                'jawaban_wawancara.4' => ['required', 'string'],
+                'jawaban_wawancara.5' => ['required', 'string'],
             ]);
 
             $metadata = json_decode(
@@ -1146,9 +1153,12 @@ class WawancaraController extends Controller
                 'nama_narasumber' => $namaResponden,
                 'jabatan_narasumber' => $validated['jabatan'],
 
+                // DIPERBARUI MENJADI 5
                 'jawaban_1' => $validated['jawaban_wawancara'][1],
                 'jawaban_2' => $validated['jawaban_wawancara'][2],
                 'jawaban_3' => $validated['jawaban_wawancara'][3],
+                'jawaban_4' => $validated['jawaban_wawancara'][4],
+                'jawaban_5' => $validated['jawaban_wawancara'][5],
 
                 'hasil_wawancara' => json_encode(
                     $metadata,
