@@ -19,6 +19,9 @@ use App\Http\Controllers\ManajemenAkunController;
 use App\Http\Controllers\GembiraController;
 use App\Http\Controllers\PkgsdMbiController;
 use App\Http\Controllers\CetakGabunganController;
+use App\Http\Controllers\Stem\StemFasdaDampakController;
+use App\Http\Controllers\PublicStemController;
+use App\Http\Controllers\Admin\StemRekapController;
 
 
 // ============================================================
@@ -39,6 +42,17 @@ Route::post('/logout', [
     LoginController::class,
     'logout',
 ])->name('logout');
+
+
+// ============================================================
+// AREA PUBLIK (TANPA LOGIN)
+// ============================================================
+
+Route::prefix('publik')->name('public.')->group(function () {
+    Route::get('/', [PublicStemController::class, 'index'])->name('index');
+    Route::get('/evaluasi-dampak/{token}', [PublicStemController::class, 'evaluasiCreate'])->name('evaluasi.create');
+    Route::post('/evaluasi-dampak/{token}', [PublicStemController::class, 'evaluasiStore'])->name('evaluasi.store');
+});
 
 
 // ============================================================
@@ -63,7 +77,31 @@ Route::middleware('auth')->group(function () {
 
 
     // ========================================================
-    // RIWAYAT INSTRUMEN PEMANTAUAN
+    // INSTRUMEN STEM  ⬅️ HARUS DI ATAS Route::resource('instrumen')
+    // ========================================================
+
+    Route::prefix('instrumen/stem')->name('instrumen.stem.')->group(function () {
+        Route::get('/', function () { return view('instrumen.stem.index'); })->name('index');
+        Route::get('/fasda', function () { return view('instrumen.stem.fasda'); })->name('fasda');
+        Route::get('/diseminasi', function () { return view('instrumen.stem.diseminasi'); })->name('diseminasi');
+
+        // Route Instrumen Fasda Dampak
+        Route::get('/fasda/dampak/create', [StemFasdaDampakController::class, 'create'])->name('fasda.dampak.create');
+        Route::post('/fasda/dampak', [StemFasdaDampakController::class, 'store'])->name('fasda.dampak.store');
+    });
+
+
+    // ========================================================
+    // ADMIN: REKAP INSTRUMEN STEM
+    // ========================================================
+
+    Route::prefix('admin/stem')->name('admin.stem.')->group(function () {
+        Route::get('/rekap-evaluasi-dampak', [StemRekapController::class, 'evaluasiDampak'])->name('rekap.evaluasi');
+    });
+
+
+    // ========================================================
+    // RIWAYAT INSTRUMEN PEMANTAUAN (Bawaan awal)
     // ========================================================
 
     Route::resource('instrumen', InstrumenController::class)
@@ -86,7 +124,6 @@ Route::middleware('auth')->group(function () {
         [BcksPengisianController::class, 'cetak']
     )->name('bcks.cetak');
 
-    // ROUTE BARU UNTUK HISTORI LAMA
     Route::get(
         '/bcks/{bcksPengisian}/histori-lama',
         [BcksPengisianController::class, 'historiLama']
@@ -97,45 +134,14 @@ Route::middleware('auth')->group(function () {
     // INSTRUMEN BIMBINGAN DAN KONSELING (BK)
     // ========================================================
 
-    Route::get('/bk', [
-        BKController::class,
-        'index',
-    ])->name('bk.index');
-
-    Route::get('/bk/create', [
-        BKController::class,
-        'create',
-    ])->name('bk.create');
-
-    Route::post('/bk', [
-        BKController::class,
-        'store',
-    ])->name('bk.store');
-
-    Route::get('/bk/{submission}', [
-        BKController::class,
-        'show',
-    ])->name('bk.show');
-
-    Route::get('/bk/{submission}/edit', [
-        BKController::class,
-        'edit',
-    ])->name('bk.edit');
-
-    Route::get('/bk/{submission}/cetak', [
-        BKController::class,
-        'cetak',
-    ])->name('bk.cetak');
-
-    Route::put('/bk/{submission}', [
-        BKController::class,
-        'update',
-    ])->name('bk.update');
-
-    Route::delete('/bk/{submission}', [
-        BKController::class,
-        'destroy',
-    ])->name('bk.destroy');
+    Route::get('/bk', [BKController::class, 'index'])->name('bk.index');
+    Route::get('/bk/create', [BKController::class, 'create'])->name('bk.create');
+    Route::post('/bk', [BKController::class, 'store'])->name('bk.store');
+    Route::get('/bk/{submission}', [BKController::class, 'show'])->name('bk.show');
+    Route::get('/bk/{submission}/edit', [BKController::class, 'edit'])->name('bk.edit');
+    Route::get('/bk/{submission}/cetak', [BKController::class, 'cetak'])->name('bk.cetak');
+    Route::put('/bk/{submission}', [BKController::class, 'update'])->name('bk.update');
+    Route::delete('/bk/{submission}', [BKController::class, 'destroy'])->name('bk.destroy');
 
 
     // ========================================================
@@ -171,7 +177,6 @@ Route::middleware('auth')->group(function () {
             'pkgsd-mbi' => 'pkgsdMbi',
         ]);
 
-    // Cetak hasil PKGSD MBI
     Route::get('/pkgsd-mbi/{pkgsdMbi}/cetak', [PkgsdMbiController::class, 'cetak'])
         ->name('pkgsd-mbi.cetak');
 
@@ -198,89 +203,22 @@ Route::middleware('auth')->group(function () {
     // LEMBAR WAWANCARA
     // ========================================================
 
-    // --------------------------------------------------------
-    // Wawancara BCKS
-    // --------------------------------------------------------
+    Route::get('/wawancara/bcks', [WawancaraController::class, 'createBcks'])->name('wawancara.bcks.create');
+    Route::get('/wawancara/{wawancara}/cetak-bcks', [WawancaraController::class, 'cetakBcks'])->name('wawancara.cetak-bcks');
 
-    Route::get('/wawancara/bcks', [
-        WawancaraController::class,
-        'createBcks',
-    ])->name('wawancara.bcks.create');
+    Route::get('/wawancara/bk', [WawancaraController::class, 'createBk'])->name('wawancara.bk.create');
+    Route::post('/wawancara/bk', [WawancaraController::class, 'storeBk'])->name('wawancara.bk.store');
 
-    Route::get('/wawancara/{wawancara}/cetak-bcks', [
-        WawancaraController::class,
-        'cetakBcks',
-    ])->name('wawancara.cetak-bcks');
+    Route::get('/wawancara/tendik', [WawancaraController::class, 'createTendik'])->name('wawancara.tendik.create');
+    Route::post('/wawancara/tendik', [WawancaraController::class, 'storeTendik'])->name('wawancara.tendik.store');
 
+    Route::get('/wawancara/gembira', [WawancaraController::class, 'createGembira'])->name('wawancara.gembira.create');
+    Route::post('/wawancara/gembira', [WawancaraController::class, 'storeGembira'])->name('wawancara.gembira.store');
 
-    // --------------------------------------------------------
-    // Wawancara BK
-    // --------------------------------------------------------
+    Route::get('/wawancara/pkgsd-mbi', [WawancaraController::class, 'createPkgsdMbi'])->name('wawancara.pkgsd-mbi.create');
+    Route::post('/wawancara/pkgsd-mbi', [WawancaraController::class, 'storePkgsdMbi'])->name('wawancara.pkgsd-mbi.store');
 
-    Route::get('/wawancara/bk', [
-        WawancaraController::class,
-        'createBk',
-    ])->name('wawancara.bk.create');
-
-    Route::post('/wawancara/bk', [
-        WawancaraController::class,
-        'storeBk',
-    ])->name('wawancara.bk.store');
-
-
-    // --------------------------------------------------------
-    // Wawancara TENDIK
-    // --------------------------------------------------------
-
-    Route::get('/wawancara/tendik', [
-        WawancaraController::class,
-        'createTendik',
-    ])->name('wawancara.tendik.create');
-
-    Route::post('/wawancara/tendik', [
-        WawancaraController::class,
-        'storeTendik',
-    ])->name('wawancara.tendik.store');
-
-
-    // --------------------------------------------------------
-    // Wawancara Matematika GEMBIRA
-    // --------------------------------------------------------
-
-    Route::get('/wawancara/gembira', [
-        WawancaraController::class,
-        'createGembira',
-    ])->name('wawancara.gembira.create');
-
-    Route::post('/wawancara/gembira', [
-        WawancaraController::class,
-        'storeGembira',
-    ])->name('wawancara.gembira.store');
-
-
-    // --------------------------------------------------------
-    // Wawancara PKGSD MBI
-    // --------------------------------------------------------
-
-    Route::get('/wawancara/pkgsd-mbi', [
-        WawancaraController::class,
-        'createPkgsdMbi',
-    ])->name('wawancara.pkgsd-mbi.create');
-
-    Route::post('/wawancara/pkgsd-mbi', [
-        WawancaraController::class,
-        'storePkgsdMbi',
-    ])->name('wawancara.pkgsd-mbi.store');
-
-
-    // --------------------------------------------------------
-    // Cetak dan pengelolaan wawancara umum
-    // --------------------------------------------------------
-
-    Route::get('/wawancara/{wawancara}/cetak', [
-        WawancaraController::class,
-        'cetak',
-    ])->name('wawancara.cetak');
+    Route::get('/wawancara/{wawancara}/cetak', [WawancaraController::class, 'cetak'])->name('wawancara.cetak');
 
     Route::resource('wawancara', WawancaraController::class)
         ->parameters([
@@ -330,7 +268,6 @@ Route::middleware('auth')->group(function () {
             ->parameters([
                 'manajemen-akun' => 'manajemen_akun',
             ]);
-
     });
 
-});
+}); 

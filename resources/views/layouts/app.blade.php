@@ -229,20 +229,6 @@
             border-bottom: 1px solid rgba(255, 255, 255, .16);
         }
 
-        /*
-         * FIX #1 — scrollbar disembunyikan.
-         * Saat layar/zoom besar menu tidak muat, nav memunculkan scrollbar
-         * yang memakan ruang di sisi kanan dan membuat pil putih tidak
-         * menempel ke panel konten. Nav tetap bisa di-scroll (roda mouse /
-         * sentuh), hanya batang scrollnya yang disembunyikan.
-         */
-        /* wadah pemotong: apa pun yang keluar dari sisi kanan (scrollbar) tidak terlihat */
-        /*
-         * WADAH NAV — lebar wadah ini = lebar sidebar.
-         * container-type membuat satuan "cqw" (1% lebar wadah) bisa dipakai
-         * di dalamnya, sehingga lebar menu TIDAK bergantung pada ada/tidaknya
-         * scrollbar maupun tebalnya.
-         */
         .nav-clip {
             position: relative;
             flex: 1 1 0%;
@@ -251,10 +237,6 @@
             container-type: inline-size;
         }
 
-        /*
-         * Elemen yang scroll dibuat 40px lebih lebar dari wadah, jadi scrollbar
-         * (apa pun jenisnya, maks. ±17px) berada di luar area yang terpotong.
-         */
         .side-nav {
             position: absolute;
             top: 0;
@@ -264,13 +246,10 @@
             overflow-x: hidden;
             overflow-y: auto;
             scrollbar-width: none;
-            /* Firefox */
             -ms-overflow-style: none;
-            /* Edge lama */
             overscroll-behavior: contain;
         }
 
-        /* isi menu: lebarnya persis selebar wadah (sidebar), bukan selebar scroller */
         .nav-inner {
             box-sizing: border-box;
             width: 100cqw;
@@ -320,7 +299,6 @@
             transition: background-color .45s var(--ease), color .45s var(--ease);
         }
 
-        /* isi menu bergeser lewat transform (GPU) agar halus, tanpa reflow */
         .nav-item svg,
         .nav-item span {
             transition: transform .45s var(--ease);
@@ -340,7 +318,6 @@
             transform: translateX(4px);
         }
 
-        /* menu aktif: pil putih yang menyatu dengan panel konten */
         .nav-item.active {
             background: #fff;
             color: var(--p-700);
@@ -388,31 +365,16 @@
             }
         }
 
-        /* =================================================================
-           PERPINDAHAN ANTAR-MENU — pil putih meluncur ke menu tujuan
-           (View Transitions API; browser lama otomatis memakai nav-in)
-
-           FIX #2:
-           - sidebar punya layer sendiri & tidak ikut cross-fade "root"
-             (sebelumnya sidebar ikut berkedip/memudar)
-           - snapshot LAMA pil disembunyikan, snapshot BARU hanya meluncur
-             (sebelumnya old/new saling cross-fade dengan ukuran berbeda,
-             sehingga sisa teks lama tampak menumpuk di belakang teks baru)
-           ================================================================= */
         @view-transition {
             navigation: auto;
         }
 
         @supports (view-transition-name: none) {
-
-            /* pil aktif: layer sendiri, animasi nav-in dimatikan */
             .nav-item.active {
                 view-transition-name: nav-active;
                 animation: none;
             }
 
-            /* sidebar statis: layer sendiri hanya di desktop
-               (di mobile sidebar off-canvas, jangan dijadikan layer) */
             @media (min-width: 1024px) {
                 .sidebar {
                     view-transition-name: sidebar;
@@ -420,7 +382,6 @@
             }
         }
 
-        /* sidebar tidak dianimasikan sama sekali */
         ::view-transition-group(sidebar) {
             animation: none;
         }
@@ -433,7 +394,6 @@
             animation: none;
         }
 
-        /* pil: grup meluncur, gambar lama dibuang, gambar baru tanpa fade */
         ::view-transition-group(nav-active) {
             animation-duration: .6s;
             animation-timing-function: var(--ease);
@@ -448,7 +408,6 @@
             opacity: 1;
         }
 
-        /* isi halaman berganti dengan fade lembut & singkat */
         ::view-transition-old(root),
         ::view-transition-new(root) {
             animation-duration: .25s;
@@ -456,7 +415,6 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-
             ::view-transition-group(*),
             ::view-transition-old(*),
             ::view-transition-new(*) {
@@ -469,7 +427,6 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-
             .nav-item,
             .nav-item svg,
             .nav-item span {
@@ -597,18 +554,11 @@
     </style>
 </head>
 
-{{-- h-full + overflow-hidden: halaman dikunci, hanya <main> yang scroll --}}
-
 <body class="overflow-hidden antialiased" style="color: var(--ink);">
 
     @php
         $menu = fn(bool $active) => $active ? 'nav-item active' : 'nav-item';
 
-        /*
-        |----------------------------------------------------------------------
-        | IKON MENU (Heroicons outline, SVG inline)
-        |----------------------------------------------------------------------
-        */
         $icons = [
             'dashboard' => 'M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z',
 
@@ -638,11 +588,11 @@
     <div class="shell">
         <div class="frame">
 
-            {{-- BACKDROP (hanya mobile) — klik untuk menutup sidebar --}}
+            {{-- BACKDROP (hanya mobile) --}}
             <div id="sidebar-backdrop" class="fixed inset-0 z-30 hidden bg-slate-900/50 lg:hidden"></div>
 
             {{-- =========================================================
-            SIDEBAR — off-canvas di mobile, tetap di desktop
+            SIDEBAR
             ========================================================== --}}
             <aside id="sidebar"
                 class="sidebar fixed inset-y-0 left-0 z-40 flex w-64 flex-shrink-0 -translate-x-full flex-col text-white transition-transform duration-200 ease-in-out lg:static lg:translate-x-0">
@@ -673,7 +623,7 @@
                     </button>
                 </div>
 
-                {{-- Navigasi (scroll sendiri bila layar pendek, scrollbar disembunyikan) --}}
+                {{-- Navigasi --}}
                 <div class="nav-clip">
                 <nav class="side-nav">
                 <div class="nav-inner">
@@ -694,6 +644,12 @@
                         <a href="{{ url('/instrumen') }}" class="{{ $menu(request()->is('instrumen*')) }}">
                             {!! $icon('instrumen') !!}
                             <span>Instrumen Pemantauan</span>
+                        </a>
+
+                        {{-- MENU BARU: REKAP EVALUASI STEM --}}
+                        <a href="{{ route('admin.stem.rekap.evaluasi') }}" class="{{ $menu(request()->is('admin/stem/rekap-evaluasi*')) }}">
+                            {!! $icon('instrumen') !!}
+                            <span>Rekap Evaluasi STEM</span>
                         </a>
 
                         <a href="{{ url('/wawancara') }}" class="{{ $menu(request()->is('wawancara*')) }}">
@@ -768,7 +724,7 @@
             ========================================================== --}}
             <div class="panel">
 
-                {{-- HEADER — ada hamburger di mobile --}}
+                {{-- HEADER --}}
                 <header class="topbar">
 
                     <div class="flex min-w-0 items-center gap-3">
@@ -783,7 +739,6 @@
                         </button>
 
                         <div class="min-w-0">
-                            {{-- judul mengikuti halaman: @section('page-title', 'Lembar Wawancara') --}}
                             <h2 class="top-title truncate">@yield('page-title', 'Dashboard')</h2>
                             <p class="top-sub hidden truncate sm:block">Sistem Monitoring dan Evaluasi BGTK Provinsi
                                 NTB</p>
@@ -839,7 +794,7 @@
 
                 </header>
 
-                {{-- KONTEN (satu-satunya area yang scroll) --}}
+                {{-- KONTEN --}}
                 <main class="main-scroll">
                     <section class="w-full content-wrap">
                         @yield('content')
@@ -889,7 +844,6 @@
             const elDate = document.getElementById('rt-date');
             if (!elTime) return;
 
-            /* ---------- JAM: berdetak tiap detik ---------- */
             const fmtJam = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
             const fmtTgl = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
             const fmtZona = new Intl.DateTimeFormat('id-ID', { timeZoneName: 'short' });
@@ -904,13 +858,11 @@
             tick();
             setInterval(tick, 1000);
 
-            /* ---------- CUACA: Mataram, NTB — diperbarui tiap 10 menit ---------- */
             const LAT = -8.5833, LON = 116.1167;
             const elIco = document.getElementById('wx-ico');
             const elTemp = document.getElementById('wx-temp');
             const elLabel = document.getElementById('wx-label');
 
-            // kode cuaca WMO -> [label, ikon siang, ikon malam]
             function kode(c) {
                 if (c === 0) return ['Cerah', '☀️', '🌙'];
                 if (c === 1) return ['Cerah berawan', '🌤️', '🌙'];

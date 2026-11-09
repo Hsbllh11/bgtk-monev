@@ -64,4 +64,36 @@ class Sekolah extends Model
     {
         return $this->hasMany(TindakLanjut::class, 'sekolah_id');
     }
+
+    /**
+     * Relasi ke instrumen STEM — FASDA (Dampak).
+     */
+    public function stemFasdaDampak(): HasMany
+    {
+        return $this->hasMany(StemFasdaDampak::class, 'sekolah_id');
+    }
+
+    /**
+     * Relasi ke instrumen STEM — FASDA (Evaluasi).
+     */
+    public function stemFasdaEvaluasi(): HasMany
+    {
+        return $this->hasMany(StemFasdaEvaluasi::class, 'sekolah_id');
+    }
+
+    /**
+     * Relasi ke instrumen STEM — Diseminasi (Monitoring).
+     */
+    public function stemDiseminasiMonitoring(): HasMany
+    {
+        return $this->hasMany(StemDiseminasiMonitoring::class, 'sekolah_id');
+    }
+
+    /**
+     * Relasi ke instrumen STEM — Diseminasi (Reaction).
+     */
+    public function stemDiseminasiReaction(): HasMany
+    {
+        return $this->hasMany(StemDiseminasiReaction::class, 'sekolah_id');
+    }
 }

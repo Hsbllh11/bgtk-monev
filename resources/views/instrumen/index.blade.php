@@ -1011,6 +1011,38 @@
                 </div>
             </div>
 
+            {{-- INSTRUMEN STEM --}}
+            <div class="i-inst c-cyan">
+                <svg class="i-clip" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                </svg>
+                <span class="i-pin"></span>
+
+                <div class="i-inst-body">
+                    <div class="i-inst-top">
+                        <span class="i-inst-ico">
+                            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                            </svg>
+                        </span>
+                        <div class="i-inst-text">
+                            <span class="i-badge">Instrumen 06</span>
+                            <h3>Instrumen STEM</h3>
+                            <p>Instrumen monitoring dan evaluasi program STEM.</p>
+                        </div>
+                    </div>
+                    <div class="i-actions">
+                        <a href="{{ route('instrumen.stem.index') }}" class="i-btn-main">
+                            + Isi Instrumen
+                        </a>
+                        <button type="button" class="i-btn-ghost">
+                            Cetak Blanko
+                        </button>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         {{-- =========================================================
@@ -1037,6 +1069,9 @@
                         </option>
                         <option value="PKGSD MBI" @selected(request('jenis_instrumen') === 'PKGSD MBI')>
                             PKGSD MBI
+                        </option>
+                        <option value="STEM" @selected(request('jenis_instrumen') === 'STEM')>
+                            STEM
                         </option>
                     </select>
                 </div>
@@ -1160,6 +1195,7 @@
                                     'TENDIK' => ['bg' => '#ecfdf5', 'border' => '#a7f3d0', 'text' => '#047857'],
                                     'GEMBIRA' => ['bg' => '#fffbeb', 'border' => '#fde68a', 'text' => '#b45309'],
                                     'PKGSD MBI' => ['bg' => '#ecfeff', 'border' => '#a5f3fc', 'text' => '#0e7490'],
+                                    'STEM' => ['bg' => '#ecfeff', 'border' => '#a5f3fc', 'text' => '#0e7490'],
                                 ];
 
                                 $warna = $paletInstrumen[strtoupper(trim($riwayat['jenis']))]
