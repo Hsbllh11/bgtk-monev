@@ -20,8 +20,11 @@ use App\Http\Controllers\GembiraController;
 use App\Http\Controllers\PkgsdMbiController;
 use App\Http\Controllers\CetakGabunganController;
 use App\Http\Controllers\Stem\StemFasdaDampakController;
-use App\Http\Controllers\PublicStemController;
-use App\Http\Controllers\Admin\StemRekapController;
+use App\Http\Controllers\Stem\StemFasdaEvaluasiController;
+use App\Http\Controllers\Stem\StemDiseminasiReactionController;
+use App\Http\Controllers\Stem\StemDiseminasiMonitoringController;
+use App\Http\Controllers\Stem\StemHistoryController;
+use App\Http\Controllers\PublicController; // <-- TAMBAHKAN INI
 
 
 // ============================================================
@@ -45,13 +48,20 @@ Route::post('/logout', [
 
 
 // ============================================================
-// AREA PUBLIK (TANPA LOGIN)
+// AREA PUBLIK (TANPA LOGIN) - TAMBAHKAN DISINI
 // ============================================================
 
 Route::prefix('publik')->name('public.')->group(function () {
-    Route::get('/', [PublicStemController::class, 'index'])->name('index');
-    Route::get('/evaluasi-dampak/{token}', [PublicStemController::class, 'evaluasiCreate'])->name('evaluasi.create');
-    Route::post('/evaluasi-dampak/{token}', [PublicStemController::class, 'evaluasiStore'])->name('evaluasi.store');
+    // Halaman utama pilihan instrumen
+    Route::get('/', [PublicController::class, 'index'])->name('index');
+
+    // Instrumen Reaction
+    Route::get('/reaction/create', [StemDiseminasiReactionController::class, 'publicForm'])->name('reaction.create');
+    Route::post('/reaction', [StemDiseminasiReactionController::class, 'publicStore'])->name('reaction.store');
+
+    // Instrumen Evaluasi Dampak
+    Route::get('/evaluasi/create', [StemFasdaEvaluasiController::class, 'publicForm'])->name('evaluasi.create');
+    Route::post('/evaluasi', [StemFasdaEvaluasiController::class, 'publicStore'])->name('evaluasi.store');
 });
 
 
@@ -85,18 +95,72 @@ Route::middleware('auth')->group(function () {
         Route::get('/fasda', function () { return view('instrumen.stem.fasda'); })->name('fasda');
         Route::get('/diseminasi', function () { return view('instrumen.stem.diseminasi'); })->name('diseminasi');
 
-        // Route Instrumen Fasda Dampak
+        // =====================================================
+        // 1. INSTRUMEN FASDA DAMPAK (Wawancara) — Tanpa Index
+        // =====================================================
         Route::get('/fasda/dampak/create', [StemFasdaDampakController::class, 'create'])->name('fasda.dampak.create');
         Route::post('/fasda/dampak', [StemFasdaDampakController::class, 'store'])->name('fasda.dampak.store');
-    });
+
+        // ✅ ROUTE SHOW — dipakai oleh 'show_route' => route('instrumen.stem.fasda.dampak.show', ...)
+        Route::get('/fasda/dampak/{dampak}', [StemFasdaDampakController::class, 'show'])->name('fasda.dampak.show');
+
+        Route::get('/fasda/dampak/{dampak}/edit', [StemFasdaDampakController::class, 'edit'])->name('fasda.dampak.edit');
+        Route::put('/fasda/dampak/{dampak}', [StemFasdaDampakController::class, 'update'])->name('fasda.dampak.update');
+        Route::delete('/fasda/dampak/{dampak}', [StemFasdaDampakController::class, 'destroy'])->name('fasda.dampak.destroy');
+
+        // ✅ ROUTE CETAK — tetap dipertahankan (dipakai untuk tombol cetak terpisah)
+        Route::get('/fasda/dampak/{dampak}/cetak', [StemFasdaDampakController::class, 'cetak'])->name('fasda.dampak.cetak');
 
 
-    // ========================================================
-    // ADMIN: REKAP INSTRUMEN STEM
-    // ========================================================
+        // =====================================================
+        // 2. INSTRUMEN FASDA EVALUASI
+        // =====================================================
+        Route::get('/fasda/evaluasi/create', [StemFasdaEvaluasiController::class, 'create'])->name('fasda.evaluasi.create');
+        Route::post('/fasda/evaluasi', [StemFasdaEvaluasiController::class, 'store'])->name('fasda.evaluasi.store');
 
-    Route::prefix('admin/stem')->name('admin.stem.')->group(function () {
-        Route::get('/rekap-evaluasi-dampak', [StemRekapController::class, 'evaluasiDampak'])->name('rekap.evaluasi');
+        Route::get('/fasda/evaluasi/{evaluasi}', [StemFasdaEvaluasiController::class, 'show'])->name('fasda.evaluasi.show');
+        Route::get('/fasda/evaluasi/{evaluasi}/edit', [StemFasdaEvaluasiController::class, 'edit'])->name('fasda.evaluasi.edit');
+        Route::put('/fasda/evaluasi/{evaluasi}', [StemFasdaEvaluasiController::class, 'update'])->name('fasda.evaluasi.update');
+        Route::delete('/fasda/evaluasi/{evaluasi}', [StemFasdaEvaluasiController::class, 'destroy'])->name('fasda.evaluasi.destroy');
+
+        // ✅ BARU: ROUTE CETAK Evaluasi (ditambahkan)
+        Route::get('/fasda/evaluasi/{evaluasi}/cetak', [StemFasdaEvaluasiController::class, 'cetak'])->name('fasda.evaluasi.cetak');
+
+
+        // =====================================================
+        // 3. INSTRUMEN DISEMINASI REACTION
+        // =====================================================
+        Route::get('/diseminasi/reaction/create', [StemDiseminasiReactionController::class, 'create'])->name('diseminasi.reaction.create');
+        Route::post('/diseminasi/reaction', [StemDiseminasiReactionController::class, 'store'])->name('diseminasi.reaction.store');
+
+        Route::get('/diseminasi/reaction/{reaction}', [StemDiseminasiReactionController::class, 'show'])->name('diseminasi.reaction.show');
+        Route::get('/diseminasi/reaction/{reaction}/edit', [StemDiseminasiReactionController::class, 'edit'])->name('diseminasi.reaction.edit');
+        Route::put('/diseminasi/reaction/{reaction}', [StemDiseminasiReactionController::class, 'update'])->name('diseminasi.reaction.update');
+        Route::delete('/diseminasi/reaction/{reaction}', [StemDiseminasiReactionController::class, 'destroy'])->name('diseminasi.reaction.destroy');
+
+        // ✅ BARU: ROUTE CETAK Reaction (ditambahkan)
+        Route::get('/diseminasi/reaction/{reaction}/cetak', [StemDiseminasiReactionController::class, 'cetak'])->name('diseminasi.reaction.cetak');
+
+
+        // =====================================================
+        // 4. INSTRUMEN MONITORING DISEMINASI
+        // =====================================================
+        Route::get('/diseminasi/monitoring/create', [StemDiseminasiMonitoringController::class, 'create'])->name('diseminasi.monitoring.create');
+        Route::post('/diseminasi/monitoring', [StemDiseminasiMonitoringController::class, 'store'])->name('diseminasi.monitoring.store');
+
+        Route::get('/diseminasi/monitoring/{monitoring}', [StemDiseminasiMonitoringController::class, 'show'])->name('diseminasi.monitoring.show');
+        Route::get('/diseminasi/monitoring/{monitoring}/edit', [StemDiseminasiMonitoringController::class, 'edit'])->name('diseminasi.monitoring.edit');
+        Route::put('/diseminasi/monitoring/{monitoring}', [StemDiseminasiMonitoringController::class, 'update'])->name('diseminasi.monitoring.update');
+        Route::delete('/diseminasi/monitoring/{monitoring}', [StemDiseminasiMonitoringController::class, 'destroy'])->name('diseminasi.monitoring.destroy');
+
+        // ✅ BARU: ROUTE CETAK Monitoring (ditambahkan)
+        Route::get('/diseminasi/monitoring/{monitoring}/cetak', [StemDiseminasiMonitoringController::class, 'cetak'])->name('diseminasi.monitoring.cetak');
+
+
+        // =====================================================
+        // Route untuk mengambil partial tabel riwayat (AJAX/HTML)
+        // =====================================================
+        Route::get('/riwayat/{kategori}', [StemHistoryController::class, 'index'])->name('riwayat');
     });
 
 
@@ -270,4 +334,4 @@ Route::middleware('auth')->group(function () {
             ]);
     });
 
-}); 
+});

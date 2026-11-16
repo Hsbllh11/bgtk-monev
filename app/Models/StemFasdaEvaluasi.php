@@ -27,11 +27,16 @@ class StemFasdaEvaluasi extends Model
 
     protected $casts = [
         'tanggal_pengisian' => 'date',
+
+        // Pendidik — JSON array
         'pendidik_perencanaan' => 'array',
         'pendidik_pelaksanaan' => 'array',
         'pendidik_evaluasi_refleksi' => 'array',
         'pendidik_dampak_kualitas' => 'array',
         'pendidik_pengembangan_profesional' => 'array',
+        'pendidik_catatan' => 'array',  // ← BARU: 22 catatan Pendidik (JSON)
+
+        // Murid — JSON array
         'murid_iklim_kelas' => 'array',
         'murid_lingkungan_suportif' => 'array',
         'murid_kebebasan_eksplorasi' => 'array',

@@ -1,0 +1,1070 @@
+
+============================================================
+FILE: app\Models\BcksJawaban.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class BcksJawaban extends Model
+{
+    protected $table = 'bcks_jawaban';
+
+    protected $fillable = [
+        'bcks_pengisian_id',
+        'nomor_indikator',
+        'level',
+        'skor',
+        'catatan',
+    ];
+
+    protected $casts = [
+        'nomor_indikator' => 'integer',
+        'skor' => 'integer',
+    ];
+
+    /**
+     * Relasi ke data pengisian BCKS.
+     */
+    public function pengisian(): BelongsTo
+    {
+        return $this->belongsTo(
+            BcksPengisian::class,
+            'bcks_pengisian_id'
+        );
+    }
+}
+
+============================================================
+FILE: app\Models\BcksJawabanLama.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class BcksJawabanLama extends Model
+{
+    protected $table = 'bcks_jawaban_lama';
+    
+    public $timestamps = true;
+
+    protected $fillable = [
+        'bcks_pengisian_id',
+        'nomor_indikator',
+        'level',
+        'skor',
+        'catatan',
+    ];
+}
+
+============================================================
+FILE: app\Models\BcksPengisian.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class BcksPengisian extends Model
+{
+    protected $table = 'bcks_pengisians';
+
+    protected $fillable = [
+        'nama_bcks',
+        'unit_kerja',
+        'angkatan_pelatihan',
+        'nama_responden',
+        'unit_kerja_responden',
+        'status_responden',
+        'nama_petugas_monev',
+        'unit_kerja_petugas',
+        'tanggal_evaluasi',
+        'total_skor',
+        'nilai_akhir',
+        'predikat',
+        'dampak_implementasi_rptks',
+        'kendala_strategi_mitigasi',
+        'perubahan_pengambilan_keputusan',
+        'dukungan_lingkungan_sekolah',
+        'keberlanjutan_program_inovasi',
+        'status_pengisian',
+        'sekolah_id',
+    ];
+
+    protected $casts = [
+        'tanggal_evaluasi' => 'date',
+        'total_skor' => 'integer',
+        'nilai_akhir' => 'decimal:2',
+    ];
+
+    /**
+     * Relasi ke jawaban setiap indikator BCKS.
+     * Otomatis mengambil dari tabel arsip jika tabel baru kosong.
+     */
+    public function jawaban(): HasMany
+    {
+        // Cek apakah ada jawaban di tabel baru (format 40 soal)
+        if ($this->jawabanBaru()->exists()) {
+            return $this->jawabanBaru();
+        }
+
+        // Jika kosong, ambil dari tabel arsip lama (format 27 soal)
+        return $this->hasMany(BcksJawabanLama::class, 'bcks_pengisian_id');
+    }
+
+    /**
+     * Relasi asli ke tabel jawaban baru.
+     */
+    public function jawabanBaru(): HasMany
+    {
+        return $this->hasMany(BcksJawaban::class, 'bcks_pengisian_id');
+    }
+
+    public function sekolah()
+    {
+        return $this->belongsTo(Sekolah::class);
+    }
+}
+
+============================================================
+FILE: app\Models\BKAnswer.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class BKAnswer extends Model
+{
+    use HasFactory;
+
+    protected $table = 'bk_answers';
+
+    protected $fillable = [
+        'bk_submission_id',
+        'bk_question_id',
+        'jawaban',
+        'skor',
+    ];
+
+    protected $casts = [
+        'jawaban' => 'boolean',
+        'skor' => 'integer',
+    ];
+
+    /**
+     * Pengisian instrumen BK.
+     */
+    public function submission()
+    {
+        return $this->belongsTo(
+            BKSubmission::class,
+            'bk_submission_id'
+        );
+    }
+
+    /**
+     * Pertanyaan BK.
+     */
+    public function question()
+    {
+        return $this->belongsTo(
+            BKQuestion::class,
+            'bk_question_id'
+        );
+    }
+}
+
+============================================================
+FILE: app\Models\BKEssayAnswer.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class BKEssayAnswer extends Model
+{
+    use HasFactory;
+
+    protected $table = 'bk_essay_answers';
+
+    protected $fillable = [
+        'bk_submission_id',
+        'nomor',
+        'pertanyaan',
+        'jawaban',
+    ];
+
+    /**
+     * Pengisian BK.
+     */
+    public function submission()
+    {
+        return $this->belongsTo(
+            BKSubmission::class,
+            'bk_submission_id'
+        );
+    }
+}
+
+============================================================
+FILE: app\Models\BKQuestion.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class BKQuestion extends Model
+{
+    use HasFactory;
+
+    protected $table = 'bk_questions';
+
+    protected $fillable = [
+        'level',
+        'level_nama',
+        'bagian',
+        'judul_bagian',
+        'nomor',
+        'pernyataan',
+        'urutan',
+        'aktif',
+    ];
+
+    protected $casts = [
+        'aktif' => 'boolean',
+    ];
+
+    /**
+     * Jawaban dari pertanyaan ini.
+     */
+    public function answers()
+    {
+        return $this->hasMany(BKAnswer::class, 'bk_question_id');
+    }
+}
+
+============================================================
+FILE: app\Models\BKSubmission.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class BKSubmission extends Model
+{
+    use HasFactory;
+
+    protected $table = 'bk_submissions';
+
+    protected $fillable = [
+        // Identitas petugas Monev
+        'nama_petugas_monev',
+        'instansi_petugas',
+        'lokasi_monev',
+        'tanggal_pelaksanaan',
+
+        // Identitas responden
+        'nama_responden',
+        'jabatan_responden',
+        'jabatan_lainnya',
+        'satuan_pendidikan',
+        'masa_kerja',
+        'nama_pelatihan',
+        'tanggal_pengisian',
+
+        // Field lama, dipertahankan untuk kompatibilitas data
+        'instansi_responden',
+        'kab_kota',
+
+        // Hasil penilaian
+        'jumlah_soal',
+        'jumlah_ya',
+        'jumlah_tidak',
+        'total_skor',
+        'skor_maksimal',
+        'skor_persentase',
+        'kategori',
+        'status',
+        'sekolah_id',
+    ];
+
+    protected $casts = [
+        'tanggal_pelaksanaan' => 'date',
+        'tanggal_pengisian' => 'date',
+        'masa_kerja' => 'integer',
+        'skor_persentase' => 'decimal:2',
+    ];
+
+    /**
+     * Daftar pertanyaan dan jawaban Ya/Tidak.
+     */
+    public function answers()
+    {
+        return $this->hasMany(BKAnswer::class, 'bk_submission_id');
+    }
+
+    /**
+     * Jawaban pertanyaan uraian.
+     */
+    public function essayAnswers()
+    {
+        return $this->hasMany(BKEssayAnswer::class, 'bk_submission_id');
+    }
+
+    /**
+     * Sekolah yang terkait dengan pengisian BK.
+     */
+    public function sekolah()
+    {
+        return $this->belongsTo(Sekolah::class);
+    }
+}
+
+============================================================
+FILE: app\Models\GembiraPengisian.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class GembiraPengisian extends Model
+{
+    use HasFactory;
+
+    protected $table = 'gembira_pengisians';
+
+    protected $fillable = [
+        'sekolah_id',
+        'nama_guru',
+        'nama_sekolah',
+        'kelas_fase',
+        'topik_materi',
+        'nama_petugas_monev',
+        'jabatan_penilai',
+        'tanggal_monev',
+        'sumber_data_bukti',
+        'level_1_jawaban',
+        'level_2_jawaban',
+        'tanggal_observasi',
+        'durasi_pembelajaran',
+        'jumlah_murid_hadir',
+        'observasi_ke',
+        'level_3_jawaban',
+        'level_4_jawaban',
+        'status',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'tanggal_monev' => 'date',
+            'tanggal_observasi' => 'date',
+            'level_1_jawaban' => 'array',
+            'level_2_jawaban' => 'array',
+            'level_3_jawaban' => 'array',
+            'level_4_jawaban' => 'array',
+        ];
+    }
+
+    /**
+     * Relasi ke data sekolah.
+     */
+    public function sekolah(): BelongsTo
+    {
+        return $this->belongsTo(Sekolah::class, 'sekolah_id');
+    }
+}
+
+
+============================================================
+FILE: app\Models\Instrumen.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Instrumen extends Model
+{
+    use HasFactory;
+
+    protected $table = 'instrumens';
+
+    protected $fillable = [
+        'kode_instrumen',
+        'nama_instrumen',
+        'jenis_instrumen',
+        'deskripsi',
+        'status',
+        'jumlah_pertanyaan',
+        'capaian',
+        'tanggal_mulai',
+        'tanggal_selesai',
+    ];
+
+    protected $casts = [
+        'jumlah_pertanyaan' => 'integer',
+        'capaian' => 'decimal:2',
+        'tanggal_mulai' => 'date',
+        'tanggal_selesai' => 'date',
+    ];
+
+    /**
+     * Relasi ke Wawancara
+     */
+    public function wawancaras()
+    {
+        return $this->hasMany(Wawancara::class);
+    }
+}
+
+============================================================
+FILE: app\Models\PkgsdMbiPengisian.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class PkgsdMbiPengisian extends Model
+{
+    use HasFactory;
+
+    protected $table = 'pkgsd_mbi_pengisians';
+
+    protected $fillable = [
+        'sekolah_id',
+        'nama_guru',
+        'nama_sekolah',
+        'kelas_fase',
+        'topik_materi',
+        'nama_petugas_monev',
+        'jabatan_penilai',
+        'tanggal_monev',
+        'sumber_data_bukti',
+        'level_1_jawaban',
+        'level_2_jawaban',
+        'level_3_jawaban',
+        'level_4_jawaban',
+        'status',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'tanggal_monev' => 'date',
+            'level_1_jawaban' => 'array',
+            'level_2_jawaban' => 'array',
+            'level_3_jawaban' => 'array',
+            'level_4_jawaban' => 'array',
+        ];
+    }
+
+    public function sekolah(): BelongsTo
+    {
+        return $this->belongsTo(Sekolah::class, 'sekolah_id');
+    }
+}
+
+
+============================================================
+FILE: app\Models\Sekolah.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Sekolah extends Model
+{
+    use HasFactory;
+
+    protected $table = 'sekolahs';
+
+    protected $fillable = [
+        'npsn',
+        'nama_sekolah',
+        'jenjang',
+        'kabupaten_kota',
+        'kecamatan',
+        'alamat',
+        'status_monitoring',
+        'tahun_monitoring',
+    ];
+
+    protected $casts = [
+        'tahun_monitoring' => 'integer',
+    ];
+
+    public function bcksPengisians(): HasMany
+    {
+        return $this->hasMany(BcksPengisian::class, 'sekolah_id');
+    }
+
+    public function bkSubmissions(): HasMany
+    {
+        return $this->hasMany(BKSubmission::class, 'sekolah_id');
+    }
+
+    public function tendiks(): HasMany
+    {
+        return $this->hasMany(Tendik::class, 'sekolah_id');
+    }
+
+    public function gembiraPengisians(): HasMany
+    {
+        return $this->hasMany(GembiraPengisian::class, 'sekolah_id');
+    }
+
+    /**
+     * Relasi ke instrumen PKGSD MBI.
+     */
+    public function pkgsdMbiPengisians(): HasMany
+    {
+        return $this->hasMany(PkgsdMbiPengisian::class, 'sekolah_id');
+    }
+
+    public function wawancaras(): HasMany
+    {
+        return $this->hasMany(Wawancara::class, 'sekolah_id');
+    }
+
+    public function tindakLanjuts(): HasMany
+    {
+        return $this->hasMany(TindakLanjut::class, 'sekolah_id');
+    }
+
+    /**
+     * Relasi ke instrumen STEM â€” FASDA (Dampak).
+     */
+    public function stemFasdaDampak(): HasMany
+    {
+        return $this->hasMany(StemFasdaDampak::class, 'sekolah_id');
+    }
+
+    /**
+     * Relasi ke instrumen STEM â€” FASDA (Evaluasi).
+     */
+    public function stemFasdaEvaluasi(): HasMany
+    {
+        return $this->hasMany(StemFasdaEvaluasi::class, 'sekolah_id');
+    }
+
+    /**
+     * Relasi ke instrumen STEM â€” Diseminasi (Monitoring).
+     */
+    public function stemDiseminasiMonitoring(): HasMany
+    {
+        return $this->hasMany(StemDiseminasiMonitoring::class, 'sekolah_id');
+    }
+
+    /**
+     * Relasi ke instrumen STEM â€” Diseminasi (Reaction).
+     */
+    public function stemDiseminasiReaction(): HasMany
+    {
+        return $this->hasMany(StemDiseminasiReaction::class, 'sekolah_id');
+    }
+}
+
+============================================================
+FILE: app\Models\StemDiseminasiMonitoring.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class StemDiseminasiMonitoring extends Model
+{
+    use HasFactory;
+
+    protected $table = 'stem_diseminasi_monitoring';
+
+    protected $fillable = [
+        'sekolah_id', 'nama_satuan_pendidikan', 'kab_kota', 'nama_supervisor', 'jabatan_instansi', 
+        'nama_fasilitator_daerah', 'tanggal_supervisi', 'tahapan_dsupervisi',
+        
+        'aspek_persiapan_pelaksanaan', 'aspek_elaborasi_konsep', 'aspek_refleksi_evaluasi',
+        'aspek_ruang_karya', 'aspek_keterlaksanaan', 'aspek_kelengkapan_bukti',
+        'aspek_desain_aktivitas', 'aspek_implementasi_stem', 'aspek_tindak_lanjut', 'aspek_dampak_awal',
+        
+        'wawancara_guru_1', 'wawancara_guru_2', 'wawancara_guru_3', 'wawancara_guru_4',
+        'wawancara_guru_5', 'wawancara_guru_6', 'wawancara_guru_7', 'wawancara_guru_8',
+    ];
+
+    protected $casts = [
+        'tanggal_supervisi' => 'date',
+        'tahapan_dsupervisi' => 'array',
+        'aspek_persiapan_pelaksanaan' => 'array',
+        'aspek_elaborasi_konsep' => 'array',
+        'aspek_refleksi_evaluasi' => 'array',
+        'aspek_ruang_karya' => 'array',
+        'aspek_keterlaksanaan' => 'array',
+        'aspek_kelengkapan_bukti' => 'array',
+        'aspek_desain_aktivitas' => 'array',
+        'aspek_implementasi_stem' => 'array',
+        'aspek_tindak_lanjut' => 'array',
+        'aspek_dampak_awal' => 'array',
+    ];
+
+    public function sekolah(): BelongsTo
+    {
+        return $this->belongsTo(Sekolah::class);
+    }
+}
+
+============================================================
+FILE: app\Models\StemDiseminasiReaction.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class StemDiseminasiReaction extends Model
+{
+    use HasFactory;
+
+    protected $table = 'stem_diseminasi_reaction';
+
+    protected $fillable = [
+        'sekolah_id', 'nama_responden', 'asal_sekolah', 'tanggal_pengisian',
+        
+        'evaluasi_program', 'sarana_prasarana', 'fasilitator', 
+        'akses_lms', 'bahan_kegiatan', 'jangka_waktu', 'layanan_menu',
+    ];
+
+    protected $casts = [
+        'tanggal_pengisian' => 'date',
+        'evaluasi_program' => 'array',
+        'sarana_prasarana' => 'array',
+        'fasilitator' => 'array',
+        'akses_lms' => 'array',
+        'bahan_kegiatan' => 'array',
+        'jangka_waktu' => 'array',
+        'layanan_menu' => 'array',
+    ];
+
+    public function sekolah(): BelongsTo
+    {
+        return $this->belongsTo(Sekolah::class);
+    }
+}
+
+============================================================
+FILE: app\Models\StemFasdaDampak.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class StemFasdaDampak extends Model
+{
+    use HasFactory;
+
+    protected $table = 'stem_fasda_dampak';
+
+    protected $fillable = [
+        'sekolah_id', 'nama_sekolah', 'nama_pendidik', 'mata_pelajaran', 'tanggal_observasi', 'nama_petugas_monev',
+        
+        // Bagian 1
+        'skor_konteks_masalah', 'bukti_konteks_masalah',
+        'skor_skenario_lkpd', 'bukti_skenario_lkpd',
+        'skor_integrasi_disiplin', 'bukti_integrasi_disiplin',
+        'skor_instrumen_asesmen', 'bukti_instrumen_asesmen',
+        
+        // Bagian 2
+        'skor_prinsip_5m', 'bukti_prinsip_5m',
+        'skor_aksi_eksperimen', 'bukti_aksi_eksperimen',
+        'skor_dinamika_kolaborasi', 'bukti_dinamika_kolaborasi',
+        'skor_resiliensi', 'bukti_resiliensi',
+        'skor_fungsionalitas', 'bukti_fungsionalitas',
+        
+        // Bagian 3
+        'wawancara_murid_1', 'wawancara_murid_2', 'wawancara_murid_3', 'wawancara_murid_4',
+        'wawancara_pendidik_1', 'wawancara_pendidik_2', 'wawancara_pendidik_3', 'wawancara_pendidik_4',
+    ];
+
+    protected $casts = [
+        'tanggal_observasi' => 'date',
+    ];
+
+    public function sekolah(): BelongsTo
+    {
+        return $this->belongsTo(Sekolah::class);
+    }
+}
+
+============================================================
+FILE: app\Models\StemFasdaEvaluasi.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class StemFasdaEvaluasi extends Model
+{
+    use HasFactory;
+
+    protected $table = 'stem_fasda_evaluasi';
+
+    protected $fillable = [
+        'sekolah_id', 'nama_responden', 'peran_responden', 'asal_sekolah', 'kabupaten_kota', 'provinsi', 'tanggal_pengisian',
+        
+        // Pendidik
+        'pendidik_perencanaan', 'pendidik_pelaksanaan', 'pendidik_evaluasi_refleksi', 
+        'pendidik_dampak_kualitas', 'pendidik_pengembangan_profesional', 'pendidik_catatan',
+        
+        // Murid
+        'murid_iklim_kelas', 'murid_lingkungan_suportif', 'murid_kebebasan_eksplorasi',
+        'murid_penghargaan_kolaboratif', 'murid_keingintahuan', 'murid_kepuasan',
+        'murid_prinsip_mendalam', 'murid_perkembangan', 'murid_hasil_belajar',
+    ];
+
+    protected $casts = [
+        'tanggal_pengisian' => 'date',
+        'pendidik_perencanaan' => 'array',
+        'pendidik_pelaksanaan' => 'array',
+        'pendidik_evaluasi_refleksi' => 'array',
+        'pendidik_dampak_kualitas' => 'array',
+        'pendidik_pengembangan_profesional' => 'array',
+        'murid_iklim_kelas' => 'array',
+        'murid_lingkungan_suportif' => 'array',
+        'murid_kebebasan_eksplorasi' => 'array',
+        'murid_penghargaan_kolaboratif' => 'array',
+        'murid_keingintahuan' => 'array',
+        'murid_kepuasan' => 'array',
+        'murid_prinsip_mendalam' => 'array',
+        'murid_perkembangan' => 'array',
+        'murid_hasil_belajar' => 'array',
+    ];
+
+    public function sekolah(): BelongsTo
+    {
+        return $this->belongsTo(Sekolah::class);
+    }
+}
+
+============================================================
+FILE: app\Models\Tendik.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Tendik extends Model
+{
+    use HasFactory;
+
+    protected $table = 'tendiks';
+
+    protected $fillable = [
+        'nama_petugas_monev',
+        'instansi_petugas',
+        'nama_responden',
+        'jabatan_responden',
+        'jabatan_lainnya',
+        'satuan_pendidikan',
+        'masa_kerja',
+        'nama_pelatihan',
+        'tanggal_pengisian',
+        'sekolah_id',
+        'lokasi_monev',
+
+        // Jawaban butir 1â€“43
+        'jawaban_1',
+        'jawaban_2',
+        'jawaban_3',
+        'jawaban_4',
+        'jawaban_5',
+        'jawaban_6',
+        'jawaban_7',
+        'jawaban_8',
+        'jawaban_9',
+        'jawaban_10',
+        'jawaban_11',
+        'jawaban_12',
+        'jawaban_13',
+        'jawaban_14',
+        'jawaban_15',
+        'jawaban_16',
+        'jawaban_17',
+        'jawaban_18',
+        'jawaban_19',
+        'jawaban_20',
+        'jawaban_21',
+        'jawaban_22',
+        'jawaban_23',
+        'jawaban_24',
+        'jawaban_25',
+        'jawaban_26',
+        'jawaban_27',
+        'jawaban_28',
+        'jawaban_29',
+        'jawaban_30',
+        'jawaban_31',
+        'jawaban_32',
+        'jawaban_33',
+        'jawaban_34',
+        'jawaban_35',
+        'jawaban_36',
+        'jawaban_37',
+        'jawaban_38',
+        'jawaban_39',
+        'jawaban_40',
+        'jawaban_41',
+        'jawaban_42',
+        'jawaban_43',
+
+        // Rekap skor
+        'skor_level_1',
+        'skor_level_2',
+        'skor_level_3',
+        'skor_level_4',
+        'skor_keseluruhan',
+        'predikat',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'masa_kerja' => 'integer',
+            'tanggal_pengisian' => 'date',
+            'skor_level_1' => 'decimal:2',
+            'skor_level_2' => 'decimal:2',
+            'skor_level_3' => 'decimal:2',
+            'skor_level_4' => 'decimal:2',
+            'skor_keseluruhan' => 'decimal:2',
+        ];
+    }
+    public function sekolah()
+    {
+        return $this->belongsTo(Sekolah::class);
+    }
+}
+
+
+============================================================
+FILE: app\Models\TindakLanjut.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class TindakLanjut extends Model
+{
+    use HasFactory;
+
+    protected $table = 'tindak_lanjuts';
+
+    protected $fillable = [
+        'sekolah_id',
+        'wawancara_id',
+        'judul_tindak_lanjut',
+        'uraian_tindak_lanjut',
+        'penanggung_jawab',
+        'tanggal_mulai',
+        'target_selesai',
+        'status',
+        'keterangan',
+    ];
+
+    protected $casts = [
+        'tanggal_mulai' => 'date',
+        'target_selesai' => 'date',
+    ];
+
+    public function sekolah()
+    {
+        return $this->belongsTo(Sekolah::class);
+    }
+
+    public function wawancara()
+    {
+        return $this->belongsTo(Wawancara::class);
+    }
+}
+
+============================================================
+FILE: app\Models\User.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+#[Fillable([
+    'name',
+    'email',
+    'username',
+    'nip',
+    'password',
+    'role',
+    'is_active',
+])]
+#[Hidden(['password', 'remember_token'])]
+class User extends Authenticatable
+{
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, Notifiable;
+
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'is_active' => 'boolean',
+        ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isPetugasMonev(): bool
+    {
+        return $this->role === 'petugas_monev';
+    }
+}
+
+
+============================================================
+FILE: app\Models\Wawancara.php
+============================================================
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Wawancara extends Model
+{
+    use HasFactory;
+
+    protected $table = 'wawancaras';
+
+    protected $fillable = [
+        'jenis_wawancara',
+        'instrumen_id',
+        'sekolah_id',
+        'tanggal_wawancara',
+        'status',
+
+        // Identitas BCKS
+        'nama_bcks',
+        'unit_kerja_bcks',
+        'angkatan_pelatihan_bcks',
+
+        // Identitas responden
+        'nama_responden',
+        'unit_kerja_responden',
+        'status_responden',
+
+        // Identitas petugas Monev
+        'nama_petugas_monev',
+        'unit_kerja_petugas',
+        'tanggal_evaluasi',
+
+        // Jawaban esai
+        'jawaban_1',
+        'jawaban_2',
+        'jawaban_3',
+        'jawaban_4',
+        'jawaban_5',
+        'jawaban_6',
+        'jawaban_7',
+        'jawaban_8',
+
+        // Hasil dan catatan
+        'hasil_wawancara',
+        'catatan',
+
+        // Kolom lama untuk menjaga kompatibilitas data
+        'nama_narasumber',
+        'jabatan_narasumber',
+        'nama_pewawancara',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'tanggal_wawancara' => 'date',
+            'tanggal_evaluasi' => 'date',
+        ];
+    }
+
+    public function instrumen()
+    {
+        return $this->belongsTo(Instrumen::class);
+    }
+
+    public function sekolah()
+    {
+        return $this->belongsTo(Sekolah::class);
+    }
+
+    public function tindakLanjut()
+    {
+        return $this->hasOne(TindakLanjut::class);
+    }
+}

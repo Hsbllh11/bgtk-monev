@@ -1,0 +1,1863 @@
+
+============================================================
+FILE: database\migrations\0001_01_01_000000_create_users_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->rememberToken();
+            $table->timestamps();
+        });
+
+        Schema::create('password_reset_tokens', function (Blueprint $table) {
+            $table->string('email')->primary();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
+
+        Schema::create('sessions', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->foreignId('user_id')->nullable()->index();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('users');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('sessions');
+    }
+};
+
+
+============================================================
+FILE: database\migrations\0001_01_01_000001_create_cache_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('cache', function (Blueprint $table) {
+            $table->string('key')->primary();
+            $table->mediumText('value');
+            $table->bigInteger('expiration')->index();
+        });
+
+        Schema::create('cache_locks', function (Blueprint $table) {
+            $table->string('key')->primary();
+            $table->string('owner');
+            $table->bigInteger('expiration')->index();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('cache');
+        Schema::dropIfExists('cache_locks');
+    }
+};
+
+
+============================================================
+FILE: database\migrations\0001_01_01_000002_create_jobs_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('jobs', function (Blueprint $table) {
+            $table->id();
+            $table->string('queue')->index();
+            $table->longText('payload');
+            $table->unsignedSmallInteger('attempts');
+            $table->unsignedInteger('reserved_at')->nullable();
+            $table->unsignedInteger('available_at');
+            $table->unsignedInteger('created_at');
+        });
+
+        Schema::create('job_batches', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->string('name');
+            $table->integer('total_jobs');
+            $table->integer('pending_jobs');
+            $table->integer('failed_jobs');
+            $table->longText('failed_job_ids');
+            $table->mediumText('options')->nullable();
+            $table->integer('cancelled_at')->nullable();
+            $table->integer('created_at');
+            $table->integer('finished_at')->nullable();
+        });
+
+        Schema::create('failed_jobs', function (Blueprint $table) {
+            $table->id();
+            $table->string('uuid')->unique();
+            $table->string('connection');
+            $table->string('queue');
+            $table->longText('payload');
+            $table->longText('exception');
+            $table->timestamp('failed_at')->useCurrent();
+
+            $table->index(['connection', 'queue', 'failed_at']);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('jobs');
+        Schema::dropIfExists('job_batches');
+        Schema::dropIfExists('failed_jobs');
+    }
+};
+
+
+============================================================
+FILE: database\migrations\2026_10_06_041124_create_sekolahs_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('sekolahs', function (Blueprint $table) {
+            $table->id();
+
+            $table->string('npsn', 20)->unique();
+            $table->string('nama_sekolah');
+            $table->enum('jenjang', ['SD', 'SMP', 'SMA', 'SMK']);
+            $table->string('kabupaten_kota');
+            $table->string('kecamatan')->nullable();
+            $table->text('alamat')->nullable();
+
+            $table->enum('status_monitoring', [
+                'Sudah Dimonitor',
+                'Belum Dimonitor'
+            ])->default('Belum Dimonitor');
+
+            $table->year('tahun_monitoring')->nullable();
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('sekolahs');
+    }
+};
+
+============================================================
+FILE: database\migrations\2026_10_07_005606_create_instrumens_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('instrumens', function (Blueprint $table) {
+            $table->id();
+
+            $table->string('kode_instrumen', 50)->unique();
+
+            $table->string('nama_instrumen');
+
+            $table->enum('jenis_instrumen', [
+                'Pemantauan',
+                'Evaluasi',
+                'Monitoring'
+            ]);
+
+            $table->text('deskripsi')->nullable();
+
+            $table->enum('status', [
+                'Draft',
+                'Aktif',
+                'Selesai'
+            ])->default('Draft');
+
+            $table->integer('jumlah_pertanyaan')->default(0);
+
+            $table->decimal('capaian', 5, 2)->default(0);
+
+            $table->date('tanggal_mulai')->nullable();
+
+            $table->date('tanggal_selesai')->nullable();
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('instrumens');
+    }
+};
+
+============================================================
+FILE: database\migrations\2026_10_07_020252_create_wawancaras_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+   public function up(): void
+{
+    Schema::create('wawancaras', function (Blueprint $table) {
+        $table->id();
+
+        $table->foreignId('instrumen_id')
+            ->constrained('instrumens')
+            ->cascadeOnDelete();
+
+        $table->foreignId('sekolah_id')
+            ->constrained('sekolahs')
+            ->cascadeOnDelete();
+
+        $table->date('tanggal_wawancara');
+
+        $table->string('nama_narasumber');
+
+        $table->string('jabatan_narasumber')->nullable();
+
+        $table->string('nama_pewawancara');
+
+        $table->enum('status', [
+            'Belum Dilaksanakan',
+            'Selesai'
+        ])->default('Belum Dilaksanakan');
+
+        $table->text('hasil_wawancara')->nullable();
+
+        $table->text('catatan')->nullable();
+
+        $table->timestamps();
+    });
+}
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('wawancaras');
+    }
+};
+
+
+============================================================
+FILE: database\migrations\2026_10_07_023652_create_tindak_lanjuts_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('tindak_lanjuts', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('sekolah_id')
+                ->constrained('sekolahs')
+                ->cascadeOnDelete();
+
+            $table->foreignId('wawancara_id')
+                ->nullable()
+                ->constrained('wawancaras')
+                ->nullOnDelete();
+
+            $table->string('judul_tindak_lanjut');
+
+            $table->text('uraian_tindak_lanjut');
+
+            $table->string('penanggung_jawab');
+
+            $table->date('tanggal_mulai')
+                ->nullable();
+
+            $table->date('target_selesai')
+                ->nullable();
+
+            $table->enum('status', [
+                'Belum Dimulai',
+                'Dalam Proses',
+                'Selesai',
+            ])->default('Belum Dimulai');
+
+            $table->text('keterangan')
+                ->nullable();
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('tindak_lanjuts');
+    }
+};
+
+============================================================
+FILE: database\migrations\2026_10_07_070057_create_bcks_pengisians_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Jalankan migration.
+     */
+    public function up(): void
+    {
+        Schema::create('bcks_pengisians', function (Blueprint $table) {
+
+            $table->id();
+
+            /*
+            |--------------------------------------------------------------------------
+            | IDENTITAS BCKS
+            |--------------------------------------------------------------------------
+            */
+
+            $table->string('nama_bcks');
+
+            $table->string('unit_kerja')->nullable();
+
+            $table->string('angkatan_pelatihan')->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | IDENTITAS RESPONDEN
+            |--------------------------------------------------------------------------
+            */
+
+            $table->string('nama_responden');
+
+            $table->string('unit_kerja_responden')->nullable();
+
+            $table->enum('status_responden', [
+                'BCKS',
+                'Atasan Langsung / Pengawas Sekolah',
+                'Perwakilan Guru / Tenaga Kependidikan',
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | IDENTITAS PETUGAS MONEV
+            |--------------------------------------------------------------------------
+            */
+
+            $table->string('nama_petugas_monev');
+
+            $table->string('unit_kerja_petugas')->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | WAKTU EVALUASI
+            |--------------------------------------------------------------------------
+            */
+
+            $table->date('tanggal_evaluasi');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | HASIL PENILAIAN
+            |--------------------------------------------------------------------------
+            |
+            | Total maksimal 27 indikator x skor 4 = 108.
+            |
+            */
+
+            $table->unsignedSmallInteger('total_skor')
+                ->default(0);
+
+            $table->decimal('nilai_akhir', 5, 2)
+                ->default(0);
+
+            $table->enum('predikat', [
+                'Sangat Baik',
+                'Baik',
+                'Cukup',
+                'Perlu Pembinaan',
+            ])->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PERTANYAAN TERBUKA
+            |--------------------------------------------------------------------------
+            */
+
+            $table->text('dampak_implementasi_rptks')->nullable();
+
+            $table->text('kendala_strategi_mitigasi')->nullable();
+
+            $table->text('perubahan_pengambilan_keputusan')->nullable();
+
+            $table->text('dukungan_lingkungan_sekolah')->nullable();
+
+            $table->text('keberlanjutan_program_inovasi')->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS PENGISIAN
+            |--------------------------------------------------------------------------
+            */
+
+            $table->enum('status_pengisian', [
+                'Draft',
+                'Selesai',
+            ])->default('Draft');
+
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Balikkan migration.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('bcks_pengisians');
+    }
+};
+
+============================================================
+FILE: database\migrations\2026_10_07_070202_create_bcks_jawaban_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Jalankan migration.
+     */
+    public function up(): void
+    {
+        Schema::create('bcks_jawaban', function (Blueprint $table) {
+
+            $table->id();
+
+            /*
+            |--------------------------------------------------------------------------
+            | RELASI PENGISIAN
+            |--------------------------------------------------------------------------
+            */
+
+            $table->foreignId('bcks_pengisian_id')
+                ->constrained('bcks_pengisians')
+                ->cascadeOnDelete();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | IDENTITAS INDIKATOR
+            |--------------------------------------------------------------------------
+            |
+            | nomor_indikator menyimpan nomor pertanyaan 1 sampai 27.
+            |
+            */
+
+            $table->unsignedTinyInteger('nomor_indikator');
+
+            /*
+            |--------------------------------------------------------------------------
+            | LEVEL EVALUASI
+            |--------------------------------------------------------------------------
+            */
+
+            $table->enum('level', [
+                'Reaction',
+                'Learning',
+                'Behavior',
+                'Results',
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SKOR
+            |--------------------------------------------------------------------------
+            |
+            | Setiap pertanyaan hanya boleh memiliki satu skor:
+            |
+            | 1 = skor 1
+            | 2 = skor 2
+            | 3 = skor 3
+            | 4 = skor 4
+            |
+            */
+
+            $table->unsignedTinyInteger('skor');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CATATAN
+            |--------------------------------------------------------------------------
+            |
+            | Catatan bersifat opsional.
+            |
+            */
+
+            $table->text('catatan')->nullable();
+
+
+            $table->timestamps();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | INDEX
+            |--------------------------------------------------------------------------
+            |
+            | Satu pengisian tidak boleh memiliki nomor indikator
+            | yang sama lebih dari satu kali.
+            |
+            */
+
+            $table->unique([
+                'bcks_pengisian_id',
+                'nomor_indikator',
+            ]);
+        });
+    }
+
+    /**
+     * Balikkan migration.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('bcks_jawaban');
+    }
+};
+
+============================================================
+FILE: database\migrations\2026_10_08_005556_create_bk_instruments_tables.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Menjalankan migration.
+     */
+    public function up(): void
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | BK SUBMISSIONS
+        |--------------------------------------------------------------------------
+        | Menyimpan setiap pengisian instrumen BK.
+        |
+        */
+        Schema::create('bk_submissions', function (Blueprint $table) {
+
+            $table->id();
+
+            /*
+            |--------------------------------------------------------------------------
+            | IDENTITAS PETUGAS MONEV
+            |--------------------------------------------------------------------------
+            */
+
+            $table->string('nama_petugas_monev');
+            $table->string('instansi_petugas')->nullable();
+            $table->string('lokasi_monev')->nullable();
+            $table->date('tanggal_pelaksanaan')->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | IDENTITAS RESPONDEN
+            |--------------------------------------------------------------------------
+            */
+
+            $table->string('nama_responden');
+            $table->string('instansi_responden')->nullable();
+            $table->string('kab_kota')->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | HASIL PENILAIAN
+            |--------------------------------------------------------------------------
+            */
+
+            $table->unsignedInteger('jumlah_soal')->default(65);
+
+            $table->unsignedInteger('jumlah_ya')->default(0);
+
+            $table->unsignedInteger('jumlah_tidak')->default(0);
+
+            $table->decimal('skor_persentase', 5, 2)->default(0);
+
+            $table->enum('kategori', [
+                'Baik / Kategori Tinggi',
+                'Kurang / Kategori Rendah',
+            ])->nullable();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS
+            |--------------------------------------------------------------------------
+            */
+
+            $table->enum('status', [
+                'Draft',
+                'Selesai',
+            ])->default('Draft');
+
+
+            $table->timestamps();
+
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BK QUESTIONS
+        |--------------------------------------------------------------------------
+        | Master 65 pernyataan instrumen BK.
+        |
+        */
+
+        Schema::create('bk_questions', function (Blueprint $table) {
+
+            $table->id();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | LEVEL KIRKPATRICK
+            |--------------------------------------------------------------------------
+            */
+
+            $table->unsignedTinyInteger('level');
+
+            $table->string('level_nama');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | BAGIAN / KELOMPOK PERTANYAAN
+            |--------------------------------------------------------------------------
+            */
+
+            $table->string('bagian');
+
+            $table->string('judul_bagian');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | NOMOR PERTANYAAN
+            |--------------------------------------------------------------------------
+            */
+
+            $table->unsignedTinyInteger('nomor');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PERNYATAAN
+            |--------------------------------------------------------------------------
+            */
+
+            $table->text('pernyataan');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | URUTAN TAMPIL
+            |--------------------------------------------------------------------------
+            */
+
+            $table->unsignedSmallInteger('urutan');
+
+
+            $table->boolean('aktif')->default(true);
+
+            $table->timestamps();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | INDEX
+            |--------------------------------------------------------------------------
+            */
+
+            $table->index([
+                'level',
+                'bagian',
+                'urutan',
+            ]);
+
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BK ANSWERS
+        |--------------------------------------------------------------------------
+        | Menyimpan jawaban Ya / Tidak untuk 65 pernyataan.
+        |
+        */
+
+        Schema::create('bk_answers', function (Blueprint $table) {
+
+            $table->id();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | RELASI
+            |--------------------------------------------------------------------------
+            */
+
+            $table->foreignId('bk_submission_id')
+                ->constrained('bk_submissions')
+                ->cascadeOnDelete();
+
+
+            $table->foreignId('bk_question_id')
+                ->constrained('bk_questions')
+                ->restrictOnDelete();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | JAWABAN
+            |--------------------------------------------------------------------------
+            |
+            | true  = Ya
+            | false = Tidak
+            |
+            */
+
+            $table->boolean('jawaban');
+
+
+            $table->timestamps();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SATU PERTANYAAN HANYA BOLEH MEMILIKI
+            | SATU JAWABAN DALAM SATU PENGISIAN
+            |--------------------------------------------------------------------------
+            */
+
+            $table->unique([
+                'bk_submission_id',
+                'bk_question_id',
+            ]);
+
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BK ESSAY ANSWERS
+        |--------------------------------------------------------------------------
+        | Menyimpan 3 pertanyaan uraian Bagian B.
+        |
+        */
+
+        Schema::create('bk_essay_answers', function (Blueprint $table) {
+
+            $table->id();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | RELASI
+            |--------------------------------------------------------------------------
+            */
+
+            $table->foreignId('bk_submission_id')
+                ->constrained('bk_submissions')
+                ->cascadeOnDelete();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | NOMOR PERTANYAAN
+            |--------------------------------------------------------------------------
+            */
+
+            $table->unsignedTinyInteger('nomor');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PERTANYAAN
+            |--------------------------------------------------------------------------
+            */
+
+            $table->text('pertanyaan');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | JAWABAN
+            |--------------------------------------------------------------------------
+            */
+
+            $table->text('jawaban')->nullable();
+
+
+            $table->timestamps();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SATU NOMOR ESSAY HANYA SEKALI PER PENGISIAN
+            |--------------------------------------------------------------------------
+            */
+
+            $table->unique([
+                'bk_submission_id',
+                'nomor',
+            ]);
+
+        });
+    }
+
+
+    /**
+     * Membatalkan migration.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('bk_essay_answers');
+
+        Schema::dropIfExists('bk_answers');
+
+        Schema::dropIfExists('bk_questions');
+
+        Schema::dropIfExists('bk_submissions');
+    }
+};
+
+============================================================
+FILE: database\migrations\2026_10_12_013426_add_jawaban_esai_to_wawancaras_table.php
+============================================================
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('wawancaras', function (Blueprint $table) {
+            $table->longText('jawaban_1')->nullable();
+            $table->longText('jawaban_2')->nullable();
+            $table->longText('jawaban_3')->nullable();
+            $table->longText('jawaban_4')->nullable();
+            $table->longText('jawaban_5')->nullable();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('wawancaras', function (Blueprint $table) {
+            $table->dropColumn([
+                'jawaban_1',
+                'jawaban_2',
+                'jawaban_3',
+                'jawaban_4',
+                'jawaban_5',
+            ]);
+        });
+    }
+};
+
+
+============================================================
+FILE: database\migrations\2026_10_12_020511_add_identitas_bcks_to_wawancaras_table.php
+============================================================
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('wawancaras', function (Blueprint $table) {
+            // A. Identitas BCKS
+            $table->string('nama_bcks')->nullable();
+            $table->string('unit_kerja_bcks')->nullable();
+            $table->string('angkatan_pelatihan_bcks')->nullable();
+
+            // B. Identitas Responden
+            $table->string('nama_responden')->nullable();
+            $table->string('unit_kerja_responden')->nullable();
+            $table->string('status_responden')->nullable();
+
+            // C. Petugas Monev
+            $table->string('nama_petugas_monev')->nullable();
+            $table->string('unit_kerja_petugas')->nullable();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('wawancaras', function (Blueprint $table) {
+            $table->dropColumn([
+                'nama_bcks',
+                'unit_kerja_bcks',
+                'angkatan_pelatihan_bcks',
+                'nama_responden',
+                'unit_kerja_responden',
+                'status_responden',
+                'nama_petugas_monev',
+                'unit_kerja_petugas',
+            ]);
+        });
+    }
+};
+
+
+============================================================
+FILE: database\migrations\2026_10_12_021346_add_tanggal_evaluasi_to_wawancaras_table.php
+============================================================
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        if (! Schema::hasColumn('wawancaras', 'tanggal_evaluasi')) {
+            Schema::table('wawancaras', function (Blueprint $table) {
+                $table->date('tanggal_evaluasi')->nullable();
+            });
+        }
+    }
+
+    public function down(): void
+    {
+        if (Schema::hasColumn('wawancaras', 'tanggal_evaluasi')) {
+            Schema::table('wawancaras', function (Blueprint $table) {
+                $table->dropColumn('tanggal_evaluasi');
+            });
+        }
+    }
+};
+
+
+============================================================
+FILE: database\migrations\2026_10_12_025118_add_jenis_wawancara_to_wawancaras_table.php
+============================================================
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        if (! Schema::hasColumn('wawancaras', 'jenis_wawancara')) {
+            Schema::table('wawancaras', function (Blueprint $table) {
+                $table->string('jenis_wawancara', 20)
+                    ->nullable()
+                    ->after('id')
+                    ->index();
+            });
+        }
+    }
+
+    public function down(): void
+    {
+        /*
+         * Kolom ini berisi klasifikasi jenis wawancara.
+         * Sebelum rollback, pastikan data jenis wawancara
+         * sudah dicadangkan jika ingin mempertahankannya.
+         */
+        if (Schema::hasColumn('wawancaras', 'jenis_wawancara')) {
+            Schema::table('wawancaras', function (Blueprint $table) {
+                $table->dropIndex(['jenis_wawancara']);
+                $table->dropColumn('jenis_wawancara');
+            });
+        }
+    }
+};
+
+
+============================================================
+FILE: database\migrations\2026_10_12_034102_make_wawancara_pelaksanaan_fields_nullable.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('wawancaras', function (Blueprint $table) {
+            $table->unsignedBigInteger('instrumen_id')->nullable()->change();
+            $table->unsignedBigInteger('sekolah_id')->nullable()->change();
+        });
+    }
+
+    public function down(): void
+    {
+        // Sengaja tidak mengubah kolom kembali menjadi NOT NULL
+        // agar data yang memiliki nilai NULL tetap aman.
+    }
+};
+
+============================================================
+FILE: database\migrations\2026_10_13_024712_create_tendiks_table.php
+============================================================
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('tendiks', function (Blueprint $table) {
+            $table->id();
+
+            // Identitas petugas Monev
+            $table->string('nama_petugas_monev');
+            $table->string('instansi_petugas');
+
+            // Identitas responden Tendik
+            $table->string('nama_responden');
+            $table->string('jabatan_responden');
+            $table->string('jabatan_lainnya')->nullable();
+            $table->string('satuan_pendidikan');
+            $table->unsignedSmallInteger('masa_kerja');
+            $table->string('nama_pelatihan');
+            $table->date('tanggal_pengisian');
+
+            // Jawaban tertutup butir 1â€“43, masing-masing bernilai 1â€“4
+            for ($i = 1; $i <= 43; $i++) {
+                $table->unsignedTinyInteger('jawaban_' . $i)->nullable();
+            }
+
+            // Rekap skor empat level
+            $table->decimal('skor_level_1', 5, 2)->nullable();
+            $table->decimal('skor_level_2', 5, 2)->nullable();
+            $table->decimal('skor_level_3', 5, 2)->nullable();
+            $table->decimal('skor_level_4', 5, 2)->nullable();
+            $table->decimal('skor_keseluruhan', 5, 2)->nullable();
+            $table->string('predikat')->nullable();
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('tendiks');
+    }
+};
+
+
+============================================================
+FILE: database\migrations\2026_10_15_032612_add_username_nip_role_to_users_table.php
+============================================================
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('username')->nullable()->unique();
+            $table->string('nip', 30)->nullable()->unique();
+            $table->string('role')->default('petugas_monev');
+            $table->boolean('is_active')->default(true);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropUnique(['username']);
+            $table->dropUnique(['nip']);
+            $table->dropColumn([
+                'username',
+                'nip',
+                'role',
+                'is_active',
+            ]);
+        });
+    }
+};
+
+
+============================================================
+FILE: database\migrations\2026_10_16_053357_make_sekolah_metadata_nullable.php
+============================================================
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('sekolahs', function (Blueprint $table) {
+            $table->string('npsn', 20)->nullable()->change();
+            $table->enum('jenjang', ['SD', 'SMP', 'SMA', 'SMK'])
+                ->nullable()
+                ->change();
+            $table->string('kabupaten_kota')->nullable()->change();
+        });
+    }
+
+    public function down(): void
+    {
+        // Tidak mengembalikan kolom menjadi wajib agar data
+        // sekolah yang dibuat otomatis tetap aman.
+    }
+};
+
+
+============================================================
+FILE: database\migrations\2026_10_16_053955_add_sekolah_id_to_monev_activity_tables.php
+============================================================
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('bcks_pengisians', function (Blueprint $table) {
+            $table->foreignId('sekolah_id')
+                ->nullable()
+                ->constrained('sekolahs')
+                ->nullOnDelete();
+        });
+
+        Schema::table('bk_submissions', function (Blueprint $table) {
+            $table->foreignId('sekolah_id')
+                ->nullable()
+                ->constrained('sekolahs')
+                ->nullOnDelete();
+        });
+
+        Schema::table('tendiks', function (Blueprint $table) {
+            $table->foreignId('sekolah_id')
+                ->nullable()
+                ->constrained('sekolahs')
+                ->nullOnDelete();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('tendiks', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('sekolah_id');
+        });
+
+        Schema::table('bk_submissions', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('sekolah_id');
+        });
+
+        Schema::table('bcks_pengisians', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('sekolah_id');
+        });
+    }
+};
+
+
+============================================================
+FILE: database\migrations\2026_10_16_093452_add_lokasi_monev_to_tendiks_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('tendiks', function (Blueprint $table) {
+            if (! Schema::hasColumn('tendiks', 'lokasi_monev')) {
+                $table->string('lokasi_monev')->nullable();
+            }
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('tendiks', function (Blueprint $table) {
+            if (Schema::hasColumn('tendiks', 'lokasi_monev')) {
+                $table->dropColumn('lokasi_monev');
+            }
+        });
+    }
+};
+
+============================================================
+FILE: database\migrations\2026_10_16_102043_add_identitas_responden_to_bk_submissions_table.php
+============================================================
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('bk_submissions', function (Blueprint $table) {
+            $table->string('jabatan_responden')->nullable();
+            $table->string('jabatan_lainnya')->nullable();
+            $table->string('satuan_pendidikan')->nullable();
+            $table->unsignedTinyInteger('masa_kerja')->nullable();
+            $table->string('nama_pelatihan')->nullable();
+            $table->date('tanggal_pengisian')->nullable();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('bk_submissions', function (Blueprint $table) {
+            $table->dropColumn([
+                'jabatan_responden',
+                'jabatan_lainnya',
+                'satuan_pendidikan',
+                'masa_kerja',
+                'nama_pelatihan',
+                'tanggal_pengisian',
+            ]);
+        });
+    }
+};
+
+
+============================================================
+FILE: database\migrations\2026_10_20_165855_create_gembira_pengisians_table.php
+============================================================
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('gembira_pengisians', function (Blueprint $table) {
+            $table->id();
+
+            // Biodata
+            $table->string('nama_guru');
+            $table->string('nama_sekolah');
+            $table->string('kelas_fase')->nullable();
+            $table->string('topik_materi')->nullable();
+            $table->string('nama_petugas_monev');
+            $table->string('jabatan_penilai')->nullable();
+            $table->date('tanggal_monev');
+            $table->text('sumber_data_bukti')->nullable();
+
+            // Level 1: Reaction (29 indikator)
+            $table->json('level_1_jawaban')->nullable();
+
+            // Level 2: Learning (23 indikator)
+            $table->json('level_2_jawaban')->nullable();
+
+            // Level 3: Behavior (23 indikator)
+            $table->date('tanggal_observasi')->nullable();
+            $table->string('durasi_pembelajaran')->nullable();
+            $table->unsignedInteger('jumlah_murid_hadir')->nullable();
+            $table->unsignedInteger('observasi_ke')->nullable();
+            $table->json('level_3_jawaban')->nullable();
+
+            // Level 4: Results (11 indikator)
+            $table->json('level_4_jawaban')->nullable();
+
+            // Status pengisian
+            $table->enum('status', ['Draft', 'Selesai'])
+                ->default('Draft');
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('gembira_pengisians');
+    }
+};
+
+
+============================================================
+FILE: database\migrations\2026_10_21_161315_add_sekolah_id_to_gembira_pengisians_table.php
+============================================================
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Menambahkan relasi sekolah pada pengisian GEMBIRA.
+     */
+    public function up(): void
+    {
+        Schema::table('gembira_pengisians', function (Blueprint $table) {
+            if (!Schema::hasColumn('gembira_pengisians', 'sekolah_id')) {
+                $table->foreignId('sekolah_id')
+                    ->nullable()
+                    ->after('id')
+                    ->constrained('sekolahs')
+                    ->nullOnDelete();
+            }
+        });
+    }
+
+    /**
+     * Menghapus relasi sekolah dari pengisian GEMBIRA.
+     */
+    public function down(): void
+    {
+        Schema::table('gembira_pengisians', function (Blueprint $table) {
+            if (Schema::hasColumn('gembira_pengisians', 'sekolah_id')) {
+                $table->dropConstrainedForeignId('sekolah_id');
+            }
+        });
+    }
+};
+
+
+============================================================
+FILE: database\migrations\2026_10_21_163510_create_pkgsd_mbi_pengisians_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('pkgsd_mbi_pengisians', function (Blueprint $table) {
+            $table->id();
+
+            // Relasi ke Data Sekolah
+            $table->foreignId('sekolah_id')
+                ->nullable()
+                ->constrained('sekolahs')
+                ->nullOnDelete();
+
+            // Identitas guru dan pelaksanaan monev
+            $table->string('nama_guru');
+            $table->string('nama_sekolah');
+            $table->string('kelas_fase')->nullable();
+            $table->string('topik_materi')->nullable();
+            $table->string('nama_petugas_monev');
+            $table->string('jabatan_penilai');
+            $table->date('tanggal_monev');
+            $table->text('sumber_data_bukti')->nullable();
+
+            // Level 1â€“4 disimpan sebagai JSON
+            $table->json('level_1_jawaban')->nullable();
+            $table->json('level_2_jawaban')->nullable();
+            $table->json('level_3_jawaban')->nullable();
+            $table->json('level_4_jawaban')->nullable();
+
+            // Status pengisian
+            $table->string('status')->default('Selesai');
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('pkgsd_mbi_pengisians');
+    }
+};
+
+
+============================================================
+FILE: database\migrations\2026_10_23_015604_add_jawaban_6_8_to_wawancaras_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('wawancaras', function (Blueprint $table) {
+            foreach ([6, 7, 8] as $n) {
+                if (! Schema::hasColumn('wawancaras', "jawaban_{$n}")) {
+                    $table->longText("jawaban_{$n}")->nullable();
+                }
+            }
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('wawancaras', function (Blueprint $table) {
+            $table->dropColumn(['jawaban_6', 'jawaban_7', 'jawaban_8']);
+        });
+    }
+};
+
+============================================================
+FILE: database\migrations\2026_10_26_081102_add_skor_to_bk_tables.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        // =========================================================
+        // bk_answers: tambah kolom 'skor' bila belum ada
+        // =========================================================
+        if (!Schema::hasColumn('bk_answers', 'skor')) {
+            Schema::table('bk_answers', function (Blueprint $table) {
+                $table->unsignedTinyInteger('skor')->nullable()->after('jawaban');
+            });
+        }
+
+        // =========================================================
+        // bk_submissions: tambah kolom skor bila belum ada
+        // =========================================================
+        if (!Schema::hasColumn('bk_submissions', 'total_skor')) {
+            Schema::table('bk_submissions', function (Blueprint $table) {
+                $table->unsignedSmallInteger('total_skor')->nullable()->after('jumlah_tidak');
+            });
+        }
+
+        if (!Schema::hasColumn('bk_submissions', 'skor_maksimal')) {
+            Schema::table('bk_submissions', function (Blueprint $table) {
+                $table->unsignedSmallInteger('skor_maksimal')->nullable()->after('total_skor');
+            });
+        }
+    }
+
+    public function down(): void
+    {
+        if (Schema::hasColumn('bk_answers', 'skor')) {
+            Schema::table('bk_answers', function (Blueprint $table) {
+                $table->dropColumn('skor');
+            });
+        }
+
+        if (Schema::hasColumn('bk_submissions', 'skor_maksimal')) {
+            Schema::table('bk_submissions', function (Blueprint $table) {
+                $table->dropColumn('skor_maksimal');
+            });
+        }
+
+        if (Schema::hasColumn('bk_submissions', 'total_skor')) {
+            Schema::table('bk_submissions', function (Blueprint $table) {
+                $table->dropColumn('total_skor');
+            });
+        }
+    }
+};
+
+============================================================
+FILE: database\migrations\2026_11_09_061334_create_stem_fasda_dampak_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('stem_fasda_dampak', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('sekolah_id')->nullable()->constrained('sekolahs')->nullOnDelete();
+            
+            // Identitas
+            $table->string('nama_sekolah');
+            $table->string('nama_pendidik');
+            $table->string('mata_pelajaran')->nullable();
+            $table->date('tanggal_observasi');
+            $table->string('nama_petugas_monev');
+            
+            // Bagian 1: Telaah Dokumen (Skor 1-4)
+            $table->unsignedTinyInteger('skor_konteks_masalah');
+            $table->text('bukti_konteks_masalah')->nullable();
+            
+            $table->unsignedTinyInteger('skor_skenario_lkpd');
+            $table->text('bukti_skenario_lkpd')->nullable();
+            
+            $table->unsignedTinyInteger('skor_integrasi_disiplin');
+            $table->text('bukti_integrasi_disiplin')->nullable();
+            
+            $table->unsignedTinyInteger('skor_instrumen_asesmen');
+            $table->text('bukti_instrumen_asesmen')->nullable();
+
+            // Bagian 2: Observasi Kelas (Skor 1-4)
+            $table->unsignedTinyInteger('skor_prinsip_5m');
+            $table->text('bukti_prinsip_5m')->nullable();
+            
+            $table->unsignedTinyInteger('skor_aksi_eksperimen');
+            $table->text('bukti_aksi_eksperimen')->nullable();
+            
+            $table->unsignedTinyInteger('skor_dinamika_kolaborasi');
+            $table->text('bukti_dinamika_kolaborasi')->nullable();
+            
+            $table->unsignedTinyInteger('skor_resiliensi');
+            $table->text('bukti_resiliensi')->nullable();
+            
+            $table->unsignedTinyInteger('skor_fungsionalitas');
+            $table->text('bukti_fungsionalitas')->nullable();
+
+            // Bagian 3: Wawancara (Esai)
+            $table->text('wawancara_murid_1')->nullable();
+            $table->text('wawancara_murid_2')->nullable();
+            $table->text('wawancara_murid_3')->nullable();
+            $table->text('wawancara_murid_4')->nullable();
+            
+            $table->text('wawancara_pendidik_1')->nullable();
+            $table->text('wawancara_pendidik_2')->nullable();
+            $table->text('wawancara_pendidik_3')->nullable();
+            $table->text('wawancara_pendidik_4')->nullable();
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('stem_fasda_dampak');
+    }
+};
+
+============================================================
+FILE: database\migrations\2026_11_09_061335_create_stem_fasda_evaluasi_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('stem_fasda_evaluasi', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('sekolah_id')->nullable()->constrained('sekolahs')->nullOnDelete();
+            
+            // Identitas Responden
+            $table->string('nama_responden');
+            $table->string('peran_responden')->default('Pendidik'); // Pendidik atau Murid
+            $table->string('asal_sekolah');
+            $table->string('kabupaten_kota')->nullable();
+            $table->string('provinsi')->nullable();
+            $table->date('tanggal_pengisian');
+
+            // Jawaban Pendidik (Skor 1-4, total 22 pertanyaan)
+            $table->json('pendidik_perencanaan')->nullable(); // Soal 1-4
+            $table->json('pendidik_pelaksanaan')->nullable(); // Soal 5-9
+            $table->json('pendidik_evaluasi_refleksi')->nullable(); // Soal 10-13
+            $table->json('pendidik_dampak_kualitas')->nullable(); // Soal 14-18
+            $table->json('pendidik_pengembangan_profesional')->nullable(); // Soal 19-22
+            $table->text('pendidik_catatan')->nullable(); // Global catatan (opsional)
+
+            // Jawaban Murid (Skor 1-4, total 36 pertanyaan)
+            $table->json('murid_iklim_kelas')->nullable(); // Soal 1-4
+            $table->json('murid_lingkungan_suportif')->nullable(); // Soal 5-8
+            $table->json('murid_kebebasan_eksplorasi')->nullable(); // Soal 9-12
+            $table->json('murid_penghargaan_kolaboratif')->nullable(); // Soal 13-16
+            $table->json('murid_keingintahuan')->nullable(); // Soal 17-20
+            $table->json('murid_kepuasan')->nullable(); // Soal 21-24
+            $table->json('murid_prinsip_mendalam')->nullable(); // Soal 25-29
+            $table->json('murid_perkembangan')->nullable(); // Soal 30-33
+            $table->json('murid_hasil_belajar')->nullable(); // Soal 34-36
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('stem_fasda_evaluasi');
+    }
+};
+
+============================================================
+FILE: database\migrations\2026_11_09_061336_create_stem_diseminasi_monitoring_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('stem_diseminasi_monitoring', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('sekolah_id')->nullable()->constrained('sekolahs')->nullOnDelete();
+            
+            // Identitas Supervisi
+            $table->string('nama_satuan_pendidikan');
+            $table->string('kab_kota');
+            $table->string('nama_supervisor');
+            $table->string('jabatan_instansi');
+            $table->string('nama_fasilitator_daerah')->nullable();
+            $table->date('tanggal_supervisi');
+            $table->json('tahapan_dsupervisi')->nullable(); // Checkbox pilihan
+
+            // Instrumen A (Fasilitator) - Skor 1-4
+            $table->json('aspek_persiapan_pelaksanaan')->nullable(); // Soal 1-3
+            $table->json('aspek_elaborasi_konsep')->nullable(); // Soal 4-8
+            $table->json('aspek_refleksi_evaluasi')->nullable(); // Soal 9-11
+            $table->json('aspek_ruang_karya')->nullable(); // Soal 12-15
+            $table->json('aspek_keterlaksanaan')->nullable(); // Soal 16-18
+            $table->json('aspek_kelengkapan_bukti')->nullable(); // Soal 19-21
+            $table->json('aspek_desain_aktivitas')->nullable(); // Soal 22-25
+            $table->json('aspek_implementasi_stem')->nullable(); // Soal 26-30
+            $table->json('aspek_tindak_lanjut')->nullable(); // Soal 31-34
+            $table->json('aspek_dampak_awal')->nullable(); // Soal 35-36
+
+            // Instrumen B (Peserta) - Esai
+            $table->text('wawancara_guru_1')->nullable();
+            $table->text('wawancara_guru_2')->nullable();
+            $table->text('wawancara_guru_3')->nullable();
+            $table->text('wawancara_guru_4')->nullable();
+            $table->text('wawancara_guru_5')->nullable();
+            $table->text('wawancara_guru_6')->nullable();
+            $table->text('wawancara_guru_7')->nullable();
+            $table->text('wawancara_guru_8')->nullable();
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('stem_diseminasi_monitoring');
+    }
+};
+
+============================================================
+FILE: database\migrations\2026_11_09_061337_create_stem_diseminasi_reaction_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('stem_diseminasi_reaction', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('sekolah_id')->nullable()->constrained('sekolahs')->nullOnDelete();
+            
+            // Identitas
+            $table->string('nama_responden');
+            $table->string('asal_sekolah');
+            $table->date('tanggal_pengisian');
+
+            // Jawaban (Skor 1-4)
+            $table->json('evaluasi_program')->nullable(); // Soal 1-5
+            $table->json('sarana_prasarana')->nullable(); // Soal 6-10
+            $table->json('fasilitator')->nullable(); // Soal 11-14
+            $table->json('akses_lms')->nullable(); // Soal 15-20
+            $table->json('bahan_kegiatan')->nullable(); // Soal 21-24
+            $table->json('jangka_waktu')->nullable(); // Soal 25-26
+            $table->json('layanan_menu')->nullable(); // Soal 27-29
+
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('stem_diseminasi_reaction');
+    }
+};
+
+============================================================
+FILE: database\migrations\2026_11_09_064832_create_invitations_table.php
+============================================================
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('invitations', function (Blueprint $table) {
+            $table->id();
+            $table->uuid('token')->unique(); // Link unik
+            $table->string('jenis_instrumen'); // 'Evaluasi Dampak' atau 'Reaction'
+            $table->foreignId('sekolah_id')->nullable()->constrained('sekolahs')->nullOnDelete();
+            $table->string('nama_responden')->nullable(); // Target responden (opsional)
+            $table->dateTime('expires_at'); // Kapan link kadaluarsa
+            $table->boolean('is_used')->default(false); // Apakah sudah dipakai
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('invitations');
+    }
+};

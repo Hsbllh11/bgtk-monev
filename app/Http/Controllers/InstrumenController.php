@@ -13,6 +13,12 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
 use App\Models\PkgsdMbiPengisian;
 
+// Import model STEM
+use App\Models\StemFasdaDampak;
+use App\Models\StemFasdaEvaluasi;
+use App\Models\StemDiseminasiMonitoring;
+use App\Models\StemDiseminasiReaction;
+
 class InstrumenController extends Controller
 {
     /**
@@ -461,6 +467,270 @@ class InstrumenController extends Controller
                 ]),
             ]);
         }
+
+        // =========================================================
+        // MASUKKAN INSTRUMEN STEM
+        // =========================================================
+
+        /*
+        |--------------------------------------------------------------------------
+        | MASUKKAN INSTRUMEN STEM (DAMPAK)
+        |--------------------------------------------------------------------------
+        */
+        $stemDampakList = StemFasdaDampak::latest('tanggal_observasi')->get();
+        foreach ($stemDampakList as $item) {
+            // ⬅️ UPDATE: Hitung rata-rata dari 9 indikator observasi
+            $skorArray = [
+                $item->skor_konteks_masalah,
+                $item->skor_skenario_lkpd,
+                $item->skor_integrasi_disiplin,
+                $item->skor_instrumen_asesmen,
+                $item->skor_prinsip_5m,
+                $item->skor_aksi_eksperimen,
+                $item->skor_dinamika_kolaborasi,
+                $item->skor_resiliensi,
+                $item->skor_fungsionalitas,
+            ];
+            $totalSkor = array_sum($skorArray);
+            $skorMaksimal = count($skorArray) * 4; // 9 * 4 = 36
+            $rataRata = $skorMaksimal > 0 ? ($totalSkor / $skorMaksimal) * 100 : 0;
+
+            $predikat = match (true) {
+                $rataRata >= 85 => 'Sangat Baik',
+                $rataRata >= 70 => 'Baik',
+                $rataRata >= 55 => 'Cukup',
+                default => 'Kurang',
+            };
+
+            $riwayat->push([
+                'id' => $item->id,
+                'jenis' => 'STEM',
+                'instrumen' => 'Instrumen Dampak (Wawancara)',
+                'nama' => $item->nama_pendidik,
+                'unit_kerja' => $item->nama_sekolah,
+                'responden' => $item->nama_pendidik,
+                'status_responden' => 'Pendidik',
+                'tanggal' => $item->tanggal_observasi,
+                'nilai' => $rataRata,
+                'skor' => $totalSkor,
+                'skor_maksimal' => $skorMaksimal,
+                'predikat' => $predikat,
+                'status' => 'Selesai',
+                'show_route' => route('instrumen.stem.fasda.dampak.show', $item->id),
+                'edit_route' => route('instrumen.stem.fasda.dampak.edit', $item->id),
+                'delete_route' => route('instrumen.stem.fasda.dampak.destroy', $item->id),
+                'cetak_route' => route('instrumen.stem.fasda.dampak.cetak', $item->id),
+            ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | MASUKKAN INSTRUMEN STEM (EVALUASI)
+        |--------------------------------------------------------------------------
+        */
+        $stemEvaluasiList = StemFasdaEvaluasi::latest('tanggal_pengisian')->get();
+        foreach ($stemEvaluasiList as $item) {
+            // ⬅️ UPDATE: Perhitungan skor dari JSON per peran responden
+            $totalSkor = 0;
+            $jumlahDinilai = 0;
+
+            // Kumpulkan semua skor dari JSON
+            $levelAktif = $item->peran_responden === 'Pendidik' ? ['pendidik'] : ['murid'];
+            $kolomArray = [
+                'pendidik' => [
+                    'pendidik_perencanaan',
+                    'pendidik_pelaksanaan',
+                    'pendidik_evaluasi_refleksi',
+                    'pendidik_dampak_kualitas',
+                    'pendidik_pengembangan_profesional',
+                ],
+                'murid' => [
+                    'murid_iklim_kelas',
+                    'murid_lingkungan_suportif',
+                    'murid_kebebasan_eksplorasi',
+                    'murid_penghargaan_kolaboratif',
+                    'murid_keingintahuan',
+                    'murid_kepuasan',
+                    'murid_prinsip_mendalam',
+                    'murid_perkembangan',
+                    'murid_hasil_belajar',
+                ],
+            ];
+
+            foreach ($kolomArray[$levelAktif[0]] as $kolom) {
+                $jawaban = $item->$kolom ?? [];
+                foreach ($jawaban as $skor) {
+                    if (is_numeric($skor)) {
+                        $totalSkor += (int) $skor;
+                        $jumlahDinilai++;
+                    }
+                }
+            }
+
+            $rataRata = $jumlahDinilai > 0 ? ($totalSkor / ($jumlahDinilai * 4)) * 100 : 0;
+            $skorMaksimal = $jumlahDinilai * 4;
+
+            $predikat = match (true) {
+                $rataRata >= 85 => 'Sangat Baik',
+                $rataRata >= 70 => 'Baik',
+                $rataRata >= 55 => 'Cukup',
+                default => 'Kurang',
+            };
+
+            $riwayat->push([
+                'id' => $item->id,
+                'jenis' => 'STEM',
+                'instrumen' => 'Instrumen Evaluasi Dampak',
+                'nama' => $item->nama_responden,
+                'unit_kerja' => $item->asal_sekolah,
+                'responden' => $item->nama_responden,
+                'status_responden' => $item->peran_responden,
+                'tanggal' => $item->tanggal_pengisian,
+                'nilai' => $rataRata,
+                'skor' => $totalSkor,
+                'skor_maksimal' => $skorMaksimal,
+                'predikat' => $predikat,
+                'status' => 'Selesai',
+                // ⬅️ UPDATE ROUTE
+                'show_route' => route('instrumen.stem.fasda.evaluasi.show', $item->id),
+                'edit_route' => route('instrumen.stem.fasda.evaluasi.edit', $item->id),
+                'delete_route' => route('instrumen.stem.fasda.evaluasi.destroy', $item->id),
+                'cetak_route' => route('instrumen.stem.fasda.evaluasi.cetak', $item->id),
+            ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | MASUKKAN INSTRUMEN STEM (MONITORING)
+        |--------------------------------------------------------------------------
+        */
+        $stemMonitoringList = StemDiseminasiMonitoring::latest('tanggal_supervisi')->get();
+        foreach ($stemMonitoringList as $item) {
+            // ⬅️ UPDATE: Perhitungan skor dari 10 aspek monitoring
+            $totalSkor = 0;
+            $jumlahDinilai = 0;
+
+            $kolomMonitoring = [
+                'aspek_persiapan_pelaksanaan',
+                'aspek_elaborasi_konsep',
+                'aspek_refleksi_evaluasi',
+                'aspek_ruang_karya',
+                'aspek_keterlaksanaan',
+                'aspek_kelengkapan_bukti',
+                'aspek_desain_aktivitas',
+                'aspek_implementasi_stem',
+                'aspek_tindak_lanjut',
+                'aspek_dampak_awal',
+            ];
+
+            foreach ($kolomMonitoring as $kolom) {
+                $jawaban = $item->$kolom ?? [];
+                foreach ($jawaban as $skor) {
+                    if (is_numeric($skor)) {
+                        $totalSkor += (int) $skor;
+                        $jumlahDinilai++;
+                    }
+                }
+            }
+
+            $rataRata = $jumlahDinilai > 0 ? ($totalSkor / ($jumlahDinilai * 4)) * 100 : 0;
+            $skorMaksimal = $jumlahDinilai * 4;
+
+            $predikat = match (true) {
+                $rataRata >= 85 => 'Sangat Baik',
+                $rataRata >= 70 => 'Baik',
+                $rataRata >= 55 => 'Cukup',
+                default => 'Kurang',
+            };
+
+            $riwayat->push([
+                'id' => $item->id,
+                'jenis' => 'STEM',
+                'instrumen' => 'Instrumen Monitoring Diseminasi',
+                'nama' => $item->nama_satuan_pendidikan,
+                'unit_kerja' => $item->kab_kota,
+                'responden' => $item->nama_supervisor,
+                'status_responden' => 'Supervisor',
+                'tanggal' => $item->tanggal_supervisi,
+                'nilai' => $rataRata,
+                'skor' => $totalSkor,
+                'skor_maksimal' => $skorMaksimal,
+                'predikat' => $predikat,
+                'status' => 'Selesai',
+                // ⬅️ UPDATE ROUTE
+                'show_route' => route('instrumen.stem.diseminasi.monitoring.show', $item->id),
+                'edit_route' => route('instrumen.stem.diseminasi.monitoring.edit', $item->id),
+                'delete_route' => route('instrumen.stem.diseminasi.monitoring.destroy', $item->id),
+                'cetak_route' => route('instrumen.stem.diseminasi.monitoring.cetak', $item->id),
+            ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | MASUKKAN INSTRUMEN STEM (REACTION)
+        |--------------------------------------------------------------------------
+        */
+        $stemReactionList = StemDiseminasiReaction::latest('tanggal_pengisian')->get();
+        foreach ($stemReactionList as $item) {
+            // ⬅️ UPDATE: Perhitungan skor dari 7 aspek reaction
+            $totalSkor = 0;
+            $jumlahDinilai = 0;
+
+            $kolomReaction = [
+                'evaluasi_program',
+                'sarana_prasarana',
+                'fasilitator',
+                'akses_lms',
+                'bahan_kegiatan',
+                'jangka_waktu',
+                'layanan_menu',
+            ];
+
+            foreach ($kolomReaction as $kolom) {
+                $jawaban = $item->$kolom ?? [];
+                foreach ($jawaban as $skor) {
+                    if (is_numeric($skor)) {
+                        $totalSkor += (int) $skor;
+                        $jumlahDinilai++;
+                    }
+                }
+            }
+
+            $rataRata = $jumlahDinilai > 0 ? ($totalSkor / ($jumlahDinilai * 4)) * 100 : 0;
+            $skorMaksimal = $jumlahDinilai * 4;
+
+            $predikat = match (true) {
+                $rataRata >= 85 => 'Sangat Baik',
+                $rataRata >= 70 => 'Baik',
+                $rataRata >= 55 => 'Cukup',
+                default => 'Kurang',
+            };
+
+            $riwayat->push([
+                'id' => $item->id,
+                'jenis' => 'STEM',
+                'instrumen' => 'Instrumen Reaction',
+                'nama' => $item->nama_responden,
+                'unit_kerja' => $item->asal_sekolah,
+                'responden' => $item->nama_responden,
+                'status_responden' => 'Peserta Diseminasi',
+                'tanggal' => $item->tanggal_pengisian,
+                'nilai' => $rataRata,
+                'skor' => $totalSkor,
+                'skor_maksimal' => $skorMaksimal,
+                'predikat' => $predikat,
+                'status' => 'Selesai',
+                // ⬅️ UPDATE ROUTE
+                'show_route' => route('instrumen.stem.diseminasi.reaction.show', $item->id),
+                'edit_route' => route('instrumen.stem.diseminasi.reaction.edit', $item->id),
+                'delete_route' => route('instrumen.stem.diseminasi.reaction.destroy', $item->id),
+                'cetak_route' => route('instrumen.stem.diseminasi.reaction.cetak', $item->id),
+            ]);
+        }
+
+        // =========================================================
+        // SELESAI: MASUKKAN INSTRUMEN STEM
+        // =========================================================
 
         /*
         |--------------------------------------------------------------------------

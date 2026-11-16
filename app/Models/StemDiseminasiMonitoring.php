@@ -16,10 +16,17 @@ class StemDiseminasiMonitoring extends Model
         'sekolah_id', 'nama_satuan_pendidikan', 'kab_kota', 'nama_supervisor', 'jabatan_instansi', 
         'nama_fasilitator_daerah', 'tanggal_supervisi', 'tahapan_dsupervisi',
         
+        // Aspek
         'aspek_persiapan_pelaksanaan', 'aspek_elaborasi_konsep', 'aspek_refleksi_evaluasi',
         'aspek_ruang_karya', 'aspek_keterlaksanaan', 'aspek_kelengkapan_bukti',
         'aspek_desain_aktivitas', 'aspek_implementasi_stem', 'aspek_tindak_lanjut', 'aspek_dampak_awal',
+
+        // Bukti (BARU)
+        'bukti_persiapan_pelaksanaan', 'bukti_elaborasi_konsep', 'bukti_refleksi_evaluasi',
+        'bukti_ruang_karya', 'bukti_keterlaksanaan', 'bukti_kelengkapan_bukti',
+        'bukti_desain_aktivitas', 'bukti_implementasi_stem', 'bukti_tindak_lanjut', 'bukti_dampak_awal',
         
+        // Wawancara
         'wawancara_guru_1', 'wawancara_guru_2', 'wawancara_guru_3', 'wawancara_guru_4',
         'wawancara_guru_5', 'wawancara_guru_6', 'wawancara_guru_7', 'wawancara_guru_8',
     ];
@@ -27,6 +34,8 @@ class StemDiseminasiMonitoring extends Model
     protected $casts = [
         'tanggal_supervisi' => 'date',
         'tahapan_dsupervisi' => 'array',
+        
+        // Aspek
         'aspek_persiapan_pelaksanaan' => 'array',
         'aspek_elaborasi_konsep' => 'array',
         'aspek_refleksi_evaluasi' => 'array',
@@ -37,6 +46,19 @@ class StemDiseminasiMonitoring extends Model
         'aspek_implementasi_stem' => 'array',
         'aspek_tindak_lanjut' => 'array',
         'aspek_dampak_awal' => 'array',
+
+        // Bukti (BARU) — tidak di-cast array, karena tipe kolom di DB 'text'
+        // Jika Anda ingin menyimpannya sebagai JSON juga, silakan ubah komentar di bawah.
+        // 'bukti_persiapan_pelaksanaan' => 'array',
+        // 'bukti_elaborasi_konsep' => 'array',
+        // 'bukti_refleksi_evaluasi' => 'array',
+        // 'bukti_ruang_karya' => 'array',
+        // 'bukti_keterlaksanaan' => 'array',
+        // 'bukti_kelengkapan_bukti' => 'array',
+        // 'bukti_desain_aktivitas' => 'array',
+        // 'bukti_implementasi_stem' => 'array',
+        // 'bukti_tindak_lanjut' => 'array',
+        // 'bukti_dampak_awal' => 'array',
     ];
 
     public function sekolah(): BelongsTo

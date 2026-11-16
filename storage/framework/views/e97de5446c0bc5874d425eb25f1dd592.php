@@ -146,6 +146,20 @@
             --b-t: #ffffff;
         }
 
+        /* --- WARNA BARU UNTUK STEM (Rose/Pink) --- */
+        .c-rose {
+            --t-bg: linear-gradient(160deg, #fff1f2 0%, #fecdd3 100%);
+            --t-line: #fecdd3;
+            --t-glow: rgba(225, 29, 72, .4);
+            --t-clip: #fda4af;
+            --c: #e11d48;
+            --c-line: #fecdd3;
+            --c-text: #be123c;
+            --b: #e11d48;
+            --b-d: #be123c;
+            --b-t: #ffffff;
+        }
+
         /* --- kartu instrumen: tile pastel seperti KPI dashboard --- */
         .i-inst {
             position: relative;
@@ -1006,7 +1020,7 @@
             </div>
 
             
-            <div class="i-inst c-cyan">
+            <div class="i-inst c-rose">
                 <svg class="i-clip" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />

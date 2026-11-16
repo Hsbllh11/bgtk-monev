@@ -646,12 +646,6 @@
                             <span>Instrumen Pemantauan</span>
                         </a>
 
-                        {{-- MENU BARU: REKAP EVALUASI STEM --}}
-                        <a href="{{ route('admin.stem.rekap.evaluasi') }}" class="{{ $menu(request()->is('admin/stem/rekap-evaluasi*')) }}">
-                            {!! $icon('instrumen') !!}
-                            <span>Rekap Evaluasi STEM</span>
-                        </a>
-
                         <a href="{{ url('/wawancara') }}" class="{{ $menu(request()->is('wawancara*')) }}">
                             {!! $icon('wawancara') !!}
                             <span>Lembar Wawancara</span>

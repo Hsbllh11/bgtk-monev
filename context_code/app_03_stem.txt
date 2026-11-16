@@ -1,0 +1,572 @@
+
+============================================================
+FILE: app\Http\Controllers\Stem\StemDiseminasiMonitoringController.php
+============================================================
+<?php
+
+namespace App\Http\Controllers\Stem;
+
+use App\Http\Controllers\Controller;
+use App\Models\StemDiseminasiMonitoring;
+use App\Support\SekolahResolver;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class StemDiseminasiMonitoringController extends Controller
+{
+    public function create()
+    {
+        return view('instrumen.stem.diseminasi.monitoring.create');
+    }
+
+    public function store(Request $request)
+    {
+        // 1. Validasi Identitas
+        $validated = $request->validate([
+            'nama_satuan_pendidikan' => 'required|string|max:255',
+            'kab_kota' => 'required|string|max:255',
+            'nama_supervisor' => 'required|string|max:255',
+            'jabatan_instansi' => 'required|string|max:255',
+            'nama_fasilitator_daerah' => 'nullable|string|max:255',
+            'tanggal_supervisi' => 'required|date',
+        ]);
+
+        // 2. Validasi Dinamis Skor (36 Pertanyaan)
+        $rules = [];
+        for ($i = 0; $i < 36; $i++) {
+            $rules["monitoring_skor.{$i}"] = 'required|integer|between:1,4';
+        }
+        $request->validate($rules, [
+            '*.required' => 'Semua skor wajib diisi.',
+        ]);
+
+        // 3. Simpan
+        DB::transaction(function () use ($validated, $request) {
+            $sekolah = SekolahResolver::resolve($validated['nama_satuan_pendidikan']);
+            $skor = $request->input('monitoring_skor', []);
+
+            StemDiseminasiMonitoring::create([
+                'nama_satuan_pendidikan' => $validated['nama_satuan_pendidikan'],
+                'kab_kota' => $validated['kab_kota'],
+                'nama_supervisor' => $validated['nama_supervisor'],
+                'jabatan_instansi' => $validated['jabatan_instansi'],
+                'nama_fasilitator_daerah' => $validated['nama_fasilitator_daerah'],
+                'tanggal_supervisi' => $validated['tanggal_supervisi'],
+                'sekolah_id' => $sekolah?->id,
+
+                'tahapan_dsupervisi' => $request->input('tahapan_dsupervisi', []),
+
+                // Kelompokkan skor sesuai seksi
+                'aspek_persiapan_pelaksanaan' => array_slice($skor, 0, 3),
+                'aspek_elaborasi_konsep' => array_slice($skor, 3, 5),
+                'aspek_refleksi_evaluasi' => array_slice($skor, 8, 3),
+                'aspek_ruang_karya' => array_slice($skor, 11, 4),
+                'aspek_keterlaksanaan' => array_slice($skor, 15, 3),
+                'aspek_kelengkapan_bukti' => array_slice($skor, 18, 3),
+                'aspek_desain_aktivitas' => array_slice($skor, 21, 4),
+                'aspek_implementasi_stem' => array_slice($skor, 25, 5),
+                'aspek_tindak_lanjut' => array_slice($skor, 30, 4),
+                'aspek_dampak_awal' => array_slice($skor, 34, 2),
+
+                'wawancara_guru_1' => $request->input('wawancara_guru_1'),
+                'wawancara_guru_2' => $request->input('wawancara_guru_2'),
+                'wawancara_guru_3' => $request->input('wawancara_guru_3'),
+                'wawancara_guru_4' => $request->input('wawancara_guru_4'),
+                'wawancara_guru_5' => $request->input('wawancara_guru_5'),
+                'wawancara_guru_6' => $request->input('wawancara_guru_6'),
+                'wawancara_guru_7' => $request->input('wawancara_guru_7'),
+                'wawancara_guru_8' => $request->input('wawancara_guru_8'),
+            ]);
+        });
+
+        return redirect()->route('instrumen.stem.diseminasi')
+            ->with('success', 'Instrumen Monitoring Diseminasi berhasil disimpan.');
+    }
+}
+
+============================================================
+FILE: app\Http\Controllers\Stem\StemDiseminasiReactionController.php
+============================================================
+<?php
+
+namespace App\Http\Controllers\Stem;
+
+use App\Http\Controllers\Controller;
+use App\Models\StemDiseminasiReaction;
+use App\Support\SekolahResolver;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class StemDiseminasiReactionController extends Controller
+{
+    public function create()
+    {
+        return view('instrumen.stem.diseminasi.reaction.create');
+    }
+
+    public function store(Request $request)
+    {
+        // 1. Validasi Identitas
+        $validated = $request->validate([
+            'nama_responden' => 'required|string|max:255',
+            'asal_sekolah' => 'required|string|max:255',
+            'nama_petugas_monev' => 'required|string|max:255',
+        ]);
+
+        // 2. Validasi Dinamis (29 Pertanyaan)
+        $rules = [];
+        for ($i = 0; $i < 29; $i++) {
+            $rules["reaction_skor.{$i}"] = 'required|integer|between:1,4';
+        }
+        $request->validate($rules, [
+            '*.required' => 'Semua pertanyaan wajib diisi.',
+        ]);
+
+        // 3. Simpan
+        DB::transaction(function () use ($validated, $request) {
+            $sekolah = SekolahResolver::resolve($validated['asal_sekolah']);
+            $skor = $request->input('reaction_skor', []);
+
+            StemDiseminasiReaction::create([
+                'nama_responden' => $validated['nama_responden'],
+                'asal_sekolah' => $validated['asal_sekolah'],
+                'tanggal_pengisian' => now(),
+                'sekolah_id' => $sekolah?->id,
+
+                // Kelompokkan skor ke dalam JSON berdasarkan seksi
+                'evaluasi_program' => array_slice($skor, 0, 5),
+                'sarana_prasarana' => array_slice($skor, 5, 5),
+                'fasilitator' => array_slice($skor, 10, 4),
+                'akses_lms' => array_slice($skor, 14, 6),
+                'bahan_kegiatan' => array_slice($skor, 20, 4),
+                'jangka_waktu' => array_slice($skor, 24, 2),
+                'layanan_menu' => array_slice($skor, 26, 3),
+            ]);
+        });
+
+        return redirect()->route('instrumen.stem.diseminasi')
+            ->with('success', 'Instrumen Reaction berhasil disimpan.');
+    }
+}
+
+============================================================
+FILE: app\Http\Controllers\Stem\StemFasdaDampakController.php
+============================================================
+<?php
+
+namespace App\Http\Controllers\Stem;
+
+use App\Http\Controllers\Controller;
+use App\Models\StemFasdaDampak;
+use App\Support\SekolahResolver;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class StemFasdaDampakController extends Controller
+{
+    public function create()
+    {
+        return view('instrumen.stem.fasda.dampak.create');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $this->validateData($request);
+        $this->checkBukti($request);
+
+        DB::transaction(function () use ($validated) {
+            $sekolah = SekolahResolver::resolve($validated['nama_sekolah']);
+            $validated['sekolah_id'] = $sekolah?->id;
+            StemFasdaDampak::create($validated);
+        });
+
+        return redirect()->route('instrumen.stem.fasda')
+            ->with('success', 'Instrumen Dampak (Wawancara) berhasil disimpan.');
+    }
+
+    public function show(StemFasdaDampak $dampak)
+    {
+        return view('instrumen.stem.fasda.dampak.show', compact('dampak'));
+    }
+
+    public function edit(StemFasdaDampak $dampak)
+    {
+        return view('instrumen.stem.fasda.dampak.edit', compact('dampak'));
+    }
+
+    public function update(Request $request, StemFasdaDampak $dampak)
+    {
+        $validated = $this->validateData($request);
+        $this->checkBukti($request);
+
+        DB::transaction(function () use ($validated, $dampak) {
+            $sekolah = SekolahResolver::resolve($validated['nama_sekolah']);
+            $validated['sekolah_id'] = $sekolah?->id;
+            $dampak->update($validated);
+        });
+
+        return redirect()->route('instrumen.stem.fasda')
+            ->with('success', 'Instrumen Dampak (Wawancara) berhasil diperbarui.');
+    }
+
+    public function cetak(StemFasdaDampak $dampak)
+    {
+        return view('instrumen.stem.fasda.dampak.cetak', compact('dampak'));
+    }
+
+    public function destroy(StemFasdaDampak $dampak)
+    {
+        $dampak->delete();
+        return redirect()->route('instrumen.stem.fasda')
+            ->with('success', 'Data berhasil dihapus.');
+    }
+
+    private function validateData(Request $request)
+    {
+        return $request->validate([
+            'nama_sekolah' => 'required|string|max:255',
+            'nama_pendidik' => 'required|string|max:255',
+            'mata_pelajaran' => 'nullable|string|max:255',
+            'tanggal_observasi' => 'required|date',
+            'nama_petugas_monev' => 'required|string|max:255',
+            'skor_konteks_masalah' => 'required|integer|between:1,4',
+            'bukti_konteks_masalah' => 'nullable|string',
+            'skor_skenario_lkpd' => 'required|integer|between:1,4',
+            'bukti_skenario_lkpd' => 'nullable|string',
+            'skor_integrasi_disiplin' => 'required|integer|between:1,4',
+            'bukti_integrasi_disiplin' => 'nullable|string',
+            'skor_instrumen_asesmen' => 'required|integer|between:1,4',
+            'bukti_instrumen_asesmen' => 'nullable|string',
+            'skor_prinsip_5m' => 'required|integer|between:1,4',
+            'bukti_prinsip_5m' => 'nullable|string',
+            'skor_aksi_eksperimen' => 'required|integer|between:1,4',
+            'bukti_aksi_eksperimen' => 'nullable|string',
+            'skor_dinamika_kolaborasi' => 'required|integer|between:1,4',
+            'bukti_dinamika_kolaborasi' => 'nullable|string',
+            'skor_resiliensi' => 'required|integer|between:1,4',
+            'bukti_resiliensi' => 'nullable|string',
+            'skor_fungsionalitas' => 'required|integer|between:1,4',
+            'bukti_fungsionalitas' => 'nullable|string',
+            'wawancara_murid_1' => 'nullable|string',
+            'wawancara_murid_2' => 'nullable|string',
+            'wawancara_murid_3' => 'nullable|string',
+            'wawancara_murid_4' => 'nullable|string',
+            'wawancara_pendidik_1' => 'nullable|string',
+            'wawancara_pendidik_2' => 'nullable|string',
+            'wawancara_pendidik_3' => 'nullable|string',
+            'wawancara_pendidik_4' => 'nullable|string',
+        ]);
+    }
+
+    private function checkBukti(Request $request)
+    {
+        $skorFields = ['konteks_masalah', 'skenario_lkpd', 'integrasi_disiplin', 'instrumen_asesmen', 'prinsip_5m', 'aksi_eksperimen', 'dinamika_kolaborasi', 'resiliensi', 'fungsionalitas'];
+        foreach ($skorFields as $field) {
+            $skor = $request->input("skor_{$field}");
+            $bukti = $request->input("bukti_{$field}");
+            if (in_array($skor, [3, 4]) && empty(trim($bukti ?? ''))) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    "bukti_{$field}" => "Catatan/Bukti wajib diisi jika Skor bernilai 3 atau 4."
+                ]);
+            }
+        }
+    }
+}
+
+============================================================
+FILE: app\Http\Controllers\Stem\StemFasdaEvaluasiController.php
+============================================================
+<?php
+
+namespace App\Http\Controllers\Stem;
+
+use App\Http\Controllers\Controller;
+use App\Models\StemFasdaEvaluasi;
+use App\Support\SekolahResolver;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class StemFasdaEvaluasiController extends Controller
+{
+    public function create()
+    {
+        return view('instrumen.stem.fasda.evaluasi.create');
+    }
+
+    public function store(Request $request)
+    {
+        // 1. Validasi Input Identitas & Peran
+        $validated = $request->validate([
+            'nama_responden' => 'required|string|max:255',
+            'peran_responden' => 'required|in:Pendidik,Murid',
+            'asal_sekolah' => 'required|string|max:255',
+            'kabupaten_kota' => 'nullable|string|max:255',
+            'nama_petugas_monev' => 'required|string|max:255',
+        ]);
+
+        // 2. Validasi Dinamis Berdasarkan Peran (Pendidik / Murid)
+        $rules = [];
+        if ($request->peran_responden === 'Pendidik') {
+            for ($i = 0; $i < 22; $i++) {
+                $rules["pendidik_skor.{$i}"] = 'required|integer|between:1,4';
+            }
+        } else {
+            for ($i = 0; $i < 36; $i++) {
+                $rules["murid_skor.{$i}"] = 'required|integer|between:1,4';
+            }
+        }
+        $request->validate($rules, [
+            '*.required' => 'Semua pertanyaan wajib diisi.',
+        ]);
+
+        // 3. Proses Simpan
+        DB::transaction(function () use ($validated, $request) {
+            $sekolah = SekolahResolver::resolve($validated['asal_sekolah']);
+            
+            $dataToSave = [
+                'nama_responden' => $validated['nama_responden'],
+                'peran_responden' => $validated['peran_responden'],
+                'asal_sekolah' => $validated['asal_sekolah'],
+                'kabupaten_kota' => $validated['kabupaten_kota'],
+                'tanggal_pengisian' => now(),
+                'sekolah_id' => $sekolah?->id,
+            ];
+
+            // Kelompokkan jawaban ke dalam array JSON sesuai struktur database
+            if ($validated['peran_responden'] === 'Pendidik') {
+                $skor = $request->input('pendidik_skor', []);
+                $dataToSave['pendidik_perencanaan'] = array_slice($skor, 0, 4);
+                $dataToSave['pendidik_pelaksanaan'] = array_slice($skor, 4, 5);
+                $dataToSave['pendidik_evaluasi_refleksi'] = array_slice($skor, 9, 4);
+                $dataToSave['pendidik_dampak_kualitas'] = array_slice($skor, 13, 5);
+                $dataToSave['pendidik_pengembangan_profesional'] = array_slice($skor, 18, 4);
+            } else {
+                $skor = $request->input('murid_skor', []);
+                $dataToSave['murid_iklim_kelas'] = array_slice($skor, 0, 4);
+                $dataToSave['murid_lingkungan_suportif'] = array_slice($skor, 4, 4);
+                $dataToSave['murid_kebebasan_eksplorasi'] = array_slice($skor, 8, 4);
+                $dataToSave['murid_penghargaan_kolaboratif'] = array_slice($skor, 12, 4);
+                $dataToSave['murid_keingintahuan'] = array_slice($skor, 16, 4);
+                $dataToSave['murid_kepuasan'] = array_slice($skor, 20, 4);
+                $dataToSave['murid_prinsip_mendalam'] = array_slice($skor, 24, 5);
+                $dataToSave['murid_perkembangan'] = array_slice($skor, 29, 4);
+                $dataToSave['murid_hasil_belajar'] = array_slice($skor, 33, 3);
+            }
+
+            StemFasdaEvaluasi::create($dataToSave);
+        });
+
+        return redirect()->route('instrumen.stem.fasda')
+            ->with('success', 'Instrumen Evaluasi Dampak berhasil disimpan.');
+    }
+}
+
+============================================================
+FILE: app\Http\Controllers\Stem\StemHistoryController.php
+============================================================
+<?php
+
+namespace App\Http\Controllers\Stem;
+
+use App\Http\Controllers\Controller;
+use App\Models\StemFasdaDampak;
+use App\Models\StemFasdaEvaluasi;
+use App\Models\StemDiseminasiMonitoring;
+use App\Models\StemDiseminasiReaction;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+
+class StemHistoryController extends Controller
+{
+    public function index(Request $request, $kategori = 'semua')
+    {
+        $riwayat = collect();
+
+        // Ambil data berdasarkan kategori yang diminta
+        $ambilDampak = in_array($kategori, ['semua', 'fasda']);
+        $ambilEvaluasi = in_array($kategori, ['semua', 'fasda']);
+        $ambilMonitoring = in_array($kategori, ['semua', 'diseminasi']);
+        $ambilReaction = in_array($kategori, ['semua', 'diseminasi']);
+
+        if ($ambilDampak) {
+            foreach (StemFasdaDampak::latest('tanggal_observasi')->get() as $item) {
+                $skorArray = [$item->skor_konteks_masalah, $item->skor_skenario_lkpd, $item->skor_integrasi_disiplin, $item->skor_instrumen_asesmen, $item->skor_prinsip_5m, $item->skor_aksi_eksperimen, $item->skor_dinamika_kolaborasi, $item->skor_resiliensi, $item->skor_fungsionalitas];
+                $totalSkor = array_sum($skorArray);
+                $skorMaksimal = 36;
+                $nilai = $skorMaksimal > 0 ? ($totalSkor / $skorMaksimal) * 100 : 0;
+                
+                $riwayat->push([
+                    'jenis' => 'STEM',
+                    'instrumen' => 'Instrumen Dampak (Wawancara)',
+                    'nama' => $item->nama_pendidik,
+                    'unit_kerja' => $item->nama_sekolah,
+                    'responden' => $item->nama_pendidik,
+                    'status_responden' => 'Pendidik',
+                    'tanggal' => $item->tanggal_observasi,
+                    'nilai' => $nilai,
+                    'skor' => $totalSkor,
+                    'skor_maksimal' => $skorMaksimal,
+                    'predikat' => $this->getPredikat($nilai),
+                    'status' => 'Selesai',
+                    'show_route' => route('instrumen.stem.fasda.dampak.show', $item->id),
+                    'edit_route' => route('instrumen.stem.fasda.dampak.edit', $item->id),
+                    'cetak_route' => route('instrumen.stem.fasda.dampak.cetak', $item->id),
+                    'delete_route' => route('instrumen.stem.fasda.dampak.destroy', $item->id),
+                ]);
+            }
+        }
+
+        if ($ambilEvaluasi) {
+            foreach (StemFasdaEvaluasi::latest('tanggal_pengisian')->get() as $item) {
+                $totalSkor = 0;
+                $jumlahDinilai = 0;
+                $kolomArray = $item->peran_responden === 'Pendidik' 
+                    ? ['pendidik_perencanaan', 'pendidik_pelaksanaan', 'pendidik_evaluasi_refleksi', 'pendidik_dampak_kualitas', 'pendidik_pengembangan_profesional']
+                    : ['murid_iklim_kelas', 'murid_lingkungan_suportif', 'murid_kebebasan_eksplorasi', 'murid_penghargaan_kolaboratif', 'murid_keingintahuan', 'murid_kepuasan', 'murid_prinsip_mendalam', 'murid_perkembangan', 'murid_hasil_belajar'];
+                
+                foreach ($kolomArray as $kolom) {
+                    $jawaban = $item->$kolom ?? [];
+                    foreach ($jawaban as $skor) {
+                        if (is_numeric($skor)) {
+                            $totalSkor += (int) $skor;
+                            $jumlahDinilai++;
+                        }
+                    }
+                }
+                $skorMaksimal = $jumlahDinilai * 4;
+                $nilai = $skorMaksimal > 0 ? ($totalSkor / $skorMaksimal) * 100 : 0;
+
+                $riwayat->push([
+                    'jenis' => 'STEM',
+                    'instrumen' => 'Instrumen Evaluasi Dampak',
+                    'nama' => $item->nama_responden,
+                    'unit_kerja' => $item->asal_sekolah,
+                    'responden' => $item->nama_responden,
+                    'status_responden' => $item->peran_responden,
+                    'tanggal' => $item->tanggal_pengisian,
+                    'nilai' => $nilai,
+                    'skor' => $totalSkor,
+                    'skor_maksimal' => $skorMaksimal,
+                    'predikat' => $this->getPredikat($nilai),
+                    'status' => 'Selesai',
+                    'show_route' => route('instrumen.stem.fasda.evaluasi.show', $item->id),
+                    'edit_route' => route('instrumen.stem.fasda.evaluasi.edit', $item->id),
+                    'cetak_route' => null, // Jika belum ada cetak, set null
+                    'delete_route' => route('instrumen.stem.fasda.evaluasi.destroy', $item->id),
+                ]);
+            }
+        }
+
+        if ($ambilMonitoring) {
+            foreach (StemDiseminasiMonitoring::latest('tanggal_supervisi')->get() as $item) {
+                $totalSkor = 0;
+                $jumlahDinilai = 0;
+                $kolomArray = ['aspek_persiapan_pelaksanaan', 'aspek_elaborasi_konsep', 'aspek_refleksi_evaluasi', 'aspek_ruang_karya', 'aspek_keterlaksanaan', 'aspek_kelengkapan_bukti', 'aspek_desain_aktivitas', 'aspek_implementasi_stem', 'aspek_tindak_lanjut', 'aspek_dampak_awal'];
+                
+                foreach ($kolomArray as $kolom) {
+                    $jawaban = $item->$kolom ?? [];
+                    foreach ($jawaban as $skor) {
+                        if (is_numeric($skor)) {
+                            $totalSkor += (int) $skor;
+                            $jumlahDinilai++;
+                        }
+                    }
+                }
+                $skorMaksimal = $jumlahDinilai * 4;
+                $nilai = $skorMaksimal > 0 ? ($totalSkor / $skorMaksimal) * 100 : 0;
+
+                $riwayat->push([
+                    'jenis' => 'STEM',
+                    'instrumen' => 'Instrumen Monitoring Diseminasi',
+                    'nama' => $item->nama_satuan_pendidikan,
+                    'unit_kerja' => $item->kab_kota,
+                    'responden' => $item->nama_supervisor,
+                    'status_responden' => 'Supervisor',
+                    'tanggal' => $item->tanggal_supervisi,
+                    'nilai' => $nilai,
+                    'skor' => $totalSkor,
+                    'skor_maksimal' => $skorMaksimal,
+                    'predikat' => $this->getPredikat($nilai),
+                    'status' => 'Selesai',
+                    'show_route' => route('instrumen.stem.diseminasi.monitoring.show', $item->id),
+                    'edit_route' => route('instrumen.stem.diseminasi.monitoring.edit', $item->id),
+                    'cetak_route' => null,
+                    'delete_route' => route('instrumen.stem.diseminasi.monitoring.destroy', $item->id),
+                ]);
+            }
+        }
+
+        if ($ambilReaction) {
+            foreach (StemDiseminasiReaction::latest('tanggal_pengisian')->get() as $item) {
+                $totalSkor = 0;
+                $jumlahDinilai = 0;
+                $kolomArray = ['evaluasi_program', 'sarana_prasarana', 'fasilitator', 'akses_lms', 'bahan_kegiatan', 'jangka_waktu', 'layanan_menu'];
+                
+                foreach ($kolomArray as $kolom) {
+                    $jawaban = $item->$kolom ?? [];
+                    foreach ($jawaban as $skor) {
+                        if (is_numeric($skor)) {
+                            $totalSkor += (int) $skor;
+                            $jumlahDinilai++;
+                        }
+                    }
+                }
+                $skorMaksimal = $jumlahDinilai * 4;
+                $nilai = $skorMaksimal > 0 ? ($totalSkor / $skorMaksimal) * 100 : 0;
+
+                $riwayat->push([
+                    'jenis' => 'STEM',
+                    'instrumen' => 'Instrumen Reaction',
+                    'nama' => $item->nama_responden,
+                    'unit_kerja' => $item->asal_sekolah,
+                    'responden' => $item->nama_responden,
+                    'status_responden' => 'Peserta Diseminasi',
+                    'tanggal' => $item->tanggal_pengisian,
+                    'nilai' => $nilai,
+                    'skor' => $totalSkor,
+                    'skor_maksimal' => $skorMaksimal,
+                    'predikat' => $this->getPredikat($nilai),
+                    'status' => 'Selesai',
+                    'show_route' => route('instrumen.stem.diseminasi.reaction.show', $item->id),
+                    'edit_route' => route('instrumen.stem.diseminasi.reaction.edit', $item->id),
+                    'cetak_route' => null,
+                    'delete_route' => route('instrumen.stem.diseminasi.reaction.destroy', $item->id),
+                ]);
+            }
+        }
+
+        // Urutkan berdasarkan tanggal terbaru
+        $riwayat = $riwayat->sortByDesc(function ($item) {
+            return $item['tanggal'] ? $item['tanggal']->timestamp : 0;
+        })->values();
+
+        // Pagination
+        $perPage = 10;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage('riwayat_page');
+        $currentItems = $riwayat->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $riwayatPengisian = new LengthAwarePaginator(
+            $currentItems,
+            $riwayat->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => request()->url(),
+                'pageName' => 'riwayat_page',
+            ]
+        );
+        $riwayatPengisian->appends($request->except('riwayat_page'));
+
+        return view('instrumen.stem.partials.riwayat-table', compact('riwayatPengisian'));
+    }
+
+    private function getPredikat($nilai)
+    {
+        return match (true) {
+            $nilai >= 85 => 'Sangat Baik',
+            $nilai >= 70 => 'Baik',
+            $nilai >= 55 => 'Cukup',
+            default => 'Kurang',
+        };
+    }
+}

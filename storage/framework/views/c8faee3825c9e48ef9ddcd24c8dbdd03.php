@@ -646,13 +646,6 @@
                             <span>Instrumen Pemantauan</span>
                         </a>
 
-                        
-                        <a href="<?php echo e(route('admin.stem.rekap.evaluasi')); ?>" class="<?php echo e($menu(request()->is('admin/stem/rekap-evaluasi*'))); ?>">
-                            <?php echo $icon('instrumen'); ?>
-
-                            <span>Rekap Evaluasi STEM</span>
-                        </a>
-
                         <a href="<?php echo e(url('/wawancara')); ?>" class="<?php echo e($menu(request()->is('wawancara*'))); ?>">
                             <?php echo $icon('wawancara'); ?>
 

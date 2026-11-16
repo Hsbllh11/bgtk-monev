@@ -46,7 +46,7 @@
             'GEMBIRA' => [
                 'no' => '04',
                 'judul' => 'Wawancara Matematika GEMBIRA',
-                'desk' => 'Form wawancara program GEMBIRA.',
+                'desk' => 'Form wawancara GEMBIRA.',
                 'solid' => '#f59e0b',
                 'hover' => '#d97706',
                 'bg' => '#fffbeb',
