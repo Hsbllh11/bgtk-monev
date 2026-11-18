@@ -7,11 +7,12 @@ use App\Models\BcksPengisian;
 use App\Models\BKSubmission;
 use App\Models\Tendik;
 use App\Models\GembiraPengisian;
+use App\Models\PkgsdMbiPengisian;
+use App\Models\PmKkaPengisian; // <-- TAMBAHKAN INI
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
-use App\Models\PkgsdMbiPengisian;
 
 // Import model STEM
 use App\Models\StemFasdaDampak;
@@ -467,6 +468,58 @@ class InstrumenController extends Controller
                 ]),
             ]);
         }
+
+        // =========================================================
+        // MASUKKAN PM KKA  ⬅️ TAMBAHKAN BLOK INI
+        // =========================================================
+        $pmKkaList = PmKkaPengisian::latest('tanggal_monev')->get();
+        foreach ($pmKkaList as $item) {
+            $jawabanLevel1 = $item->level_1_jawaban ?? [];
+            $totalSkor = 0;
+            $jumlahDinilai = 0;
+
+            foreach ($jawabanLevel1 as $jawaban) {
+                $skor = is_array($jawaban) ? ($jawaban['skor'] ?? null) : $jawaban;
+                if (is_numeric($skor) && $skor >= 1 && $skor <= 4) {
+                    $totalSkor += (int) $skor;
+                    $jumlahDinilai++;
+                }
+            }
+
+            $rataRata = $jumlahDinilai > 0 ? $totalSkor / $jumlahDinilai : 0;
+            $nilai = $jumlahDinilai > 0 ? ($totalSkor / ($jumlahDinilai * 4)) * 100 : 0;
+
+            $predikat = match (true) {
+                $jumlahDinilai === 0 => '-',
+                $nilai >= 85 => 'Sangat Baik',
+                $nilai >= 70 => 'Baik',
+                $nilai >= 55 => 'Cukup',
+                default => 'Kurang',
+            };
+
+            $riwayat->push([
+                'id' => $item->id,
+                'jenis' => 'PM KKA',
+                'instrumen' => 'Monitoring & Evaluasi PM KKA',
+                'nama' => $item->nama_guru,
+                'unit_kerja' => $item->nama_sekolah,
+                'responden' => $item->nama_guru,
+                'status_responden' => $item->kelas_fase ?? '-',
+                'tanggal' => $item->tanggal_monev ? \Illuminate\Support\Carbon::parse($item->tanggal_monev) : null,
+                'nilai' => $nilai,
+                'skor' => $totalSkor,
+                'skor_maksimal' => $jumlahDinilai * 4,
+                'predikat' => $predikat,
+                'status' => 'Selesai',
+                'show_route' => route('pm-kka.show', $item->id),
+                'edit_route' => route('pm-kka.edit', $item->id),
+                'delete_route' => route('pm-kka.destroy', $item->id),
+                'cetak_route' => route('pm-kka.cetak', $item->id),
+            ]);
+        }
+        // =========================================================
+        // SELESAI: MASUKKAN PM KKA
+        // =========================================================
 
         // =========================================================
         // MASUKKAN INSTRUMEN STEM

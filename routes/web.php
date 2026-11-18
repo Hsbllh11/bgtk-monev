@@ -19,12 +19,13 @@ use App\Http\Controllers\ManajemenAkunController;
 use App\Http\Controllers\GembiraController;
 use App\Http\Controllers\PkgsdMbiController;
 use App\Http\Controllers\CetakGabunganController;
+use App\Http\Controllers\PmKkaController; // <-- TAMBAHKAN INI
 use App\Http\Controllers\Stem\StemFasdaDampakController;
 use App\Http\Controllers\Stem\StemFasdaEvaluasiController;
 use App\Http\Controllers\Stem\StemDiseminasiReactionController;
 use App\Http\Controllers\Stem\StemDiseminasiMonitoringController;
 use App\Http\Controllers\Stem\StemHistoryController;
-use App\Http\Controllers\PublicController; // <-- TAMBAHKAN INI
+use App\Http\Controllers\PublicController;
 
 
 // ============================================================
@@ -48,7 +49,7 @@ Route::post('/logout', [
 
 
 // ============================================================
-// AREA PUBLIK (TANPA LOGIN) - TAMBAHKAN DISINI
+// AREA PUBLIK (TANPA LOGIN)
 // ============================================================
 
 Route::prefix('publik')->name('public.')->group(function () {
@@ -243,6 +244,20 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/pkgsd-mbi/{pkgsdMbi}/cetak', [PkgsdMbiController::class, 'cetak'])
         ->name('pkgsd-mbi.cetak');
+
+
+    // ========================================================
+    // INSTRUMEN PM-KKA  ⬅️ TAMBAHKAN DISINI
+    // ========================================================
+
+    Route::get('/pm-kka', [PmKkaController::class, 'index'])->name('pm-kka.index');
+    Route::get('/pm-kka/create', [PmKkaController::class, 'create'])->name('pm-kka.create');
+    Route::post('/pm-kka', [PmKkaController::class, 'store'])->name('pm-kka.store');
+    Route::get('/pm-kka/{pmKka}', [PmKkaController::class, 'show'])->name('pm-kka.show');
+    Route::get('/pm-kka/{pmKka}/edit', [PmKkaController::class, 'edit'])->name('pm-kka.edit');
+    Route::put('/pm-kka/{pmKka}', [PmKkaController::class, 'update'])->name('pm-kka.update');
+    Route::delete('/pm-kka/{pmKka}', [PmKkaController::class, 'destroy'])->name('pm-kka.destroy');
+    Route::get('/pm-kka/{pmKka}/cetak', [PmKkaController::class, 'cetak'])->name('pm-kka.cetak');
 
 
     // ========================================================

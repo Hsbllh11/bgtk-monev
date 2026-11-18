@@ -162,6 +162,20 @@
             --b-t: #ffffff;
         }
 
+        /* --- WARNA BARU UNTUK PM KKA (Lime) --- */
+        .c-lime {
+            --t-bg: linear-gradient(160deg, #f7fee7 0%, #d9f99d 100%);
+            --t-line: #d3ef9a;
+            --t-glow: rgba(101, 163, 13, .5);
+            --t-clip: #a3c96a;
+            --c: #65a30d;
+            --c-line: #d3ef9a;
+            --c-text: #4d7c0f;
+            --b: #65a30d;
+            --b-d: #4d7c0f;
+            --b-t: #ffffff;
+        }
+
         /* --- kartu instrumen: tile pastel seperti KPI dashboard --- */
         .i-inst {
             position: relative;
@@ -1060,6 +1074,52 @@
         </div>
 
         {{-- =========================================================
+        INSTRUMEN PM KKA (BARU)
+        ========================================================== --}}
+        <div class="i-grid3">
+
+            {{-- PM KKA (Menggunakan warna c-lime) --}}
+            <div class="i-inst c-lime">
+                <svg class="i-clip" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                </svg>
+                <span class="i-pin"></span>
+
+                <div class="i-inst-body">
+                    <div class="i-inst-top">
+                        <span class="i-inst-ico">
+                            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                stroke-width="1.8" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </span>
+
+                        <div class="i-inst-text">
+                            <span class="i-badge">Instrumen 07</span>
+                            <h3>Instrumen PM KKA</h3>
+                            <p>Instrumen monitoring dan evaluasi program PM KKA.</p>
+                        </div>
+                    </div>
+
+                    <div class="i-actions">
+                        {{-- Sesuaikan nama route 'pm-kka.create' dengan route PM KKA Anda --}}
+                        <a href="{{ Route::has('pm-kka.create') ? route('pm-kka.create') : '#' }}" class="i-btn-main">
+                            <span>+</span>
+                            Isi Instrumen
+                        </a>
+
+                        <button type="button" class="i-btn-ghost">
+                            Cetak Blanko
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        {{-- =========================================================
         FILTER
         ========================================================== --}}
         <form action="{{ route('instrumen.index') }}" method="GET" class="i-card i-filter">
@@ -1086,6 +1146,9 @@
                         </option>
                         <option value="STEM" @selected(request('jenis_instrumen') === 'STEM')>
                             STEM
+                        </option>
+                        <option value="PM KKA" @selected(request('jenis_instrumen') === 'PM KKA')>
+                            PM KKA
                         </option>
                     </select>
                 </div>
@@ -1210,6 +1273,7 @@
                                     'GEMBIRA' => ['bg' => '#fffbeb', 'border' => '#fde68a', 'text' => '#b45309'],
                                     'PKGSD MBI' => ['bg' => '#ecfeff', 'border' => '#a5f3fc', 'text' => '#0e7490'],
                                     'STEM' => ['bg' => '#ecfeff', 'border' => '#a5f3fc', 'text' => '#0e7490'],
+                                    'PM KKA' => ['bg' => '#f7fee7', 'border' => '#d9f99d', 'text' => '#4d7c0f'],
                                 ];
 
                                 $warna = $paletInstrumen[strtoupper(trim($riwayat['jenis']))]
