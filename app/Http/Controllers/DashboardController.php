@@ -6,7 +6,12 @@ use App\Models\BcksPengisian;
 use App\Models\BKSubmission;
 use App\Models\GembiraPengisian;
 use App\Models\PkgsdMbiPengisian;
+use App\Models\PmKkaPengisian;
 use App\Models\Sekolah;
+use App\Models\StemDiseminasiMonitoring;
+use App\Models\StemDiseminasiReaction;
+use App\Models\StemFasdaDampak;
+use App\Models\StemFasdaEvaluasi;
 use App\Models\Tendik;
 use App\Models\TindakLanjut;
 use App\Models\Wawancara;
@@ -21,6 +26,8 @@ class DashboardController extends Controller
         'TENDIK'    => ['solid' => '#059669', 'soft' => '#ecfdf5', 'text' => '#047857'],
         'GEMBIRA'   => ['solid' => '#d97706', 'soft' => '#fffbeb', 'text' => '#b45309'],
         'PKGSD MBI' => ['solid' => '#0891b2', 'soft' => '#ecfeff', 'text' => '#0e7490'],
+        'STEM'      => ['solid' => '#e11d48', 'soft' => '#fff1f2', 'text' => '#be123c'],
+        'PM KKA'    => ['solid' => '#65a30d', 'soft' => '#f7fee7', 'text' => '#4d7c0f'],
     ];
 
     public function index()
@@ -83,6 +90,67 @@ class DashboardController extends Controller
                 $m->tanggal_monev, $m->created_at,
                 $this->persenDariJson($m, 'Peserta PKGSD MBI'),
                 $m->sekolah_id, route('pkgsd-mbi.show', $m->id));
+        }
+
+        // ---------- PM KKA ----------
+        foreach (PmKkaPengisian::all() as $m) {
+            $tambah('Instrumen', 'PM KKA', $m->id, $m->nama_guru, $m->nama_petugas_monev,
+                $m->tanggal_monev, $m->created_at,
+                $this->persenDariSkor([$m->level_1_jawaban, $m->level_2_jawaban]),
+                $m->sekolah_id, route('pm-kka.show', $m->id));
+        }
+
+        // ---------- STEM: Fasda Dampak ----------
+        foreach (StemFasdaDampak::all() as $m) {
+            $skor = array_map(
+                fn ($f) => $m->{"skor_$f"},
+                ['konteks_masalah', 'skenario_lkpd', 'integrasi_disiplin', 'instrumen_asesmen',
+                 'prinsip_5m', 'aksi_eksperimen', 'dinamika_kolaborasi', 'resiliensi', 'fungsionalitas']
+            );
+
+            $tambah('Instrumen', 'STEM', $m->id, $m->nama_pendidik, $m->nama_petugas_monev,
+                $m->tanggal_observasi, $m->created_at,
+                $this->persenDariSkor([$skor]),
+                $m->sekolah_id, route('instrumen.stem.fasda.dampak.show', $m->id));
+        }
+
+        // ---------- STEM: Fasda Evaluasi ----------
+        foreach (StemFasdaEvaluasi::all() as $m) {
+            $kolom = $m->peran_responden === 'Pendidik'
+                ? ['pendidik_perencanaan', 'pendidik_pelaksanaan', 'pendidik_evaluasi_refleksi',
+                   'pendidik_dampak_kualitas', 'pendidik_pengembangan_profesional']
+                : ['murid_iklim_kelas', 'murid_lingkungan_suportif', 'murid_kebebasan_eksplorasi',
+                   'murid_penghargaan_kolaboratif', 'murid_keingintahuan', 'murid_kepuasan',
+                   'murid_prinsip_mendalam', 'murid_perkembangan', 'murid_hasil_belajar'];
+
+            $tambah('Instrumen', 'STEM', $m->id, $m->nama_responden, null,
+                $m->tanggal_pengisian, $m->created_at,
+                $this->persenDariSkor(array_map(fn ($k) => $m->$k, $kolom)),
+                $m->sekolah_id, route('instrumen.stem.fasda.evaluasi.show', $m->id));
+        }
+
+        // ---------- STEM: Diseminasi Monitoring ----------
+        foreach (StemDiseminasiMonitoring::all() as $m) {
+            $kolom = ['aspek_persiapan_pelaksanaan', 'aspek_elaborasi_konsep', 'aspek_refleksi_evaluasi',
+                      'aspek_ruang_karya', 'aspek_keterlaksanaan', 'aspek_kelengkapan_bukti',
+                      'aspek_desain_aktivitas', 'aspek_implementasi_stem', 'aspek_tindak_lanjut',
+                      'aspek_dampak_awal'];
+
+            $tambah('Instrumen', 'STEM', $m->id, $m->nama_satuan_pendidikan, $m->nama_supervisor,
+                $m->tanggal_supervisi, $m->created_at,
+                $this->persenDariSkor(array_map(fn ($k) => $m->$k, $kolom)),
+                $m->sekolah_id, route('instrumen.stem.diseminasi.monitoring.show', $m->id));
+        }
+
+        // ---------- STEM: Diseminasi Reaction ----------
+        foreach (StemDiseminasiReaction::all() as $m) {
+            $kolom = ['evaluasi_program', 'sarana_prasarana', 'fasilitator', 'akses_lms',
+                      'bahan_kegiatan', 'jangka_waktu', 'layanan_menu'];
+
+            $tambah('Instrumen', 'STEM', $m->id, $m->nama_responden, $m->nama_petugas_monev ?? null,
+                $m->tanggal_pengisian, $m->created_at,
+                $this->persenDariSkor(array_map(fn ($k) => $m->$k, $kolom)),
+                $m->sekolah_id, route('instrumen.stem.diseminasi.reaction.show', $m->id));
         }
 
         foreach (Wawancara::all() as $m) {
@@ -198,13 +266,22 @@ class DashboardController extends Controller
             ->take(8)
             ->values();
 
-        $petugasTeraktif = $aktivitas
-            ->filter(fn ($a) => $a['petugas'] !== '' && $a['petugas'] !== '-')
+        $bukanPetugas = fn ($a) => $a['petugas'] === '' || $a['petugas'] === '-';
+
+        // Semua petugas + jumlah INSTRUMEN yang diinputkan (wawancara tidak dihitung)
+        $petugasSemua = $instrumen
+            ->reject($bukanPetugas)
             ->groupBy(fn ($a) => mb_strtolower($a['petugas']))
-            ->map(fn ($g) => ['nama' => $g->first()['petugas'], 'jumlah' => $g->count()])
-            ->sortByDesc('jumlah')
-            ->take(5)
+            ->map(fn ($g) => [
+                'nama'   => $g->first()['petugas'],
+                'jumlah' => $g->count(),
+                'rinci'  => $g->countBy('jenis')->all(),
+            ])
+            ->sortBy([['jumlah', 'desc'], ['nama', 'asc']])
             ->values();
+
+        // Pengisian tanpa nama petugas (mis. formulir publik)
+        $tanpaPetugas = $instrumen->filter($bukanPetugas)->count();
 
         $jam   = $sekarang->hour;
         $salam = $jam < 11 ? 'Selamat pagi' : ($jam < 15 ? 'Selamat siang' : ($jam < 18 ? 'Selamat sore' : 'Selamat malam'));
@@ -233,7 +310,8 @@ class DashboardController extends Controller
 
             'chart'            => $chart,
             'terbaru'          => $terbaru,
-            'petugasTeraktif'  => $petugasTeraktif,
+            'petugasSemua'     => $petugasSemua,
+            'tanpaPetugas'     => $tanpaPetugas,
         ]);
     }
 
@@ -250,6 +328,29 @@ class DashboardController extends Controller
         foreach ($levelAktif as $level) {
             foreach ((array) ($item->{"level_{$level}_jawaban"} ?? []) as $jawaban) {
                 $skor = is_array($jawaban) ? ($jawaban['skor'] ?? null) : $jawaban;
+
+                if (is_numeric($skor) && (int) $skor >= 1 && (int) $skor <= 4) {
+                    $total += (int) $skor;
+                    $jumlah++;
+                }
+            }
+        }
+
+        return $jumlah > 0 ? round(($total / $jumlah / 4) * 100, 1) : null;
+    }
+
+    /**
+     * Persentase rata-rata skor 1–4 dari kumpulan jawaban.
+     * Tiap elemen bisa berupa array skor atau array ['skor' => n].
+     */
+    private function persenDariSkor(array $kumpulan): ?float
+    {
+        $total = 0;
+        $jumlah = 0;
+
+        foreach ($kumpulan as $kelompok) {
+            foreach ((array) ($kelompok ?? []) as $item) {
+                $skor = is_array($item) ? ($item['skor'] ?? null) : $item;
 
                 if (is_numeric($skor) && (int) $skor >= 1 && (int) $skor <= 4) {
                     $total += (int) $skor;

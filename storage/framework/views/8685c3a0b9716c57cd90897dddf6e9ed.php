@@ -750,6 +750,109 @@
             font-weight: 700;
             color: var(--p-600);
         }
+
+        /* ===================== TAMBAHAN: MODAL PETUGAS ===================== */
+        .d-btn-soft {
+            display: block;
+            width: 100%;
+            margin-top: 16px;
+            padding: 12px 14px;
+            border: 1px solid var(--p-200);
+            border-radius: 12px;
+            background: var(--p-50);
+            color: var(--p-700);
+            font-family: inherit;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s, transform .2s;
+        }
+
+        .d-btn-soft:hover {
+            background: var(--p-100);
+            transform: translateY(-1px);
+        }
+
+        .d-dlg {
+            width: min(560px, 92vw);
+            max-height: 82vh;
+            padding: 0;
+            border: 0;
+            border-radius: 18px;
+            box-shadow: 0 30px 60px -20px rgba(15, 27, 61, .45);
+        }
+
+        .d-dlg[open] {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .d-dlg::backdrop {
+            background: rgba(15, 27, 61, .45);
+        }
+
+        .d-dlg-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 20px;
+        }
+
+        .d-dlg-x {
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+        }
+
+        .d-dlg-x:hover {
+            background: var(--p-50);
+            color: var(--p-700);
+        }
+
+        .d-dlg-search {
+            width: 100%;
+            height: 42px;
+            padding: 0 14px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .d-dlg-search:focus {
+            border-color: var(--p-500);
+            box-shadow: 0 0 0 4px var(--p-100);
+        }
+
+        .d-dlg-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px 16px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--p-200) transparent;
+        }
+
+        .d-dlg-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .d-dlg-row:last-of-type {
+            border-bottom: 0;
+        }
+
+        .d-dlg-row .no {
+            color: #94a3b8;
+        }
     </style>
 
     <div class="d-wrap">
@@ -1043,30 +1146,84 @@
                     </div>
                 </div>
 
+                
                 <div class="d-card">
-                    <h2 class="d-card-h">Petugas Monev Teraktif</h2>
-                    <p class="d-card-s">Berdasarkan jumlah pengisian.</p>
+                    <div class="d-head" style="margin-bottom:0">
+                        <div>
+                            <h2 class="d-card-h">Pengisian per Petugas Monev</h2>
+                            <p class="d-card-s">Jumlah instrumen yang sudah diinputkan.</p>
+                        </div>
+                        <span class="d-pill"><?php echo e($petugasSemua->count()); ?> petugas</span>
+                    </div>
 
-                    <?php $maks = max($petugasTeraktif->max('jumlah') ?? 0, 1); ?>
+                    <?php $maks = max($petugasSemua->max('jumlah') ?? 0, 1); ?>
+
                     <div style="margin-top:6px">
-                        <?php $__empty_1 = true; $__currentLoopData = $petugasTeraktif; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <?php $__empty_1 = true; $__currentLoopData = $petugasSemua->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <div class="d-pt">
                                 <div class="d-pt-top">
-                                    <span class="truncate" style="font-weight:600;color:#334155"><?php echo e($i + 1); ?>.
-                                        <?php echo e($p['nama']); ?></span>
-                                    <span
-                                        style="margin-left:12px;flex-shrink:0;font-weight:800;color:var(--ink)"><?php echo e($p['jumlah']); ?></span>
+                                    <span class="truncate" style="font-weight:600;color:#334155"><?php echo e($i + 1); ?>. <?php echo e($p['nama']); ?></span>
+                                    <span style="margin-left:12px;flex-shrink:0;font-weight:800;color:var(--ink)"><?php echo e($p['jumlah']); ?></span>
                                 </div>
                                 <div class="d-track" style="height:7px">
-                                    <div class="d-fill"
-                                        style="width: <?php echo e(($p['jumlah'] / $maks) * 100); ?>%; background: linear-gradient(90deg, #3b82f6, #1d4ed8)">
-                                    </div>
+                                    <div class="d-fill" style="width: <?php echo e(($p['jumlah'] / $maks) * 100); ?>%; background: linear-gradient(90deg, #3b82f6, #1d4ed8)"></div>
                                 </div>
                             </div>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <p style="padding:24px 0;text-align:center;font-size:13px;color:#94a3b8">Belum ada data petugas.</p>
                         <?php endif; ?>
                     </div>
+
+                    <?php if($petugasSemua->count() > 5): ?>
+                        <button type="button" class="d-btn-soft" onclick="document.getElementById('dlgPetugas').showModal()">
+                            Lihat semua (<?php echo e($petugasSemua->count()); ?> petugas)
+                        </button>
+                    <?php endif; ?>
+
+                    
+                    <dialog id="dlgPetugas" class="d-dlg">
+                        <div class="d-dlg-head">
+                            <div>
+                                <h3 class="d-card-h">Semua Petugas Monev</h3>
+                                <p class="d-card-s">
+                                    <?php echo e($petugasSemua->count()); ?> petugas · <?php echo e($petugasSemua->sum('jumlah')); ?> instrumen
+                                    <?php if($tanpaPetugas > 0): ?> · <?php echo e($tanpaPetugas); ?> tanpa nama petugas <?php endif; ?>
+                                </p>
+                            </div>
+                            <button type="button" class="d-dlg-x" aria-label="Tutup"
+                                onclick="document.getElementById('dlgPetugas').close()">✕</button>
+                        </div>
+
+                        <div style="padding:0 20px 12px">
+                            <input type="search" id="cariPetugas" placeholder="Cari nama petugas..." class="d-dlg-search">
+                        </div>
+
+                        <div class="d-dlg-list" id="listPetugas">
+                            <?php $__currentLoopData = $petugasSemua; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div class="d-dlg-row" data-nama="<?php echo e(mb_strtolower($p['nama'])); ?>">
+                                    <div style="min-width:0;flex:1">
+                                        <p style="font-size:13px;font-weight:600;color:#334155">
+                                            <span class="no"><?php echo e($i + 1); ?>.</span> <?php echo e($p['nama']); ?>
+
+                                        </p>
+                                        <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:5px">
+                                            <?php $__currentLoopData = $p['rinci']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $jenis => $n): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <?php $m = $jenisMeta[$jenis] ?? ['soft' => '#f1f5f9', 'text' => '#475569']; ?>
+                                                <span class="d-badge" style="padding:2px 8px;font-size:11px;background:<?php echo e($m['soft']); ?>;color:<?php echo e($m['text']); ?>">
+                                                    <?php echo e($jenis); ?> · <?php echo e($n); ?>
+
+                                                </span>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </div>
+                                    </div>
+                                    <span style="flex-shrink:0;font-size:18px;font-weight:800;color:var(--ink)"><?php echo e($p['jumlah']); ?></span>
+                                </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <p id="kosongPetugas" style="display:none;padding:28px 0;text-align:center;font-size:13px;color:#94a3b8">
+                                Petugas tidak ditemukan.
+                            </p>
+                        </div>
+                    </dialog>
                 </div>
             </div>
         </div>
@@ -1282,6 +1439,24 @@
                 data: { labels: ['Belum Dimulai', 'Dalam Proses', 'Selesai'], datasets: [{ data: D.tl, backgroundColor: ['#cbd5e1', '#3b82f6', '#10b981'], borderWidth: 3, borderColor: '#fff', hoverOffset: 6 }] },
                 options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: legendBawah } }
             });
+
+            // ===== Modal petugas: cari + klik latar untuk menutup =====
+            const dlg = document.getElementById('dlgPetugas');
+            if (dlg) {
+                dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+                const cari = document.getElementById('cariPetugas');
+                cari?.addEventListener('input', () => {
+                    const q = cari.value.trim().toLowerCase();
+                    let tampil = 0;
+                    document.querySelectorAll('#listPetugas .d-dlg-row').forEach(r => {
+                        const cocok = r.dataset.nama.includes(q);
+                        r.style.display = cocok ? '' : 'none';
+                        if (cocok) tampil++;
+                    });
+                    document.getElementById('kosongPetugas').style.display = tampil ? 'none' : 'block';
+                });
+            }
         });
     </script>
 <?php $__env->stopSection(); ?>
