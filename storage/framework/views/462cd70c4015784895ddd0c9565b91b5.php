@@ -103,9 +103,7 @@
         $isPendidik = $evaluasi->peran_responden === 'Pendidik';
         $daftarPertanyaan = $isPendidik ? $pendidikQs : $muridQs;
 
-        // =========================================================
-        // PERBAIKAN: Kumpulkan skor dari kolom-kolom JSON di database
-        // =========================================================
+        // Kumpulkan skor
         if ($isPendidik) {
             $kolomArray = [
                 $evaluasi->pendidik_perencanaan,
@@ -131,12 +129,15 @@
         $jawaban = [];
         foreach ($kolomArray as $kolom) {
             if (is_array($kolom)) {
-                foreach ($kolom as $skor) {
-                    $jawaban[] = $skor;
-                }
+                foreach ($kolom as $skor) { $jawaban[] = $skor; }
             }
         }
-        // =========================================================
+
+        // Kumpulkan bukti (hanya Pendidik)
+        $jawabanBukti = [];
+        if ($isPendidik && is_array($evaluasi->pendidik_catatan)) {
+            $jawabanBukti = $evaluasi->pendidik_catatan;
+        }
 
         // Hitung skor
         $totalSkor = 0;
@@ -201,9 +202,13 @@
         .indicator-table td { font-size: 10.5px; }
         
         .indicator-table .number { width: 5%; text-align: center; font-weight: 600; }
-        .indicator-table .question { width: 85%; }
-        .indicator-table .score { width: 10%; text-align: center; font-weight: 700; color: #b45309; }
+        .indicator-table .question { width: 55%; }
+        .indicator-table .score { width: 8%; text-align: center; font-weight: 700; color: #b45309; }
+        .indicator-table .bukti-cell { width: 32%; color: #475569; font-size: 10px; }
         .indicator-table .group-row td { background: #eff6ff; color: #1e3a8a; font-weight: 700; font-size: 10.5px; }
+
+        .bukti-text { white-space: pre-line; }
+        .bukti-empty { color: #94a3b8; font-style: italic; }
 
         .signature-section { break-inside: avoid; page-break-inside: avoid; margin-top: 35px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
         .signature-box { text-align: center; }
@@ -290,8 +295,8 @@
                         <td class="value"><?php echo e($evaluasi->kabupaten_kota ?: '-'); ?></td>
                     </tr>
                     <tr>
-                        <td class="label">Nama Petugas Monev</td>
-                        <td class="value" colspan="3"><?php echo e($evaluasi->nama_petugas_monev ?: '-'); ?></td>
+                        <td class="label">Provinsi</td>
+                        <td class="value" colspan="3"><?php echo e($evaluasi->provinsi ?: '-'); ?></td>
                     </tr>
                 </tbody>
             </table>
@@ -327,22 +332,35 @@
                         <th class="number">No</th>
                         <th class="question">Pernyataan</th>
                         <th class="score">Skor</th>
+                        <?php if($isPendidik): ?>
+                            <th class="bukti-cell">Catatan / Bukti</th>
+                        <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>
                     <?php $nomor = 1; ?>
                     <?php $__currentLoopData = $daftarPertanyaan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $kelompok => $pertanyaanList): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr class="group-row">
-                            <td colspan="3"><?php echo e($kelompok); ?></td>
+                            <td colspan="<?php echo e($isPendidik ? 4 : 3); ?>"><?php echo e($kelompok); ?></td>
                         </tr>
                         <?php $__currentLoopData = $pertanyaanList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $teks): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <?php
                                 $skor = $jawaban[$nomor - 1] ?? '-';
+                                $bukti = $jawabanBukti[$nomor - 1] ?? '';
                             ?>
                             <tr>
                                 <td class="number"><?php echo e($nomor); ?></td>
                                 <td class="question"><?php echo e($teks); ?></td>
                                 <td class="score"><?php echo e(is_numeric($skor) ? $skor : '-'); ?></td>
+                                <?php if($isPendidik): ?>
+                                    <td class="bukti-cell">
+                                        <?php if(trim($bukti) !== ''): ?>
+                                            <div class="bukti-text"><?php echo e($bukti); ?></div>
+                                        <?php else: ?>
+                                            <div class="bukti-empty">-</div>
+                                        <?php endif; ?>
+                                    </td>
+                                <?php endif; ?>
                             </tr>
                             <?php $nomor++; ?>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -359,9 +377,9 @@
                 <div class="signature-name"><?php echo e($evaluasi->nama_responden ?: '-'); ?></div>
             </div>
             <div class="signature-box">
-                <div class="signature-title">Petugas Monev</div>
+                <div class="signature-title">Kepala Sekolah / Perwakilan</div>
                 <div class="signature-line"></div>
-                <div class="signature-name"><?php echo e($evaluasi->nama_petugas_monev ?: '-'); ?></div>
+                <div class="signature-name">..............................................</div>
             </div>
         </section>
 

@@ -79,9 +79,9 @@
         ];
 
         // =========================================================
-        // PERBAIKAN: Kumpulkan skor dari kolom-kolom JSON di database
+        // Kumpulkan skor dari kolom-kolom JSON di database
         // =========================================================
-        $kolomArray = [
+        $kolomSkor = [
             $monitoring->aspek_persiapan_pelaksanaan,
             $monitoring->aspek_elaborasi_konsep,
             $monitoring->aspek_refleksi_evaluasi,
@@ -95,11 +95,35 @@
         ];
 
         $jawaban = [];
-        foreach ($kolomArray as $kolom) {
+        foreach ($kolomSkor as $kolom) {
             if (is_array($kolom)) {
                 foreach ($kolom as $skor) {
                     $jawaban[] = $skor;
                 }
+            }
+        }
+
+        // =========================================================
+        // Kumpulkan bukti dari kolom-kolom bukti_* (BARU)
+        // =========================================================
+        $kolomBukti = [
+            $monitoring->bukti_persiapan_pelaksanaan,
+            $monitoring->bukti_elaborasi_konsep,
+            $monitoring->bukti_refleksi_evaluasi,
+            $monitoring->bukti_ruang_karya,
+            $monitoring->bukti_keterlaksanaan,
+            $monitoring->bukti_kelengkapan_bukti,
+            $monitoring->bukti_desain_aktivitas,
+            $monitoring->bukti_implementasi_stem,
+            $monitoring->bukti_tindak_lanjut,
+            $monitoring->bukti_dampak_awal,
+        ];
+
+        $jawabanBukti = [];
+        foreach ($kolomBukti as $kolom) {
+            $arr = is_array($kolom) ? $kolom : (json_decode($kolom ?? '[]', true) ?: []);
+            foreach ($arr as $b) {
+                $jawabanBukti[] = $b;
             }
         }
         // =========================================================
@@ -167,9 +191,13 @@
         .indicator-table td { font-size: 10.5px; }
         
         .indicator-table .number { width: 5%; text-align: center; font-weight: 600; }
-        .indicator-table .question { width: 85%; }
-        .indicator-table .score { width: 10%; text-align: center; font-weight: 700; color: #b45309; }
+        .indicator-table .question { width: 50%; }
+        .indicator-table .score { width: 8%; text-align: center; font-weight: 700; color: #b45309; }
+        .indicator-table .bukti-cell { width: 37%; color: #475569; font-size: 10px; }
         .indicator-table .group-row td { background: #eff6ff; color: #1e3a8a; font-weight: 700; font-size: 10.5px; }
+
+        .bukti-text { white-space: pre-line; }
+        .bukti-empty { color: #94a3b8; font-style: italic; }
 
         .qa-block { margin-bottom: 12px; break-inside: avoid; page-break-inside: avoid; }
         .qa-question { font-weight: 700; color: #1e293b; margin-bottom: 4px; font-size: 11px; }
@@ -306,22 +334,31 @@
                         <th class="number">No</th>
                         <th class="question">Indikator</th>
                         <th class="score">Skor</th>
+                        <th class="bukti-cell">Catatan / Bukti</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php $nomor = 1; ?>
                     <?php $__currentLoopData = $monitoringQs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $kelompok => $pertanyaanList): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr class="group-row">
-                            <td colspan="3"><?php echo e($kelompok); ?></td>
+                            <td colspan="4"><?php echo e($kelompok); ?></td>
                         </tr>
                         <?php $__currentLoopData = $pertanyaanList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $teks): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <?php
                                 $skor = $jawaban[$nomor - 1] ?? '-';
+                                $bukti = $jawabanBukti[$nomor - 1] ?? '';
                             ?>
                             <tr>
                                 <td class="number"><?php echo e($nomor); ?></td>
                                 <td class="question"><?php echo e($teks); ?></td>
                                 <td class="score"><?php echo e(is_numeric($skor) ? $skor : '-'); ?></td>
+                                <td class="bukti-cell">
+                                    <?php if(trim($bukti) !== ''): ?>
+                                        <div class="bukti-text"><?php echo e($bukti); ?></div>
+                                    <?php else: ?>
+                                        <div class="bukti-empty">-</div>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                             <?php $nomor++; ?>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

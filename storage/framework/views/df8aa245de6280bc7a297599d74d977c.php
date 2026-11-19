@@ -99,17 +99,14 @@
             ]
         ];
 
-        // Total butir
         $totalPendidik = 0;
         foreach ($pendidikQs as $qs) { $totalPendidik += count($qs); }
         $totalMurid = 0;
         foreach ($muridQs as $qs) { $totalMurid += count($qs); }
 
         // =========================================================
-        // PERBAIKAN: Ambil data lama dari kolom JSON yang benar
+        // Ambil data skor lama dari kolom JSON
         // =========================================================
-        $isPendidik = old('peran_responden', $evaluasi->peran_responden) === 'Pendidik';
-        
         if (old('pendidik_skor')) {
             $jawabanPendidik = old('pendidik_skor');
         } else {
@@ -153,11 +150,18 @@
                 }
             }
         }
+
         // =========================================================
+        // Ambil data bukti Pendidik (BARU)
+        // =========================================================
+        if (old('pendidik_bukti')) {
+            $jawabanBukti = old('pendidik_bukti');
+        } else {
+            $jawabanBukti = is_array($evaluasi->pendidik_catatan) ? $evaluasi->pendidik_catatan : [];
+        }
     ?>
 
     <style>
-        /* ===================== TOKEN WARNA (Sama dengan PKGSD MBI) ===================== */
         :root {
             --p-50: #eff4ff; --p-100: #dbe7fe; --p-200: #bfd4fb;
             --p-500: #3b82f6; --p-600: #2563eb; --p-700: #1d4ed8;
@@ -171,7 +175,6 @@
         .d-card-s { margin-top: 2px; font-size: 12.5px; color: var(--muted); }
         .d-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 20px 20px 14px; }
 
-        /* --- judul halaman --- */
         .d-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
         @media (max-width: 640px) { .d-title-row { flex-direction: column; } }
         .d-h1 { font-size: 28px; font-weight: 400; letter-spacing: -.02em; color: var(--ink); line-height: 1.2; }
@@ -181,7 +184,6 @@
         .d-crumb a:hover { color: var(--p-600); }
         .d-desc { margin-top: 10px; max-width: 640px; font-size: 13px; line-height: 1.7; color: #475569; }
 
-        /* --- tombol pastel --- */
         .d-pbtn {
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             flex-shrink: 0; height: 46px; padding: 0 18px; border-radius: 14px;
@@ -195,11 +197,9 @@
 
         .b-blue { --b-bg: linear-gradient(160deg, #eaf0ff 0%, #d3e1ff 100%); --b-line: #c6d8fb; --b-ink: #1d4ed8; --b-glow: rgba(37, 99, 235, .7); }
         .b-mint { --b-bg: linear-gradient(160deg, #e9faf2 0%, #cdf0e0 100%); --b-line: #bfe8d4; --b-ink: #047857; --b-glow: rgba(5, 150, 105, .7); }
-        .b-slate { --b-bg: linear-gradient(160deg, #f6f8fc 0%, #e6ebf5 100%); --b-line: #d9e0ee; --b-ink: #475569; --b-glow: rgba(71, 85, 105, .6); }
 
         .d-foot { display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
 
-        /* --- info instrumen + progres --- */
         .d-info-card { display: grid; grid-template-columns: minmax(0, 1fr); }
         @media (min-width: 1024px) { .d-info-card { grid-template-columns: minmax(0, 1fr) 280px; } }
 
@@ -213,37 +213,34 @@
         }
 
         .d-note {
-            display: flex; align-items: flex-start; gap: 10px; margin-top: 18px;
-            padding: 12px 14px; border: 1px dashed var(--p-200); border-radius: 14px;
-            background: #f5f8ff; font-size: 12.5px; line-height: 1.7; color: #475569;
+            display: flex; align-items: flex-start; gap: 12px; margin-top: 18px;
+            padding: 16px 18px; border: 1px solid var(--p-200); border-radius: 14px;
+            background: #f8faff; font-size: 12.5px; line-height: 1.7; color: #334155;
         }
-        .d-note b.t { display: block; font-weight: 700; color: var(--p-700); }
+        .d-note b.t { display: block; font-weight: 700; color: var(--p-700); font-size: 13px; margin-bottom: 6px; }
         .d-note ul { margin: 6px 0 0 16px; list-style: disc; }
-        .d-note li + li { margin-top: 3px; }
+        .d-note li + li { margin-top: 6px; }
+        .d-note .skor-box {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 20px; height: 20px; padding: 0 5px; border-radius: 5px;
+            background: var(--p-600); color: #fff; font-size: 11px; font-weight: 700; margin-right: 5px;
+        }
 
         .d-prog { padding: 22px; border-top: 1px solid var(--line); background: #f9fbff; }
         @media (min-width: 1024px) { .d-prog { border-top: 0; border-left: 1px solid var(--line); } }
-
         .d-prog-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         .d-prog-label { font-size: 12px; font-weight: 600; color: var(--muted); }
         .d-prog-pct { font-size: 12px; font-weight: 800; color: var(--p-600); }
-
         .d-bar { height: 8px; margin-top: 10px; overflow: hidden; border-radius: 9999px; background: #e6ebf5; }
         .d-bar > div { height: 100%; border-radius: 9999px; background: var(--p-600); transition: width .3s ease; }
-
         .d-prog-val { font-size: 14px; font-weight: 800; color: var(--ink); }
         .d-prog-sep { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
 
-        /* --- notifikasi error --- */
         .d-error { padding: 16px 20px; border-radius: 16px; background: #fff1f2; border: 1px solid #fecdd3; color: #be123c; }
         .d-error b { font-size: 13px; font-weight: 700; }
         .d-error ul { margin: 8px 0 0 18px; list-style: disc; font-size: 12.5px; line-height: 1.8; }
 
-        /* --- form --- */
-        .d-form-grid {
-            display: grid; gap: 18px; padding: 6px 20px 22px;
-            grid-template-columns: minmax(0, 1fr);
-        }
+        .d-form-grid { display: grid; gap: 18px; padding: 6px 20px 22px; grid-template-columns: minmax(0, 1fr); }
         @media (min-width: 768px) {
             .d-form-grid.c2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .d-form-grid .span2 { grid-column: 1 / -1; }
@@ -265,7 +262,6 @@
 
         .d-err { margin-top: 6px; font-size: 12px; color: #e11d48; }
 
-        /* --- indikator kartu rubrik --- */
         .d-group-bar { padding: 11px 20px; font-size: 12.5px; font-weight: 700; color: var(--ink); border-top: 1px solid var(--line); background: #f9fbff; }
         .d-item { padding: 20px; border-top: 1px solid var(--line); }
         .d-group-bar + .d-item { border-top: 0; }
@@ -276,11 +272,9 @@
 
         .d-opts { display: grid; gap: 10px; margin-top: 14px; grid-template-columns: minmax(0, 1fr); }
         @media (min-width: 768px) {
-            .d-opts { grid-template-columns: repeat(4, minmax(0, 1fr)); } /* 4 kolom untuk skor 1-4 */
-            .d-opts .span2 { grid-column: 1 / -1; }
+            .d-opts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
         }
 
-        /* --- OPSI RADIO (SEJAJAR) --- */
         .d-opt {
             display: flex; align-items: center; gap: 10px;
             padding: 10px 12px; border: 1px solid var(--line);
@@ -291,20 +285,28 @@
         .d-opt:has(input:checked) { border-color: var(--p-500); background: var(--p-50); box-shadow: 0 0 0 3px var(--p-100); }
         
         .d-opt input { margin: 0; width: 16px; height: 16px; accent-color: var(--p-600); cursor: pointer; }
-
         .d-opt-skor {
             display: inline-flex; align-items: center; justify-content: center;
             width: 22px; height: 22px; flex-shrink: 0; border-radius: 6px;
             background: var(--p-50); color: var(--p-700); font-size: 11px; font-weight: 800;
         }
         .d-opt:has(input:checked) .d-opt-skor { background: var(--p-600); color: #fff; }
-        
         .d-opt-txt { font-size: 12px; line-height: 1.4; color: #475569; margin: 0; }
+
+        /* CSS BARU: CATATAN/BUKTI */
+        .d-bukti-wrap {
+            margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line);
+        }
+        .d-bukti-label {
+            display: flex; align-items: center; gap: 6px; margin-bottom: 8px;
+            font-size: 12px; font-weight: 700; color: var(--p-700);
+        }
+        .d-bukti-label svg { flex-shrink: 0; }
+        .d-bukti-optional { margin-left: auto; font-size: 11px; font-weight: 500; color: var(--muted); }
     </style>
 
     <div class="d-wrap">
 
-        
         <section>
             <div class="d-title-row">
                 <div>
@@ -315,9 +317,6 @@
                         <a href="<?php echo e(route('instrumen.stem.index')); ?>">STEM</a> &nbsp;›&nbsp;
                         <a href="<?php echo e(route('instrumen.stem.fasda')); ?>">Fasda</a> &nbsp;›&nbsp; Edit Evaluasi
                     </p>
-                    <p class="d-desc">
-                        Perbarui data evaluasi dampak pelatihan STEM.
-                    </p>
                 </div>
                 <a href="<?php echo e(route('instrumen.stem.fasda.evaluasi.show', $evaluasi->id)); ?>" class="d-pbtn b-blue back">
                     <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
@@ -326,7 +325,6 @@
             </div>
         </section>
 
-        
         <div class="d-card">
             <div class="d-info-card">
                 <div class="d-info-main">
@@ -339,7 +337,7 @@
                         <div style="min-width:0">
                             <h2 class="d-card-h">Petunjuk Pengisian</h2>
                             <p class="d-card-s" style="line-height:1.7">
-                                Pilih salah satu peran responden di bawah, lalu isi pernyataan sesuai dengan kondisi sebenarnya.
+                                Pilih peran responden, lalu isi instrumen sesuai dengan fakta yang Anda ketahui, alami, lakukan, dan rasakan.
                             </p>
                         </div>
                     </div>
@@ -349,10 +347,11 @@
                             <path d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
                         </svg>
                         <div>
-                            <b class="t">Skala Penilaian</b>
+                            <b class="t">Skala Penilaian & Panduan</b>
                             <ul>
-                                <li><b>Pendidik:</b> 1 = Tidak Pernah, 2 = Jarang, 3 = Sering, 4 = Selalu.</li>
-                                <li><b>Murid:</b> 1 = Sangat Tidak Setuju (STS), 2 = Tidak Setuju (TS), 3 = Setuju (S), 4 = Sangat Setuju (SS).</li>
+                                <li><b>Bagian Pendidik (Skor 1-4):</b> <span class="skor-box">1</span> Tidak Pernah, <span class="skor-box">2</span> Jarang, <span class="skor-box">3</span> Sering, <span class="skor-box">4</span> Selalu.</li>
+                                <li><b>Bagian Murid (Skor 1-4):</b> <span class="skor-box">1</span> Sangat Tidak Setuju (STS), <span class="skor-box">2</span> Tidak Setuju (TS), <span class="skor-box">3</span> Setuju (S), <span class="skor-box">4</span> Sangat Setuju (SS).</li>
+                                <li>Khusus <b>Pendidik</b>, isi kolom <b>Catatan/Bukti</b> dengan bukti konkret (mis. judul Modul Ajar/RPP, foto, atau tautan dokumen) yang mendukung skor Anda.</li>
                             </ul>
                         </div>
                     </div>
@@ -378,7 +377,6 @@
             </div>
         </div>
 
-        
         <?php if($errors->any()): ?>
             <div class="d-error">
                 <b>Terdapat kesalahan pada pengisian:</b>
@@ -390,7 +388,6 @@
             </div>
         <?php endif; ?>
 
-        
         <form action="<?php echo e(route('instrumen.stem.fasda.evaluasi.update', $evaluasi->id)); ?>" method="POST" class="d-form" id="evaluasi-form">
             <?php echo csrf_field(); ?>
             <?php echo method_field('PUT'); ?>
@@ -407,50 +404,18 @@
                     <div>
                         <label class="d-label">Nama Responden <i>*</i></label>
                         <input type="text" name="nama_responden" value="<?php echo e(old('nama_responden', $evaluasi->nama_responden)); ?>" required class="d-field" placeholder="Nama lengkap">
-                        <?php $__errorArgs = ['nama_responden'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <p class="d-err"><?php echo e($message); ?></p> <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
                     </div>
                     <div>
                         <label class="d-label">Asal Satuan Pendidikan <i>*</i></label>
                         <input type="text" name="asal_sekolah" value="<?php echo e(old('asal_sekolah', $evaluasi->asal_sekolah)); ?>" required class="d-field" placeholder="Nama sekolah">
-                        <?php $__errorArgs = ['asal_sekolah'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <p class="d-err"><?php echo e($message); ?></p> <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
                     </div>
                     <div>
                         <label class="d-label">Kabupaten/Kota</label>
                         <input type="text" name="kabupaten_kota" value="<?php echo e(old('kabupaten_kota', $evaluasi->kabupaten_kota)); ?>" class="d-field" placeholder="Contoh: Mataram">
-                        <?php $__errorArgs = ['kabupaten_kota'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <p class="d-err"><?php echo e($message); ?></p> <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
                     </div>
                     <div>
-                        <label class="d-label">Nama Petugas Monev <i>*</i></label>
-                        <input type="text" name="nama_petugas_monev" value="<?php echo e(old('nama_petugas_monev', $evaluasi->nama_petugas_monev)); ?>" required class="d-field" placeholder="Nama petugas">
-                        <?php $__errorArgs = ['nama_petugas_monev'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <p class="d-err"><?php echo e($message); ?></p> <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+                        <label class="d-label">Provinsi</label>
+                        <input type="text" name="provinsi" value="<?php echo e(old('provinsi', $evaluasi->provinsi ?? 'Nusa Tenggara Barat')); ?>" class="d-field">
                     </div>
                     <div class="span2">
                         <label class="d-label">Responden Ini Adalah: <i>*</i></label>
@@ -458,14 +423,6 @@ unset($__errorArgs, $__bag); ?>
                             <option value="Pendidik" <?php if(old('peran_responden', $evaluasi->peran_responden) === 'Pendidik'): echo 'selected'; endif; ?>>Pendidik / Guru</option>
                             <option value="Murid" <?php if(old('peran_responden', $evaluasi->peran_responden) === 'Murid'): echo 'selected'; endif; ?>>Murid</option>
                         </select>
-                        <?php $__errorArgs = ['peran_responden'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> <p class="d-err"><?php echo e($message); ?></p> <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
             </section>
@@ -502,6 +459,18 @@ unset($__errorArgs, $__bag); ?>
                                             </span>
                                         </label>
                                     <?php endfor; ?>
+                                </div>
+
+                                
+                                <div class="d-bukti-wrap">
+                                    <label class="d-bukti-label" for="pendidik_bukti_<?php echo e($idxP); ?>">
+                                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        Catatan/Bukti
+                                        <span class="d-bukti-optional">(opsional)</span>
+                                    </label>
+                                    <textarea id="pendidik_bukti_<?php echo e($idxP); ?>" name="pendidik_bukti[<?php echo e($idxP); ?>]" rows="2" class="d-field" placeholder="Tuliskan bukti konkret (mis. nama dokumen, foto, atau tautan LMS)..."><?php echo e(old("pendidik_bukti.$idxP", $jawabanBukti[$idxP] ?? '')); ?></textarea>
                                 </div>
                             </div>
                             <?php $idxP++; ?>
@@ -593,7 +562,6 @@ unset($__errorArgs, $__bag); ?>
 
             function updateProgress() {
                 const peran = peranSelect.value;
-                const activeRadios = document.querySelectorAll(`input[data-eval-radio="${peran.toLowerCase()}"]`);
                 const checkedRadios = document.querySelectorAll(`input[data-eval-radio="${peran.toLowerCase()}"]:checked`);
                 
                 const totalIndikator = peran === 'Pendidik' ? totalPendidik : totalMurid;
